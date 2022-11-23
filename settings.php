@@ -156,8 +156,8 @@
         }
         else {
             add_settings_section('duo_settings', 'Main Settings', 'duo_settings_text', 'duo_settings');
-            add_settings_field('duo_ikey', 'Integration key', 'duo_settings_ikey', 'duo_settings', 'duo_settings');
-            add_settings_field('duo_skey', 'Secret key', 'duo_settings_skey', 'duo_settings', 'duo_settings');
+            add_settings_field('duo_ikey', 'Client ID', 'duo_settings_ikey', 'duo_settings', 'duo_settings');
+            add_settings_field('duo_skey', 'Client Secret', 'duo_settings_skey', 'duo_settings', 'duo_settings');
             add_settings_field('duo_host', 'API hostname', 'duo_settings_host', 'duo_settings', 'duo_settings');
             add_settings_field('duo_roles', 'Enable for roles:', 'duo_settings_roles', 'duo_settings', 'duo_settings');
             add_settings_field('duo_xmlrpc', 'Disable XML-RPC (recommended)', 'duo_settings_xmlrpc', 'duo_settings', 'duo_settings');

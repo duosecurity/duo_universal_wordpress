@@ -1,0 +1,27 @@
+---
+version: '3.3'
+services:
+  wordpress:
+    image: duo:wordpress
+    build: ./
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: exampleuser
+      WORDPRESS_DB_PASSWORD: examplepass
+      WORDPRESS_DB_NAME: exampledb
+      WORDPRESS_DEBUG: true
+    volumes:
+      - /home/mbishop/workspace/containers/wordpress:/data
+      - .:/var/www/html/wp-content/plugins/duo_universal_wordpress
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: exampledb
+      MYSQL_USER: exampleuser
+      MYSQL_PASSWORD: examplepass
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
