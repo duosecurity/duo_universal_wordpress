@@ -117,7 +117,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
                 $error_msg = $_GET["error"] . ":" . $_GET["error_description"];
                 $error = new WP_Error('Duo authentication_failed',
                                      __("<strong>ERROR</strong>: $error_msg"));
-                duo_debug_log('Error in URL');
+                duo_debug_log($error_msg);
                 return $error;
             }
 
@@ -125,7 +125,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
                 $error_msg = "Missing state or code";
                 $error = new WP_Error('Duo authentication_failed',
                                      __("<strong>ERROR</strong>: $error_msg"));
-                duo_debug_log('Error in params');
+                duo_debug_log($error_msg);
                 return $error;
             }
 
@@ -142,7 +142,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
                 $error_msg = "No saved state please login again";
                 $error = new WP_Error('Duo authentication_failed',
                                      __("<strong>ERROR</strong>: $error_msg"));
-                duo_debug_log('Missing saved state');
+                duo_debug_log($error_msg);
                 return $error;
             }
             try {
@@ -155,7 +155,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
                 $error_msg = "Error decoding Duo result. Confirm device clock is correct.";
                 $error = new WP_Error('Duo authentication_failed',
                                      __("<strong>ERROR</strong>: $error_msg"));
-                duo_debug_log('Error in decoding');
+                duo_debug_log($error_msg);
                 return $error;
             }
             duo_debug_log("Completed secondary auth for $associated_user");
@@ -197,9 +197,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
                         update_user_auth_status($user->user_login, "authenticated");
                         return $user;
                     } else {
-                        # Otherwise the login fails and redirect user to the login page
-                        # XXX should this be Lee facing?
-                        duo_debug_log("2FA Unavailable. Confirm Duo client/secret/host values are correct");
+                        $error_msg = "2FA Unavailable. Confirm Duo client/secret/host values are correct";
+                        $error = new WP_Error('Duo authentication_failed',
+                                             __("<strong>Error</strong>: $error_msg"));
+                        duo_debug_log($error_msg);
+                        return $error;
                     }
                 }
             }
