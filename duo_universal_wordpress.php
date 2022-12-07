@@ -28,8 +28,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+    require_once('duo_settings.php');
     require_once('utilities.php');
-    require_once('settings.php');
 
     # We may or may not even need cookies
     $GLOBALS['DuoAuthCookieName'] = 'duo_wordpress_auth_cookie';

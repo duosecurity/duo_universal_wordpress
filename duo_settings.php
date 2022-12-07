@@ -53,6 +53,16 @@
         echo "<input id='duo_host' name='duo_host' size='40' type='text' value='$host' />";
     }
 
+    function duo_settings_failmode() {
+        $failmode = esc_attr(duo_get_option('duo_failmode'));
+        ?>
+            <select id='duo_failmode' name='duo_failmode'/>";
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+            </select>
+        <?php
+    }
+
     function duo_settings_roles() {
         $wp_roles = duo_get_roles();
         $roles = $wp_roles->get_names();
@@ -151,6 +161,7 @@
             duo_add_site_option('duo_ikey', '');
             duo_add_site_option('duo_skey', '');
             duo_add_site_option('duo_host', '');
+            duo_add_site_option('duo_failmode', '');
             duo_add_site_option('duo_roles', $allroles);
             duo_add_site_option('duo_xmlrpc', 'off');
         }
@@ -159,17 +170,20 @@
             add_settings_field('duo_ikey', 'Client ID', 'duo_settings_ikey', 'duo_settings', 'duo_settings');
             add_settings_field('duo_skey', 'Client Secret', 'duo_settings_skey', 'duo_settings', 'duo_settings');
             add_settings_field('duo_host', 'API hostname', 'duo_settings_host', 'duo_settings', 'duo_settings');
+            add_settings_field('duo_failmode', 'Failmode', 'duo_settings_failmode', 'duo_settings', 'duo_settings');
             add_settings_field('duo_roles', 'Enable for roles:', 'duo_settings_roles', 'duo_settings', 'duo_settings');
             add_settings_field('duo_xmlrpc', 'Disable XML-RPC (recommended)', 'duo_settings_xmlrpc', 'duo_settings', 'duo_settings');
             register_setting('duo_settings', 'duo_ikey', 'duo_ikey_validate');
             register_setting('duo_settings', 'duo_skey', 'duo_skey_validate');
             register_setting('duo_settings', 'duo_host');
+            register_setting('duo_settings', 'duo_failmode');
             register_setting('duo_settings', 'duo_roles', 'duo_roles_validate');
             register_setting('duo_settings', 'duo_xmlrpc', 'duo_xmlrpc_validate');
         }
     }
 
     function duo_mu_options() {
+        duo_debug_log('Displaying multisite settings');
 
 ?>
         <h3>Duo Security</h3>
@@ -178,6 +192,7 @@
             <tr><th>Integration key</th><td><?php duo_settings_ikey();?></td></tr>
             <tr><th>Secret key</th><td><?php duo_settings_skey();?></td></tr>
             <tr><th>API hostname</th><td><?php duo_settings_host();?></td></tr>
+            <tr><th>Failmode</th><td><?php duo_settings_failmode();?></td></tr>
             <tr><th>Roles</th><td><?php duo_settings_roles();?></td></tr>
             <tr><th>Disable XML-RPC</th><td><?php duo_settings_xmlrpc();?></td></tr>
         </table>
@@ -198,6 +213,13 @@
         if(isset($_POST['duo_host'])) {
             $host = $_POST['duo_host'];
             $result = update_site_option('duo_host', $host);
+        }
+
+        if(isset($_POST['duo_failmode'])) {
+            $failmode = $_POST['duo_failmode'];
+            $result = update_site_option('duo_failmode', $failmode);
+        } else {
+            $result = update_site_option('duo_failmode', "open");
         }
 
         if(isset($_POST['duo_roles'])) {
@@ -229,4 +251,5 @@
     // Custom fields in network settings
     add_action('wpmu_options', 'duo_mu_options');
     add_action('update_wpmu_options', 'duo_update_mu_options');
+
 ?>
