@@ -87,14 +87,18 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
     }
 
     function duo_start_second_factor($user, $redirect_to=NULL){
-        // TODO not sure if we need this redirect
-        if (!$redirect_to){
-            // Some custom themes do not provide the redirect_to value
-            // Admin page is a good default
-            $redirect_to = isset( $_POST['redirect_to'] ) ? $_POST['redirect_to'] : admin_url();
-        }
+        global $DuoClient;
+
+        $DuoClient->healthCheck();
+
+        $oidc_state = $DuoClient->generateState();
+        $redirect_url = get_page_url();
+        $DuoClient->redirect_url = $redirect_url;
+        update_user_auth_status($user->user_login, "in-progress", $redirect_url, $oidc_state);
 
         wp_logout();
+        $prompt_uri = $DuoClient->createAuthUrl($user->user_login, $oidc_state);
+        wp_redirect($prompt_uri);
         exit();
     }
     
@@ -109,9 +113,59 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
             return;
         }
 
-        // if (primary authentication completed) {
-        // TODO
-        // }
+        if (isset($_GET['duo_code'])) {
+            //secondary auth
+            duo_debug_log('Doing secondary auth');
+            if (isset($_GET["error"])) {
+                $error_msg = $_GET["error"] . ":" . $_GET["error_description"];
+                $error = new WP_Error('Duo authentication_failed',
+                                     __("<strong>ERROR</strong>: $error_msg"));
+                duo_debug_log('Error in URL');
+                return $error;
+            }
+
+            if (!isset($_GET["duo_code"]) || !isset($_GET["state"])) {
+                $error_msg = "Missing state or code";
+                $error = new WP_Error('Duo authentication_failed',
+                                     __("<strong>ERROR</strong>: $error_msg"));
+                duo_debug_log('Error in params');
+                return $error;
+            }
+
+            # Get authorization token to trade for 2FA
+            $code = $_GET["duo_code"];
+
+            # Get state to verify consistency and originality
+            $state = $_GET["state"];
+
+            # Retrieve the previously stored state and username from the session
+            $associated_user = get_username_from_oidc_state($state);
+
+            if (empty($associated_user)) {
+                $error_msg = "No saved state please login again";
+                $error = new WP_Error('Duo authentication_failed',
+                                     __("<strong>ERROR</strong>: $error_msg"));
+                duo_debug_log('Missing saved state');
+                return $error;
+            }
+            try {
+                global $DuoClient;
+                // Update redirect URL to be one associated with initial authentication
+                $DuoClient->redirect_url = get_redirect_url($associated_user);
+                $decoded_token = $DuoClient->exchangeAuthorizationCodeFor2FAResult($code, $associated_user);
+            } catch (Duo\DuoUniversal\DuoException $e) {
+                duo_debug_log($e->getMessage());
+                $error_msg = "Error decoding Duo result. Confirm device clock is correct.";
+                $error = new WP_Error('Duo authentication_failed',
+                                     __("<strong>ERROR</strong>: $error_msg"));
+                duo_debug_log('Error in decoding');
+                return $error;
+            }
+            duo_debug_log("Completed secondary auth for $associated_user");
+            update_user_auth_status($associated_user, "authenticated");
+            $user = new WP_User(0, $associated_user);
+            return $user;
+        }
 
         if (strlen($username) > 0) {
             // primary auth
@@ -127,6 +181,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
                 return;
             }
 
+            duo_debug_log("Doing primary authentication");
             remove_action('authenticate', 'wp_authenticate_username_password', 20);
             $user = wp_authenticate_username_password(NULL, $username, $password);
             if (!is_a($user, 'WP_User')) {
@@ -134,8 +189,22 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
                 return $user;
             } else {
                 duo_debug_log("Primary auth succeeded, starting second factor for $username");
-                update_user_auth_status($user->user_login, "primary");
-                duo_start_second_factor($user);
+                update_user_auth_status($user->user_login, "in-progress");
+                try {
+                    duo_start_second_factor($user);
+                } catch (Duo\DuoUniversal\DuoException $e) {
+                    duo_debug_log($e->getMessage());
+                    if (duo_get_option("duo_failmode") == "open") {
+                        # If we're failing open, errors in 2FA still allow for success
+                        duo_debug_log("Login 'Successful', but 2FA Not Performed. Confirm Duo client/secret/host values are correct");
+                        update_user_auth_status($user->user_login, "authenticated");
+                        return $user;
+                    } else {
+                        # Otherwise the login fails and redirect user to the login page
+                        # XXX should this be Lee facing?
+                        duo_debug_log("2FA Unavailable. Confirm Duo client/secret/host values are correct");
+                    }
+                }
             }
         }
         duo_debug_log('Starting primary authentication');
