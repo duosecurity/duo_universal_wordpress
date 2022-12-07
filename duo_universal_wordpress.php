@@ -83,7 +83,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
         return $protocol.$_SERVER['HTTP_HOST'].duo_get_uri();
     }
 
-    function duo_start_second_factor($user, $redirect_to=NULL){
+    function duo_start_second_factor($user){
         global $DuoClient;
 
         $DuoClient->healthCheck();
@@ -238,7 +238,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
             duo_debug_log("Verifying auth state for user: $user->user_login");
             if (duo_role_require_mfa($user) and !duo_verify_auth_status($user->user_login)){
                 duo_debug_log("User not authenticated with Duo. Starting second factor for: $user->user_login");
-                duo_start_second_factor($user, duo_get_uri());
+                duo_start_second_factor($user);
             }
             duo_debug_log("User $user->user_login allowed");
         }
