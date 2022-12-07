@@ -8,10 +8,10 @@
         <?php if(is_multisite()) { ?>
             <form action="ms-options.php" method="post">
         <?php } else { ?>
-            <form action="options.php" method="post"> 
+            <form action="options.php" method="post">
         <?php } ?>
             <?php settings_fields('duo_settings'); ?>
-            <?php do_settings_sections('duo_settings'); ?> 
+            <?php do_settings_sections('duo_settings'); ?>
             <p class="submit">
                 <input name="Submit" type="submit" class="button primary-button" value="<?php esc_attr_e('Save Changes'); ?>" />
             </p>
@@ -20,31 +20,31 @@
 <?php
     }
 
-    function duo_settings_ikey() {
-        $ikey = esc_attr(duo_get_option('duo_ikey'));
-        echo "<input id='duo_ikey' name='duo_ikey' size='40' type='text' value='$ikey' />";
+    function duo_settings_client_id() {
+        $client_id = esc_attr(duo_get_option('duo_client_id'));
+        echo "<input id='duo_client_id' name='duo_client_id' size='40' type='text' value='$client_id' />";
     }
 
-    function duo_ikey_validate($ikey) {
-        if (strlen($ikey) != 20) {
-            add_settings_error('duo_ikey', '', 'Integration key is not valid');
+    function duo_client_id_validate($client_id) {
+        if (strlen($client_id) != 20) {
+            add_settings_error('duo_client_id', '', 'Client id is not valid');
             return "";
         } else {
-            return $ikey;
+            return $client_id;
         }
     }
-    
-    function duo_settings_skey() {
-        $skey = esc_attr(duo_get_option('duo_skey'));
-        echo "<input id='duo_skey' name='duo_skey' size='40' type='password' value='$skey' autocomplete='off' />";
+
+    function duo_settings_client_secret() {
+        $client_secret = esc_attr(duo_get_option('duo_client_secret'));
+        echo "<input id='duo_client_secret' name='duo_client_secret' size='40' type='password' value='$client_secret' autocomplete='off' />";
     }
 
-    function duo_skey_validate($skey){
-        if (strlen($skey) != 40) {
-            add_settings_error('duo_skey', '', 'Secret key is not valid');
+    function duo_client_secret_validate($client_secret){
+        if (strlen($client_secret) != 40) {
+            add_settings_error('duo_client_secret', '', 'Client secret is not valid');
             return "";
         } else {
-            return $skey;
+            return $client_secret;
         }
     }
 
@@ -101,7 +101,7 @@
 
     function duo_settings_text() {
         echo "<p>See the <a target='_blank' href='https://www.duosecurity.com/docs/wordpress'>Duo for WordPress guide</a> to enable Duo two-factor authentication for your WordPress logins.</p>";
-        echo '<p>You can retrieve your integration key, secret key, and API hostname by logging in to the Duo Admin Panel.</p>';
+        echo '<p>You can retrieve your client id, client secret, and API hostname by logging in to the Duo Admin Panel.</p>';
         echo '<p>Note: After enabling the plugin, you will be immediately prompted for second factor authentication.</p>';
     }
 
@@ -157,9 +157,9 @@
             foreach($roles as $key=>$role) {
                 $allroles[before_last_bar($key)] = before_last_bar($role);
             }
-            
-            duo_add_site_option('duo_ikey', '');
-            duo_add_site_option('duo_skey', '');
+
+            duo_add_site_option('duo_client_id', '');
+            duo_add_site_option('duo_client_secret', '');
             duo_add_site_option('duo_host', '');
             duo_add_site_option('duo_failmode', '');
             duo_add_site_option('duo_roles', $allroles);
@@ -167,14 +167,14 @@
         }
         else {
             add_settings_section('duo_settings', 'Main Settings', 'duo_settings_text', 'duo_settings');
-            add_settings_field('duo_ikey', 'Client ID', 'duo_settings_ikey', 'duo_settings', 'duo_settings');
-            add_settings_field('duo_skey', 'Client Secret', 'duo_settings_skey', 'duo_settings', 'duo_settings');
+            add_settings_field('duo_client_id', 'Client ID', 'duo_settings_client_id', 'duo_settings', 'duo_settings');
+            add_settings_field('duo_client_secret', 'Client Secret', 'duo_settings_client_secret', 'duo_settings', 'duo_settings');
             add_settings_field('duo_host', 'API hostname', 'duo_settings_host', 'duo_settings', 'duo_settings');
             add_settings_field('duo_failmode', 'Failmode', 'duo_settings_failmode', 'duo_settings', 'duo_settings');
             add_settings_field('duo_roles', 'Enable for roles:', 'duo_settings_roles', 'duo_settings', 'duo_settings');
             add_settings_field('duo_xmlrpc', 'Disable XML-RPC (recommended)', 'duo_settings_xmlrpc', 'duo_settings', 'duo_settings');
-            register_setting('duo_settings', 'duo_ikey', 'duo_ikey_validate');
-            register_setting('duo_settings', 'duo_skey', 'duo_skey_validate');
+            register_setting('duo_settings', 'duo_client_id', 'duo_client_id_validate');
+            register_setting('duo_settings', 'duo_client_secret', 'duo_client_secret_validate');
             register_setting('duo_settings', 'duo_host');
             register_setting('duo_settings', 'duo_failmode');
             register_setting('duo_settings', 'duo_roles', 'duo_roles_validate');
@@ -189,8 +189,8 @@
         <h3>Duo Security</h3>
         <table class="form-table">
             <?php duo_settings_text();?></td></tr>
-            <tr><th>Integration key</th><td><?php duo_settings_ikey();?></td></tr>
-            <tr><th>Secret key</th><td><?php duo_settings_skey();?></td></tr>
+            <tr><th>Client ID</th><td><?php duo_settings_client_id();?></td></tr>
+            <tr><th>Client Secret</th><td><?php duo_settings_client_secret();?></td></tr>
             <tr><th>API hostname</th><td><?php duo_settings_host();?></td></tr>
             <tr><th>Failmode</th><td><?php duo_settings_failmode();?></td></tr>
             <tr><th>Roles</th><td><?php duo_settings_roles();?></td></tr>
@@ -200,14 +200,14 @@
     }
 
     function duo_update_mu_options() {
-        if(isset($_POST['duo_ikey'])) {
-            $ikey = $_POST['duo_ikey'];
-            $result = update_site_option('duo_ikey', $ikey);
+        if(isset($_POST['duo_client_id'])) {
+            $client_id = $_POST['duo_client_id'];
+            $result = update_site_option('duo_client_id', $client_id);
         }
 
-        if(isset($_POST['duo_skey'])) {
-            $skey = $_POST['duo_skey'];
-            $result = update_site_option('duo_skey', $skey);
+        if(isset($_POST['duo_client_secret'])) {
+            $client_secret = $_POST['duo_client_secret'];
+            $result = update_site_option('duo_client_secret', $client_secret);
         }
 
         if(isset($_POST['duo_host'])) {

@@ -218,7 +218,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
             // XXX do we still need this skipping logic?
             if (is_multisite()) {
                 $site_info = get_current_site();
-                duo_debug_log("Duo not enabled on " . $site_info->site_name . ', skip cookie check.');
+                duo_debug_log("Duo not enabled on " . $site_info->site_name);
             }
             else {
                 duo_debug_log('Duo not enabled, skip auth check.');
@@ -227,8 +227,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
         } else {
             global $DuoClient;
             $DuoClient = new Client(
-                duo_get_option('duo_ikey'),
-                duo_get_option('duo_skey'),
+                duo_get_option('duo_client_id'),
+                duo_get_option('duo_client_secret'),
                 duo_get_option('duo_host'),
                 "",
             );

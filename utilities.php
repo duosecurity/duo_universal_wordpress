@@ -12,8 +12,7 @@
             return false; //allows the XML-RPC protocol for remote publishing
         }
 
-        // XXX rename ikey, skey
-        if (duo_get_option('duo_ikey', '') == '' || duo_get_option('duo_skey', '') == '' ||
+        if (duo_get_option('duo_client_id', '') == '' || duo_get_option('duo_client_secret', '') == '' ||
             duo_get_option('duo_host', '') == '') {
             return false;
         }
