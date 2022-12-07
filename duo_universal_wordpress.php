@@ -34,9 +34,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
     use Duo\DuoUniversal\Client;
 
-    # We may or may not even need cookies
-    $GLOBALS['DuoAuthCookieName'] = 'duo_wordpress_auth_cookie';
-    $GLOBALS['DuoSecAuthCookieName'] = 'duo_secure_wordpress_auth_cookie';
     $GLOBALS['DuoDebug'] = false;
     $DuoClient = NULL;
 
