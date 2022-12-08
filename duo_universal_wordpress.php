@@ -72,7 +72,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
     function clear_current_user_auth($user) {
         $user = wp_get_current_user();
-        $username = $user->login_status;
+        $username = $user->user_login;
         $oidc_state = get_transient("duo_auth_".$username."_oidc_state");
         // technically these could fail. What do?
         delete_transient("duo_auth_".$username."_status");
