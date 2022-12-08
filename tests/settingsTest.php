@@ -8,13 +8,6 @@ require_once('duo_wordpress_helper.php');
 
 final class SettingsTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        $helper = new Duo\DuoUniversalWordpress\WordpressHelper();
-        $this->duo_utils = new Duo\DuoUniversalWordpress\Utilities($helper);
-        $this->wordpress_helper = $helper;
-    }
-
     /**
      * Test that settings page loads correctly
      * when multisite is enabled
@@ -125,7 +118,7 @@ final class SettingsTest extends TestCase
     }
 
     /**
-     * Test that an invalid client id yields the empty string
+     * Test that an invalid client secret yields the empty string
      */
     public function testDuoClientSecretValidateInvalid(): void
     {
@@ -142,7 +135,7 @@ final class SettingsTest extends TestCase
     }
 
     /**
-     * Test that a valid client id validates
+     * Test that a valid client secret validates
      */
     public function testDuoClientSecretValidateValid(): void
     {
@@ -201,8 +194,8 @@ final class SettingsTest extends TestCase
     }
 
     /**
-     * Test that the failmode shows up in output
-     * with correct mode selected
+     * Test that selected roles show up as checked
+     * when generating role HTML
      */
     public function testSettingsRoles(): void
     {
