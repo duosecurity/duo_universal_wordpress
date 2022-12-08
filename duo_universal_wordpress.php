@@ -70,7 +70,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
         return get_transient("duo_auth_".$user."_redirect_url");
     }
 
-    function clear_current_user_auth($user) {
+    function clear_current_user_auth() {
         $user = wp_get_current_user();
         $username = $user->user_login;
         $oidc_state = get_transient("duo_auth_".$username."_oidc_state");
