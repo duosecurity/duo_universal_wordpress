@@ -64,13 +64,19 @@ class Settings {
     }
 
     function duo_settings_failmode() {
-        $failmode = esc_attr($this->duo_utils->duo_get_option('duo_failmode'));
-        ?>
-            <select id='duo_failmode' name='duo_failmode'/>";
-                <option value="open">Open</option>
-                <option value="closed">Closed</option>
-            </select>
-        <?php
+        $failmode = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duo_failmode', 'open'));
+        echo '<select id="duo_failmode" name="duo_failmode" />';
+        if ($failmode == 'open')
+        {
+            echo '<option value="open" selected>Open</option>';
+            echo '<option value="closed">Closed</option';
+        }
+        else
+        {
+            echo '<option value="open">Open</option>';
+            echo '<option value="closed" selected>Closed</option';
+        }
+        echo '</select>';
     }
 
     function duo_settings_roles() {
