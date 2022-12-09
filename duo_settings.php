@@ -1,19 +1,29 @@
 <?php
-    require_once('utilities.php');
+namespace Duo\DuoUniversalWordpress;
+require_once('utilities.php');
+require_once('duo_wordpress_helper.php');
+
+class Settings {
+    public function __construct(
+        $duo_utils
+    ) {
+        $this->duo_utils = $duo_utils;
+        $this->wordpress_helper = $duo_utils->wordpress_helper;
+    }
     function duo_settings_page() {
-        duo_debug_log('Displaying duo setting page');
+        $this->duo_utils->duo_debug_log('Displaying duo setting page');
 ?>
     <div class="wrap">
         <h2>Duo Two-Factor Authentication</h2>
-        <?php if(is_multisite()) { ?>
+        <?php if($this->wordpress_helper->is_multisite()) { ?>
             <form action="ms-options.php" method="post">
         <?php } else { ?>
             <form action="options.php" method="post">
         <?php } ?>
-            <?php settings_fields('duo_settings'); ?>
-            <?php do_settings_sections('duo_settings'); ?>
+            <?php $this->wordpress_helper->settings_fields('duo_settings'); ?>
+            <?php $this->wordpress_helper->do_settings_sections('duo_settings'); ?>
             <p class="submit">
-                <input name="Submit" type="submit" class="button primary-button" value="<?php esc_attr_e('Save Changes'); ?>" />
+                <input name="Submit" type="submit" class="button primary-button" value="<?php $this->wordpress_helper->esc_attr_e('Save Changes'); ?>" />
             </p>
         </form>
     </div>
@@ -21,13 +31,13 @@
     }
 
     function duo_settings_client_id() {
-        $client_id = esc_attr(duo_get_option('duo_client_id'));
+        $client_id = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duo_client_id'));
         echo "<input id='duo_client_id' name='duo_client_id' size='40' type='text' value='$client_id' />";
     }
 
     function duo_client_id_validate($client_id) {
         if (strlen($client_id) != 20) {
-            add_settings_error('duo_client_id', '', 'Client id is not valid');
+            $this->wordpress_helper->add_settings_error('duo_client_id', '', 'Client id is not valid');
             return "";
         } else {
             return $client_id;
@@ -35,13 +45,13 @@
     }
 
     function duo_settings_client_secret() {
-        $client_secret = esc_attr(duo_get_option('duo_client_secret'));
+        $client_secret = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duo_client_secret'));
         echo "<input id='duo_client_secret' name='duo_client_secret' size='40' type='password' value='$client_secret' autocomplete='off' />";
     }
 
     function duo_client_secret_validate($client_secret){
         if (strlen($client_secret) != 40) {
-            add_settings_error('duo_client_secret', '', 'Client secret is not valid');
+            $this->wordpress_helper->add_settings_error('duo_client_secret', '', 'Client secret is not valid');
             return "";
         } else {
             return $client_secret;
@@ -49,12 +59,12 @@
     }
 
     function duo_settings_host() {
-        $host = esc_attr(duo_get_option('duo_host'));
+        $host = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duo_host'));
         echo "<input id='duo_host' name='duo_host' size='40' type='text' value='$host' />";
     }
 
     function duo_settings_failmode() {
-        $failmode = esc_attr(duo_get_option('duo_failmode'));
+        $failmode = esc_attr($this->duo_utils->duo_get_option('duo_failmode'));
         ?>
             <select id='duo_failmode' name='duo_failmode'/>";
                 <option value="open">Open</option>
@@ -64,14 +74,14 @@
     }
 
     function duo_settings_roles() {
-        $wp_roles = duo_get_roles();
+        $wp_roles = $this->duo_utils->duo_get_roles();
         $roles = $wp_roles->get_names();
         $newroles = array();
         foreach($roles as $key=>$role) {
-            $newroles[before_last_bar($key)] = before_last_bar($role);
+            $newroles[$this->wordpress_helper->before_last_bar($key)] = $this->wordpress_helper->before_last_bar($role);
         }
 
-        $selected = duo_get_option('duo_roles', $newroles);
+        $selected = $this->duo_utils->duo_get_option('duo_roles', $newroles);
 
         foreach ($wp_roles->get_names() as $key=>$role) {
             //create checkbox for each role
@@ -87,7 +97,7 @@
             return array();
         }
 
-        $wp_roles = duo_get_roles();
+        $wp_roles = $this->duo_utils->duo_get_roles();
 
         $valid_roles = $wp_roles->get_names();
         //otherwise validate each role and then return the array
@@ -107,7 +117,7 @@
 
     function duo_settings_xmlrpc() {
         $val = '';
-        if(duo_get_option('duo_xmlrpc', 'off') == 'off') {
+        if($this->duo_utils->duo_get_option('duo_xmlrpc', 'off') == 'off') {
             $val = "checked";
         }
         echo "<input id='duo_xmlrpc' name='duo_xmlrpc' type='checkbox' value='off' $val /> Yes<br />";
@@ -123,7 +133,7 @@
 
     function duo_add_link($links, $file) {
         static $this_plugin;
-        if (!$this_plugin) $this_plugin = plugin_basename(__FILE__);
+        if (!$this_plugin) $this_plugin = $this->wordpress_helper->plugin_basename(__FILE__);
 
         if ($file == $this_plugin) {
             $settings_link = '<a href="options-general.php?page=duo_wordpress">'.__("Settings", "duo_wordpress").'</a>';
@@ -134,8 +144,8 @@
 
 
     function duo_add_page() {
-        if(! is_multisite()) {
-            add_options_page('Duo Two-Factor', 'Duo Two-Factor', 'manage_options', 'duo_wordpress', 'duo_settings_page');
+        if(! $this->wordpress_helper->is_multisite()) {
+            $this->wordpress_helper->add_options_page('Duo Two-Factor', 'Duo Two-Factor', 'manage_options', 'duo_wordpress', array($this, 'duo_settings_page'));
         }
     }
 
@@ -143,58 +153,58 @@
     function duo_add_site_option($option, $value = '') {
         // Add multisite option only if it doesn't exist already
         // With Wordpress versions < 3.3, calling add_site_option will override old values
-        if (duo_get_option($option) === FALSE){
-            add_site_option($option, $value);
+        if ($this->duo_utils->duo_get_option($option) === FALSE){
+            $this->wordpress_helper->add_site_option($option, $value);
         }
     }
 
 
     function duo_admin_init() {
-        if (is_multisite()) {
-            $wp_roles = duo_get_roles();
+        if ($this->wordpress_helper->is_multisite()) {
+            $wp_roles = $this->duo_utils->duo_get_roles();
             $roles = $wp_roles->get_names();
             $allroles = array();
             foreach($roles as $key=>$role) {
-                $allroles[before_last_bar($key)] = before_last_bar($role);
+                $allroles[$this->wordpress_helper->before_last_bar($key)] = $this->wordpress_helper->before_last_bar($role);
             }
 
-            duo_add_site_option('duo_client_id', '');
-            duo_add_site_option('duo_client_secret', '');
-            duo_add_site_option('duo_host', '');
-            duo_add_site_option('duo_failmode', '');
-            duo_add_site_option('duo_roles', $allroles);
-            duo_add_site_option('duo_xmlrpc', 'off');
+            $this->duo_add_site_option('duo_client_id', '');
+            $this->duo_add_site_option('duo_client_secret', '');
+            $this->duo_add_site_option('duo_host', '');
+            $this->duo_add_site_option('duo_failmode', '');
+            $this->duo_add_site_option('duo_roles', $allroles);
+            $this->duo_add_site_option('duo_xmlrpc', 'off');
         }
         else {
-            add_settings_section('duo_settings', 'Main Settings', 'duo_settings_text', 'duo_settings');
-            add_settings_field('duo_client_id', 'Client ID', 'duo_settings_client_id', 'duo_settings', 'duo_settings');
-            add_settings_field('duo_client_secret', 'Client Secret', 'duo_settings_client_secret', 'duo_settings', 'duo_settings');
-            add_settings_field('duo_host', 'API hostname', 'duo_settings_host', 'duo_settings', 'duo_settings');
-            add_settings_field('duo_failmode', 'Failmode', 'duo_settings_failmode', 'duo_settings', 'duo_settings');
-            add_settings_field('duo_roles', 'Enable for roles:', 'duo_settings_roles', 'duo_settings', 'duo_settings');
-            add_settings_field('duo_xmlrpc', 'Disable XML-RPC (recommended)', 'duo_settings_xmlrpc', 'duo_settings', 'duo_settings');
-            register_setting('duo_settings', 'duo_client_id', 'duo_client_id_validate');
-            register_setting('duo_settings', 'duo_client_secret', 'duo_client_secret_validate');
-            register_setting('duo_settings', 'duo_host');
-            register_setting('duo_settings', 'duo_failmode');
-            register_setting('duo_settings', 'duo_roles', 'duo_roles_validate');
-            register_setting('duo_settings', 'duo_xmlrpc', 'duo_xmlrpc_validate');
+            $this->wordpress_helper->add_settings_section('duo_settings', 'Main Settings', array($this, 'duo_settings_text'), 'duo_settings');
+            $this->wordpress_helper->add_settings_field('duo_client_id', 'Client ID', array($this, 'duo_settings_client_id'), 'duo_settings', 'duo_settings');
+            $this->wordpress_helper->add_settings_field('duo_client_secret', 'Client Secret', array($this, 'duo_settings_client_secret'), 'duo_settings', 'duo_settings');
+            $this->wordpress_helper->add_settings_field('duo_host', 'API hostname', array($this, 'duo_settings_host'), 'duo_settings', 'duo_settings');
+            $this->wordpress_helper->add_settings_field('duo_failmode', 'Failmode', array($this, 'duo_settings_failmode'), 'duo_settings', 'duo_settings');
+            $this->wordpress_helper->add_settings_field('duo_roles', 'Enable for roles:', array($this, 'duo_settings_roles'), 'duo_settings', 'duo_settings');
+            $this->wordpress_helper->add_settings_field('duo_xmlrpc', 'Disable XML-RPC (recommended)', array($this, 'duo_settings_xmlrpc'), 'duo_settings', 'duo_settings');
+            $this->wordpress_helper->register_setting('duo_settings', 'duo_client_id', 'duo_client_id_validate');
+            $this->wordpress_helper->register_setting('duo_settings', 'duo_client_secret', 'duo_client_secret_validate');
+            $this->wordpress_helper->register_setting('duo_settings', 'duo_host');
+            $this->wordpress_helper->register_setting('duo_settings', 'duo_failmode');
+            $this->wordpress_helper->register_setting('duo_settings', 'duo_roles', 'duo_roles_validate');
+            $this->wordpress_helper->register_setting('duo_settings', 'duo_xmlrpc', 'duo_xmlrpc_validate');
         }
     }
 
     function duo_mu_options() {
-        duo_debug_log('Displaying multisite settings');
+        $this->duo_utils->duo_debug_log('Displaying multisite settings');
 
 ?>
         <h3>Duo Security</h3>
         <table class="form-table">
-            <?php duo_settings_text();?></td></tr>
-            <tr><th>Client ID</th><td><?php duo_settings_client_id();?></td></tr>
-            <tr><th>Client Secret</th><td><?php duo_settings_client_secret();?></td></tr>
-            <tr><th>API hostname</th><td><?php duo_settings_host();?></td></tr>
-            <tr><th>Failmode</th><td><?php duo_settings_failmode();?></td></tr>
-            <tr><th>Roles</th><td><?php duo_settings_roles();?></td></tr>
-            <tr><th>Disable XML-RPC</th><td><?php duo_settings_xmlrpc();?></td></tr>
+            <?php $this->duo_settings_text();?></td></tr>
+            <tr><th>Client ID</th><td><?php $this->duo_settings_client_id();?></td></tr>
+            <tr><th>Client Secret</th><td><?php $this->duo_settings_client_secret();?></td></tr>
+            <tr><th>API hostname</th><td><?php $this->duo_settings_host();?></td></tr>
+            <tr><th>Failmode</th><td><?php $this->duo_settings_failmode();?></td></tr>
+            <tr><th>Roles</th><td><?php $this->duo_settings_roles();?></td></tr>
+            <tr><th>Disable XML-RPC</th><td><?php $this->duo_settings_xmlrpc();?></td></tr>
         </table>
 <?php
     }
@@ -202,54 +212,41 @@
     function duo_update_mu_options() {
         if(isset($_POST['duo_client_id'])) {
             $client_id = $_POST['duo_client_id'];
-            $result = update_site_option('duo_client_id', $client_id);
+            $result = $this->wordpress_helper->update_site_option('duo_client_id', $client_id);
         }
 
         if(isset($_POST['duo_client_secret'])) {
             $client_secret = $_POST['duo_client_secret'];
-            $result = update_site_option('duo_client_secret', $client_secret);
+            $result = $this->wordpress_helper->update_site_option('duo_client_secret', $client_secret);
         }
 
         if(isset($_POST['duo_host'])) {
             $host = $_POST['duo_host'];
-            $result = update_site_option('duo_host', $host);
+            $result = $this->wordpress_helper->update_site_option('duo_host', $host);
         }
 
         if(isset($_POST['duo_failmode'])) {
             $failmode = $_POST['duo_failmode'];
-            $result = update_site_option('duo_failmode', $failmode);
+            $result = $this->wordpress_helper->update_site_option('duo_failmode', $failmode);
         } else {
-            $result = update_site_option('duo_failmode', "open");
+            $result = $this->wordpress_helper->update_site_option('duo_failmode', "open");
         }
 
         if(isset($_POST['duo_roles'])) {
             $roles = $_POST['duo_roles'];
-            $result = update_site_option('duo_roles', $roles);
+            $result = $this->wordpress_helper->update_site_option('duo_roles', $roles);
         }
         else {
-            $result = update_site_option('duo_roles', []);
+            $result = $this->wordpress_helper->update_site_option('duo_roles', []);
         }
 
         if(isset($_POST['duo_xmlrpc'])) {
             $xmlrpc = $_POST['duo_xmlrpc'];
-            $result = update_site_option('duo_xmlrpc', $xmlrpc);
+            $result = $this->wordpress_helper->update_site_option('duo_xmlrpc', $xmlrpc);
         }
         else {
-            $result = update_site_option('duo_xmlrpc', 'on');
+            $result = $this->wordpress_helper->update_site_option('duo_xmlrpc', 'on');
         }
     }
-
-    if (!is_multisite()) {
-        add_filter('plugin_action_links', 'duo_add_link', 10, 2 );
-    }
-
-
-    //add single-site submenu option
-    add_action('admin_menu', 'duo_add_page');
-    add_action('admin_init', 'duo_admin_init');
-
-    // Custom fields in network settings
-    add_action('wpmu_options', 'duo_mu_options');
-    add_action('update_wpmu_options', 'duo_update_mu_options');
-
+}
 ?>
