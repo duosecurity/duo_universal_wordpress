@@ -43,12 +43,17 @@ $helper = new Duo\DuoUniversalWordpress\WordpressHelper();
 $utils = new Duo\DuoUniversalWordpress\Utilities($helper);
 
 if ($utils->duo_auth_enabled()) {
-    $duo_client = new Client(
-        $utils->duo_get_option('duo_client_id'),
-        $utils->duo_get_option('duo_client_secret'),
-        $utils->duo_get_option('duo_host'),
-        "",
-    );
+    try {
+        $duo_client = new Client(
+            $utils->duo_get_option('duo_client_id'),
+            $utils->duo_get_option('duo_client_secret'),
+            $utils->duo_get_option('duo_host'),
+            "",
+        );
+    } catch (Exception $e) {
+        $utils->duo_debug_log($e->getMessage());
+        $duo_client = null;
+    }
 } else {
     $duo_client = null;
 }

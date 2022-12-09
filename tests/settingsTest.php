@@ -253,4 +253,87 @@ final class SettingsTest extends TestCase
 
         $this->expectOutputRegex('/checked/');
     }
+
+    /**
+     * Test that duo_role_validate returns the list
+     * of options if all are valid
+     */
+    public function testDuoRolesValidateGood(): void
+    {
+        $duo_roles = array(
+            "Editor" => "editor",
+            "Author" => "author",
+        );
+        $roles = $this->getMockBuilder(stdClass::class)
+            ->addMethods(['get_names'])
+            ->getMock();
+        $roles->method('get_names')->willReturn($duo_roles);
+        $helper = $this->getMockBuilder(stdClass::class)
+           ->addMethods(['before_last_bar'])
+           ->getMock();
+        $helper->method('before_last_bar')->willReturnArgument(0);
+        $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\Utilities::class)
+           ->setConstructorArgs(array($helper))
+           ->onlyMethods(['duo_get_roles'])
+           ->getMock();
+
+        $duo_utils->method('duo_get_roles')->willReturn($roles);
+        $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
+
+        $input = array(
+            "Editor" => "role"
+        );
+
+        $result = $settings->duo_roles_validate($input);
+
+        $this->assertEquals($result, $input);
+    }
+
+    /**
+     * Test that duo_role_validate returns the empty
+     * array if falsey options are passed
+     */
+    public function testDuoRolesValidateEmpty(): void
+    {
+        $duo_utils = $this->createStub(Duo\DuoUniversalWordpress\Utilities::class);
+        $duo_utils->wordpress_helper = $this->wordpress_helper;
+        $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
+
+        $this->assertEmpty($settings->duo_roles_validate(1));
+        $this->assertEmpty($settings->duo_roles_validate(array()));
+        $this->assertEmpty($settings->duo_roles_validate(false));
+    }
+
+    /**
+     * Test that duo_role_validate removes bad options
+     * from selected role array
+     */
+    public function testDuoRolesValidateBadOptionsAreRemoved(): void
+    {
+        $duo_roles = array(
+            "Editor" => "editor",
+            "Author" => "author",
+        );
+        $roles = $this->getMockBuilder(stdClass::class)
+            ->addMethods(['get_names'])
+            ->getMock();
+        $roles->method('get_names')->willReturn($duo_roles);
+        $helper = $this->getMockBuilder(stdClass::class)
+           ->addMethods(['before_last_bar'])
+           ->getMock();
+        $helper->method('before_last_bar')->willReturnArgument(0);
+        $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\Utilities::class)
+           ->setConstructorArgs(array($helper))
+           ->onlyMethods(['duo_get_roles'])
+           ->getMock();
+
+        $duo_utils->method('duo_get_roles')->willReturn($roles);
+        $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
+
+        $result = $settings->duo_roles_validate(array(
+            "Missing" => "role",
+        ));
+
+        $this->assertEquals($result, array());
+    }
 }

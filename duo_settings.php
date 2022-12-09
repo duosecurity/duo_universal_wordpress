@@ -102,13 +102,12 @@ class Settings {
         if (!is_array($options) || empty($options) || (false === $options)) {
             return array();
         }
-
         $wp_roles = $this->duo_utils->duo_get_roles();
 
         $valid_roles = $wp_roles->get_names();
         //otherwise validate each role and then return the array
-        foreach ($options as $opt) {
-            if (!in_array($opt, $valid_roles)) {
+        foreach ($options as $opt=>$value) {
+            if (!array_key_exists($opt, $valid_roles)) {
                 unset($options[$opt]);
             }
         }
