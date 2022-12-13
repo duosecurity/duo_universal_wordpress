@@ -34,6 +34,7 @@ interface WordpressHelperInterface
     public function update_site_option($option, $value);
     public function esc_attr_e($text, $domain='default');
     public function esc_attr($text);
+    public function translate($text, $domain='default');
 };
 
 class WordpressHelper implements WordpressHelperInterface
@@ -161,5 +162,9 @@ class WordpressHelper implements WordpressHelperInterface
     public function esc_attr($text)
     {
         return esc_attr($text);
+    }
+    public function translate($text, $domain='default')
+    {
+       return __($text, $domain);
     }
 }

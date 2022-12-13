@@ -150,8 +150,9 @@ final class SettingsTest extends TestCase
         $duo_utils->method('duo_get_option')->willReturn("this-is-a-test-host");
         $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
 
-        $this->expectOutputRegex('/this-is-a-test-host/');
         $settings->duo_settings_host();
+
+        $this->expectOutputRegex('/this-is-a-test-host/');
     }
 
     /**

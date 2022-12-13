@@ -141,7 +141,7 @@ class Settings {
         if (!$this_plugin) $this_plugin = $this->wordpress_helper->plugin_basename(__FILE__);
 
         if ($file == $this_plugin) {
-            $settings_link = '<a href="options-general.php?page=duo_universal_wordpress">'.__("Settings", "duo_universal_wordpress").'</a>';
+            $settings_link = '<a href="options-general.php?page=duo_universal_wordpress">'.$this->wordpress_helper->translate("Settings", "duo_universal_wordpress").'</a>';
             array_unshift($links, $settings_link);
         }
         return $links;

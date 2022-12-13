@@ -48,6 +48,11 @@ class DuoUniversalWordpressPlugin
         return $this->wordpress_helper->get_transient("duo_auth_".$user."_status");
     }
 
+    function duo_verify_auth_status($user)
+    {
+        return ($this->get_user_auth_status($user) == "authenticated");
+    }
+
     function get_username_from_oidc_state($oidc_state)
     {
         return $this->wordpress_helper->get_transient("duo_auth_state_$oidc_state");
@@ -58,23 +63,42 @@ class DuoUniversalWordpressPlugin
         return $this->wordpress_helper->get_transient("duo_auth_".$user."_redirect_url");
     }
 
+    function clear_user_auth($user)
+    {
+        $username = $user->user_login;
+        try {
+            $oidc_state = $this->wordpress_helper->get_transient("duo_auth_".$username."_oidc_state");
+
+            $this->wordpress_helper->delete_transient("duo_auth_".$username."_status");
+            $this->wordpress_helper->delete_transient("duo_auth_".$username."_oidc_state");
+            $this->wordpress_helper->delete_transient("duo_auth_state_$oidc_state");
+            $this->wordpress_helper->delete_transient("duo_auth_".$username."_redirect_url");
+        } catch (Exception $e) {
+            // there's not much we can do but we shouldn't fail the logout because of this
+            $this->duo_debug_log($e->getMessage());
+        };
+    }
+
     function clear_current_user_auth()
     {
         $user = $this->wordpress_helper->wp_get_current_user();
-        $username = $user->user_login;
-        $oidc_state = $this->wordpress_helper->get_transient("duo_auth_".$username."_oidc_state");
-
-        // technically these could fail. What do?
-        $this->wordpress_helper->delete_transient("duo_auth_".$username."_status");
-        $this->wordpress_helper->delete_transient("duo_auth_".$username."_oidc_state");
-        $this->wordpress_helper->delete_transient("duo_auth_state_$oidc_state");
-        $this->wordpress_helper->delete_transient("duo_auth_".$username."_redirect_url");
+        $this->clear_user_auth($user);
     }
 
     function get_page_url()
     {
         $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
         return $protocol.$_SERVER['HTTP_HOST'].$this->duo_utils->duo_get_uri();
+    }
+
+    function exit()
+    {
+        exit();
+    }
+
+    function error_log($str, int $type=0, $destination=null, $headers=null)
+    {
+        error_log($str, $type, $destination, $headers);
     }
 
     function duo_start_second_factor($user)
@@ -89,7 +113,7 @@ class DuoUniversalWordpressPlugin
         $this->wordpress_helper->wp_logout();
         $prompt_uri = $this->duo_client->createAuthUrl($user->user_login, $oidc_state);
         $this->wordpress_helper->wp_redirect($prompt_uri);
-        exit();
+        $this->exit();
     }
 
     function duo_authenticate_user($user="", $username="", $password="")
@@ -106,26 +130,26 @@ class DuoUniversalWordpressPlugin
 
         if (isset($_GET['duo_code'])) {
             //secondary auth
-            $this->duo_debug_log('Doing secondary auth');
             if (isset($_GET["error"])) {
                 $error_msg = $_GET["error"] . ":" . $_GET["error_description"];
                 $error = $this->wordpress_helper->WP_Error(
-                    'Duo authentication_failed',
-                    __("<strong>ERROR</strong>: $error_msg")
+                    'Duo authentication failed',
+                    $this->wordpress_helper->translate("<strong>ERROR</strong>: $error_msg")
                 );
                 $this->duo_debug_log($error_msg);
                 return $error;
             }
 
-            if (!isset($_GET["duo_code"]) || !isset($_GET["state"])) {
-                $error_msg = "Missing state or code";
+            if (!isset($_GET["state"])) {
+                $error_msg = "Missing state";
                 $error = $this->wordpress_helper->WP_Error(
-                    'Duo authentication_failed',
-                    __("<strong>ERROR</strong>: $error_msg")
+                    'Duo authentication failed',
+                    $this->wordpress_helper->translate("<strong>ERROR</strong>: $error_msg")
                 );
                 $this->duo_debug_log($error_msg);
                 return $error;
             }
+            $this->duo_debug_log('Doing secondary auth');
 
             // Get authorization token to trade for 2FA
             $code = $_GET["duo_code"];
@@ -139,8 +163,8 @@ class DuoUniversalWordpressPlugin
             if (empty($associated_user)) {
                 $error_msg = "No saved state please login again";
                 $error = $this->wordpress_helper->WP_Error(
-                    'Duo authentication_failed',
-                    __("<strong>ERROR</strong>: $error_msg")
+                    'Duo authentication failed',
+                    $this->wordpress_helper->translate("<strong>ERROR</strong>: $error_msg")
                 );
                 $this->duo_debug_log($error_msg);
                 return $error;
@@ -153,8 +177,8 @@ class DuoUniversalWordpressPlugin
                 $this->duo_debug_log($e->getMessage());
                 $error_msg = "Error decoding Duo result. Confirm device clock is correct.";
                 $error = $this->wordpress_helper->WP_Error(
-                    'Duo authentication_failed',
-                    __("<strong>ERROR</strong>: $error_msg")
+                    'Duo authentication failed',
+                    $this->wordpress_helper->translate("<strong>ERROR</strong>: $error_msg")
                 );
                 $this->duo_debug_log($error_msg);
                 return $error;
@@ -170,7 +194,7 @@ class DuoUniversalWordpressPlugin
             // Don't use get_user_by(). It doesn't return a WP_User object if wordpress version < 3.3
             $user = $this->wordpress_helper->WP_User(0, $username);
             if (!$user) {
-                error_log("Failed to retrieve WP user $username");
+                $this->error_log("Failed to retrieve WP user $username");
                 return;
             }
             if(!$this->duo_utils->duo_role_require_mfa($user)) {
@@ -201,9 +225,10 @@ class DuoUniversalWordpressPlugin
                         $error_msg = "2FA Unavailable. Confirm Duo client/secret/host values are correct";
                         $error = $this->wordpress_helper->WP_Error(
                             'Duo authentication_failed',
-                            __("<strong>Error</strong>: $error_msg")
+                            $this->wordpress_helper->translate("<strong>Error</strong>: $error_msg")
                         );
                         $this->duo_debug_log($error_msg);
+                        $this->clear_user_auth($user);
                         return $error;
                     }
                 }
@@ -238,12 +263,6 @@ class DuoUniversalWordpressPlugin
             }
             $this->duo_debug_log("User $user->user_login allowed");
         }
-    }
-
-    function duo_verify_auth_status($user)
-    {
-        $status = $this->wordpress_helper->get_transient("duo_auth_".$user."_status");
-        return ($status == "authenticated");
     }
 }
 ?>
