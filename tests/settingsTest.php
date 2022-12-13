@@ -296,7 +296,7 @@ final class SettingsTest extends TestCase
     public function testDuoRolesValidateEmpty(): void
     {
         $duo_utils = $this->createStub(Duo\DuoUniversalWordpress\Utilities::class);
-        $duo_utils->wordpress_helper = $this->wordpress_helper;
+        $duo_utils->wordpress_helper = null;
         $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
 
         $this->assertEmpty($settings->duo_roles_validate(1));
