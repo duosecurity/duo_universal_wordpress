@@ -2,6 +2,7 @@
 namespace Duo\DuoUniversalWordpress;
 require_once('utilities.php');
 require_once('duo_wordpress_helper.php');
+const SECRET_PLACEHOLDER = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
 class Settings {
     public function __construct(
@@ -38,6 +39,10 @@ class Settings {
     function duo_client_id_validate($client_id) {
         if (strlen($client_id) != 20) {
             $this->wordpress_helper->add_settings_error('duo_client_id', '', 'Client ID is not valid');
+            $current_id = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duo_client_id'));
+            if ($current_id) {
+                return $current_id;
+            }
             return "";
         } else {
             return $client_id;
@@ -46,15 +51,29 @@ class Settings {
 
     function duo_settings_client_secret() {
         $client_secret = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duo_client_secret'));
-        echo "<input id='duo_client_secret' name='duo_client_secret' size='40' type='password' value='$client_secret' autocomplete='off' />";
+        if ($client_secret) {
+            $value = SECRET_PLACEHOLDER;
+        } else {
+            $value = "";
+        }
+        echo "<input id='duo_client_secret' name='duo_client_secret' size='40' type='password' value='$value' autocomplete='off' />";
     }
 
     function duo_client_secret_validate($client_secret){
+        $current_secret = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duo_client_secret'));
         if (strlen($client_secret) != 40) {
             $this->wordpress_helper->add_settings_error('duo_client_secret', '', 'Client secret is not valid');
-            return "";
+            if ($current_secret) {
+                return $current_secret;
+            } else {
+                return "";
+            }
         } else {
-            return $client_secret;
+            if ($client_secret == SECRET_PLACEHOLDER) {
+                return $current_secret;
+            } else {
+                return $client_secret;
+            }
         }
     }
 
@@ -130,6 +149,7 @@ class Settings {
     }
 
     function duo_xmlrpc_validate($option) {
+
         if($option == 'off') {
             return $option;
         }

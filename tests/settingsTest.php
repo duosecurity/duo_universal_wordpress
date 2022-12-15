@@ -44,7 +44,7 @@ final class SettingsTest extends TestCase
         $this->helper->method('do_settings_sections')->willReturn(null);
         $this->helper->method('esc_attr_e')->willReturn(null);
         $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
-        
+
         $settings->duo_settings_page();
         $this->expectOutputRegex('/action="options/');
     }
@@ -61,7 +61,7 @@ final class SettingsTest extends TestCase
              ->getMock();
         $duo_utils->method('duo_get_option')->willReturn("this-is-a-test-value");
         $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
-        
+
         $settings->duo_settings_client_id();
         $this->expectOutputRegex('/this-is-a-test-value/');
     }
@@ -80,6 +80,22 @@ final class SettingsTest extends TestCase
     }
 
     /**
+     * Test that an invalid client id doesn't clear exist value
+     */
+    public function testDuoClientIDValidateInvalidNoClear(): void
+    {
+        $id = "this is an id";
+        $this->helper->method('add_settings_error')->willReturn(null);
+        $this->helper->method('esc_attr')->willReturnArgument(0);
+        $this->duo_utils->method('duo_get_option')->willReturn($id);
+        $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
+
+        $result = $settings->duo_client_id_validate("invalid id");
+
+        $this->assertEquals($id, $result);
+    }
+
+    /**
      * Test that a valid client id validates
      */
     public function testDuoClientIDValidateValid(): void
@@ -94,7 +110,7 @@ final class SettingsTest extends TestCase
     }
 
     /**
-     * Test that client secret shows up in the output
+     * Test that client secret doesn't show up in the output if set
      */
     public function testSettingsClientSecret(): void
     {
@@ -107,7 +123,7 @@ final class SettingsTest extends TestCase
         $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
 
         $settings->duo_settings_client_secret();
-        $this->expectOutputRegex('/this-is-a-fake-secret/');
+        $this->expectOutputRegex("/".Duo\DuoUniversalWordpress\SECRET_PLACEHOLDER."/");
     }
 
     /**
@@ -117,10 +133,33 @@ final class SettingsTest extends TestCase
     {
         $this->helper->method('add_settings_error')->willReturn(null);
         $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
+        $this->helper->method('esc_attr')->willReturnArgument(0);
+        $duo_utils = $this->createMock(Duo\DuoUniversalWordpress\Utilities::class);
+        $duo_utils->wordpress_helper = $this->helper;
+        $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
 
         $result = $settings->duo_client_secret_validate("invalid secret");
 
         $this->assertEquals($result, "");
+    }
+
+    /**
+     * Test that the dummy secret doesn't overwrite settings
+     */
+    public function testDuoClientSecretValidateDummyDoesntSave(): void
+    {
+        $helper = $this->getMockBuilder(stdClass::class)
+           ->addMethods(['add_settings_error', 'esc_attr'])
+           ->getMock();
+        $helper->method('esc_attr')->willReturnArgument(0);
+        $duo_utils = $this->createMock(Duo\DuoUniversalWordpress\Utilities::class);
+        $duo_utils->wordpress_helper = $helper;
+        $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
+        $duo_utils->method('duo_get_option')->willReturn("current secret that is 40 character long");
+
+        $result = $settings->duo_client_secret_validate(Duo\DuoUniversalWordpress\SECRET_PLACEHOLDER);
+
+        $this->assertEquals($result, "current secret that is 40 character long");
     }
 
     /**
@@ -129,12 +168,37 @@ final class SettingsTest extends TestCase
     public function testDuoClientSecretValidateValid(): void
     {
         $this->helper->method('add_settings_error')->willReturn(null);
+        $this->helper->method('esc_attr')->willReturnArgument(0);
         $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
+        $duo_utils = $this->createMock(Duo\DuoUniversalWordpress\Utilities::class);
+        $duo_utils->wordpress_helper = $this->helper;
+        $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
         $client_secret = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
         $result = $settings->duo_client_secret_validate($client_secret);
 
         $this->assertEquals($result, $client_secret);
+    }
+
+    /**
+     * Test that an invalid client secret doesn't clear current secret
+     */
+    public function testDuoClientSecretValidateInvalidNoClear(): void
+    {
+        $original_secret = "current secret that is 40 character long";
+        $helper = $this->getMockBuilder(stdClass::class)
+           ->addMethods(['add_settings_error', 'esc_attr'])
+           ->getMock();
+        $helper->method('esc_attr')->willReturnArgument(0);
+        $duo_utils = $this->createMock(Duo\DuoUniversalWordpress\Utilities::class);
+        $duo_utils->method('duo_get_option')->willReturn($original_secret);
+        $duo_utils->wordpress_helper = $helper;
+        $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
+        $client_secret = "bad secret";
+
+        $result = $settings->duo_client_secret_validate($client_secret);
+
+        $this->assertEquals($result, $original_secret);
     }
 
     /**
@@ -319,7 +383,7 @@ final class SettingsTest extends TestCase
      * Test that duo_add_page NOT being called in multisite
      */
     public function testDuoAddPageSingleSite(): void
-    {   
+    {
         $this->helper->method('is_multisite')->willReturn(false);
         $this->helper->method('add_options_page');
         $this->helper->expects($this->once())->method('add_options_page');
@@ -332,11 +396,11 @@ final class SettingsTest extends TestCase
      * Test that duo_add_page being called in multisite
      */
     public function testDuoAddPageMultisite(): void
-    {   
+    {
         $this->helper->method('is_multisite')->willReturn(true);
         $this->helper->expects($this->never())->method('add_options_page');
         $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
-        
+
         $settings->duo_add_page();
     }
 
@@ -344,11 +408,11 @@ final class SettingsTest extends TestCase
      * Test that duo_add_site_option not add already exist options
      */
     public function testDuoAddDuplicateSiteOption(): void
-    {   
+    {
         $this->duo_utils->method('duo_get_option')->willReturn(true);
         $this->helper->expects($this->never())->method('add_site_option');
         $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
-        
+
         $settings->duo_add_site_option("FakeOption");
     }
 
@@ -356,22 +420,22 @@ final class SettingsTest extends TestCase
      * Test that duo_add_site_option add option to non-exist option
      */
     public function testDuoAddNewSiteOption(): void
-    {   
+    {
         $this->duo_utils->method('duo_get_option')->willReturn(false);
         $this->helper
             ->expects($this->once())
             ->method('add_site_option')
             ->with("FakeOption");
         $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
-        
+
         $settings->duo_add_site_option("FakeOption");
     }
-    
+
     /**
      * Test that duo_admin_init add correct options for multisite
      */
     public function testDuoAdminInitForMultisite(): void
-    {   
+    {
         $duo_roles = array(
             "Editor" => "editor",
             "Author" => "author",
@@ -381,7 +445,7 @@ final class SettingsTest extends TestCase
             ->getMock();
         $roles->method('get_names')->willReturn($duo_roles);
         $this->duo_utils->method('duo_get_roles')->willReturn($roles);
-        
+
         $this->helper->method('is_multisite')->willReturn(true);
         $this->helper->method('before_last_bar')->will($this->returnArgument(0));
 
@@ -408,8 +472,8 @@ final class SettingsTest extends TestCase
      * Test that duo_admin_init add correct options for single site
      */
     public function testDuoAdminInitForSingleSite(): void
-    {   
-        
+    {
+
         $this->helper->method('is_multisite')->willReturn(false);
         $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
         $this->helper
@@ -447,7 +511,7 @@ final class SettingsTest extends TestCase
      * Test duo_update_mu_option update site options with values from $_POST
      */
     public function testDuoMultisidteUpdateWithPostValues(): void
-    {   
+    {
         $this->old_POST = $_POST;
         $duo_roles = array(
             "Editor" => "editor",
@@ -482,7 +546,7 @@ final class SettingsTest extends TestCase
      * Test duo_update_mu_option update site options with empty $_POST
      */
     public function testDuoMultisidteUpdateWithEmptyPostValue(): void
-    {   
+    {
         $this->helper
             ->expects($this->exactly(3))
             ->method('update_site_option')
