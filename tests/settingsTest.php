@@ -3,8 +3,8 @@
 use Duo\DuoUniversal\DuoException;
 use Duo\DuoUniversalWordpress;
 use PHPUnit\Framework\TestCase;
-require_once('duo_settings.php');
-require_once('duo_wordpress_helper.php');
+require_once 'duo_settings.php';
+require_once 'duo_wordpress_helper.php';
 
 final class SettingsTest extends TestCase
 {
@@ -56,9 +56,9 @@ final class SettingsTest extends TestCase
     {
         $this->helper->method('esc_attr')->willReturnArgument(0);
         $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\Utilities::class)
-             ->setConstructorArgs(array($this->helper))
-             ->onlyMethods(['duo_get_option'])
-             ->getMock();
+            ->setConstructorArgs(array($this->helper))
+            ->onlyMethods(['duo_get_option'])
+            ->getMock();
         $duo_utils->method('duo_get_option')->willReturn("this-is-a-test-value");
         $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
 
@@ -149,8 +149,8 @@ final class SettingsTest extends TestCase
     public function testDuoClientSecretValidateDummyDoesntSave(): void
     {
         $helper = $this->getMockBuilder(stdClass::class)
-           ->addMethods(['add_settings_error', 'esc_attr'])
-           ->getMock();
+            ->addMethods(['add_settings_error', 'esc_attr'])
+            ->getMock();
         $helper->method('esc_attr')->willReturnArgument(0);
         $duo_utils = $this->createMock(Duo\DuoUniversalWordpress\Utilities::class);
         $duo_utils->wordpress_helper = $helper;
@@ -187,8 +187,8 @@ final class SettingsTest extends TestCase
     {
         $original_secret = "current secret that is 40 character long";
         $helper = $this->getMockBuilder(stdClass::class)
-           ->addMethods(['add_settings_error', 'esc_attr'])
-           ->getMock();
+            ->addMethods(['add_settings_error', 'esc_attr'])
+            ->getMock();
         $helper->method('esc_attr')->willReturnArgument(0);
         $duo_utils = $this->createMock(Duo\DuoUniversalWordpress\Utilities::class);
         $duo_utils->method('duo_get_option')->willReturn($original_secret);
@@ -264,14 +264,18 @@ final class SettingsTest extends TestCase
         $settings->duo_settings_roles();
         $output = $this->getActualOutput();
 
-        $this->assertEquals(1, preg_match(
-            "/name='duo_roles\[uses_2fa\]' type='checkbox' value='1'  checked/",
-            $output
-        ));
-        $this->assertEquals(1, preg_match(
-            "/name='duo_roles\[skip_2fa\]' type='checkbox' value=''/",
-            $output
-        ));
+        $this->assertEquals(
+            1, preg_match(
+                "/name='duo_roles\[uses_2fa\]' type='checkbox' value='1'  checked/",
+                $output
+            )
+        );
+        $this->assertEquals(
+            1, preg_match(
+                "/name='duo_roles\[skip_2fa\]' type='checkbox' value=''/",
+                $output
+            )
+        );
     }
 
     /**
@@ -282,9 +286,9 @@ final class SettingsTest extends TestCase
     {
         $helper = $this->createStub(stdClass::class);
         $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\Utilities::class)
-           ->setConstructorArgs(array($helper))
-           ->onlyMethods(['duo_get_option'])
-           ->getMock();
+            ->setConstructorArgs(array($helper))
+            ->onlyMethods(['duo_get_option'])
+            ->getMock();
 
         $duo_utils->method('duo_get_option')->willReturn('off');
         $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);

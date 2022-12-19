@@ -3,8 +3,8 @@
 use Duo\DuoUniversal\DuoException;
 use Duo\DuoUniversalWordpress;
 use PHPUnit\Framework\TestCase;
-require_once('authentication.php');
-require_once('duo_wordpress_helper.php');
+require_once 'authentication.php';
+require_once 'duo_wordpress_helper.php';
 
 final class authenticationTest extends TestCase
 {
@@ -23,7 +23,7 @@ final class authenticationTest extends TestCase
     function testUpdateUserAuthStatus(): void
     {
         $map = array();
-        $callback = function($key, $value, $expiration) use(&$map) {
+        $callback = function ($key, $value, $expiration) use (&$map) {
             $map[$key] = $value;
         };
         $this->helper->method('set_transient')->willReturnCallback($callback);
@@ -65,7 +65,7 @@ final class authenticationTest extends TestCase
             "duo_auth_".$user->user_login."_oidc_state" => "state",
             "duo_auth_state_state" => $user->user_login
         );
-        $delete_callback = function($key) use (&$map) {
+        $delete_callback = function ($key) use (&$map) {
             unset($map[$key]);
         };
         $this->helper->method('delete_transient')->willReturnCallback($delete_callback);
@@ -87,9 +87,9 @@ final class authenticationTest extends TestCase
         $user = $this->createMock(stdClass::class);
         $user->user_login = "test user";
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
-             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-             ->onlyMethods(['get_page_url', 'exit'])
-             ->getMock();
+            ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
+            ->onlyMethods(['get_page_url', 'exit'])
+            ->getMock();
         $authentication->method('get_page_url')->willReturn('fake url');
 
         $authentication->duo_start_second_factor($user);
@@ -124,7 +124,7 @@ final class authenticationTest extends TestCase
         $user = $this->createMock(stdClass::class);
         $user->user_login = "test user";
         $map = array();
-        $callback = function($key, $value, $expiration) use(&$map) {
+        $callback = function ($key, $value, $expiration) use (&$map) {
             $map[$key] = $value;
         };
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
@@ -183,12 +183,14 @@ final class authenticationTest extends TestCase
     {
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log',
                 'get_username_from_oidc_state',
                 'update_user_auth_status',
                 'duo_start_second_factor'
-            ])
+                ]
+            )
             ->getMock();
         $authentication->expects($this->never())->method('duo_start_second_factor');
         $user = $this->getMockBuilder(stdClass::class)
@@ -226,9 +228,11 @@ final class authenticationTest extends TestCase
     {
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log'
-              ])
+                ]
+            )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $this->helper->method('translate')->willReturnArgument(0);
@@ -248,9 +252,11 @@ final class authenticationTest extends TestCase
     {
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log'
-              ])
+                ]
+            )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $this->helper->method('translate')->willReturnArgument(0);
@@ -268,10 +274,12 @@ final class authenticationTest extends TestCase
     {
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log',
                 'get_username_from_oidc_state'
-              ])
+                ]
+            )
             ->getMock();
         $authentication->method('get_username_from_oidc_state')->willReturn(null);
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
@@ -292,11 +300,13 @@ final class authenticationTest extends TestCase
     {
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log',
                 'get_username_from_oidc_state',
                 'get_redirect_url'
-              ])
+                ]
+            )
             ->getMock();
         $this->helper->method('translate')->willReturnArgument(0);
         $this->helper->method('WP_Error')->willReturnArgument(1);
@@ -317,17 +327,19 @@ final class authenticationTest extends TestCase
     function testAuthUserSuccess(): void
     {
         $map = array();
-        $callback = function($key, $value, $expiration) use(&$map) {
+        $callback = function ($key, $value, $expiration) use (&$map) {
             $map[$key] = $value;
         };
         $this->helper->method('set_transient')->willReturnCallback($callback);
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log',
                 'get_username_from_oidc_state',
                 'get_redirect_url'
-              ])
+                ]
+            )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $authentication->method('get_username_from_oidc_state')->willReturn("test user");
@@ -349,9 +361,11 @@ final class authenticationTest extends TestCase
     {
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log',
-              ])
+                ]
+            )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $authentication->expects($this->once())->method('duo_debug_log')->with($this->equalTo("Starting primary authentication"));
@@ -369,10 +383,12 @@ final class authenticationTest extends TestCase
     {
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log',
                 'error_log',
-              ])
+                ]
+            )
             ->getMock();
         $authentication->expects($this->once())->method('error_log')->with($this->equalTo("Failed to retrieve WP user test user"));
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
@@ -388,15 +404,17 @@ final class authenticationTest extends TestCase
     function testAuthUserPrimaryNo2FARole(): void
     {
         $map = array();
-        $callback = function($key, $value, $expiration) use(&$map) {
+        $callback = function ($key, $value, $expiration) use (&$map) {
             $map[$key] = $value;
         };
         $this->helper->method('set_transient')->willReturnCallback($callback);
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log',
-              ])
+                ]
+            )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $this->duo_utils->method('duo_role_require_mfa')->willReturn(false);
@@ -420,9 +438,11 @@ final class authenticationTest extends TestCase
     {
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log',
-              ])
+                ]
+            )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $this->duo_utils->method('duo_role_require_mfa')->willReturn(true);
@@ -445,15 +465,17 @@ final class authenticationTest extends TestCase
     function testAuthUserPrimaryUpdatesAuthStatus(): void
     {
         $map = array();
-        $callback = function($key, $value, $expiration) use(&$map) {
+        $callback = function ($key, $value, $expiration) use (&$map) {
             $map[$key] = $value;
         };
         $this->helper->method('set_transient')->willReturnCallback($callback);
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log', 'duo_start_second_factor',
-              ])
+                ]
+            )
             ->getMock();
         $authentication->expects($this->once())->method('duo_start_second_factor');
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
@@ -477,15 +499,17 @@ final class authenticationTest extends TestCase
     function testAuthUserSecondaryExceptionFailmodeOpen(): void
     {
         $map = array();
-        $callback = function($key, $value, $expiration) use(&$map) {
+        $callback = function ($key, $value, $expiration) use (&$map) {
             $map[$key] = $value;
         };
         $this->helper->method('set_transient')->willReturnCallback($callback);
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log', 'duo_start_second_factor',
-              ])
+                ]
+            )
             ->getMock();
         $authentication->method('duo_start_second_factor')->willThrowException(new Duo\DuoUniversal\DuoException("error during auth"));
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
@@ -509,19 +533,21 @@ final class authenticationTest extends TestCase
     function testAuthUserSecondaryExceptionFailmodeClose(): void
     {
         $map = array();
-        $callback = function($key, $value, $expiration) use(&$map) {
+        $callback = function ($key, $value, $expiration) use (&$map) {
             $map[$key] = $value;
         };
-        $delete_callback = function($key) use (&$map) {
+        $delete_callback = function ($key) use (&$map) {
             unset($map[$key]);
         };
         $this->helper->method('set_transient')->willReturnCallback($callback);
         $this->helper->method('delete_transient')->willReturnCallback($delete_callback);
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log', 'duo_start_second_factor',
-              ])
+                ]
+            )
             ->getMock();
         $authentication->method('duo_start_second_factor')->willThrowException(new Duo\DuoUniversal\DuoException("error during auth"));
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
@@ -550,14 +576,16 @@ final class authenticationTest extends TestCase
     {
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log',
-              ])
+                ]
+            )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(false);
         $authentication->expects($this->once())
-           ->method('duo_debug_log')
-           ->with($this->equalTo("Duo not enabled, skip auth check."));
+            ->method('duo_debug_log')
+            ->with($this->equalTo("Duo not enabled, skip auth check."));
 
         $result = $authentication->duo_verify_auth();
 
@@ -571,9 +599,11 @@ final class authenticationTest extends TestCase
     {
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log',
-              ])
+                ]
+            )
             ->getMock();
         $site = $this->createMock(stdClass::class);
         $site->site_name = "test site";
@@ -581,8 +611,8 @@ final class authenticationTest extends TestCase
         $this->helper->method('is_multisite')->willReturn(true);
         $this->helper->method('get_current_site')->willReturn($site);
         $authentication->expects($this->once())
-           ->method('duo_debug_log')
-           ->with($this->equalTo("Duo not enabled on test site"));
+            ->method('duo_debug_log')
+            ->with($this->equalTo("Duo not enabled on test site"));
 
         $result = $authentication->duo_verify_auth();
 
@@ -596,9 +626,11 @@ final class authenticationTest extends TestCase
     {
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log',
-              ])
+                ]
+            )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $this->helper->method("is_user_logged_in")->willReturn(false);
@@ -618,9 +650,11 @@ final class authenticationTest extends TestCase
         $user->user_login = "test user";
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log', 'duo_start_second_factor'
-              ])
+                ]
+            )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $this->helper->method("is_user_logged_in")->willReturn(true);
@@ -645,9 +679,11 @@ final class authenticationTest extends TestCase
         $user->user_login = "test user";
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log', 'duo_verify_auth_status', 'duo_start_second_factor',
-              ])
+                ]
+            )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $this->helper->method("is_user_logged_in")->willReturn(true);
@@ -673,9 +709,11 @@ final class authenticationTest extends TestCase
         $user->user_login = "test user";
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods([
+            ->onlyMethods(
+                [
                 'duo_debug_log', 'duo_verify_auth_status', 'duo_start_second_factor',
-              ])
+                ]
+            )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $this->helper->method("is_user_logged_in")->willReturn(true);

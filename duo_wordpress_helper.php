@@ -165,6 +165,6 @@ class WordpressHelper implements WordpressHelperInterface
     }
     public function translate($text, $domain='default')
     {
-       return __($text, $domain);
+        return __($text, $domain);
     }
 }
