@@ -69,7 +69,8 @@ $settings = new Duo\DuoUniversalWordpress\Settings(
 );
 
 if (!$settings->wordpress_helper->is_multisite()) {
-    add_filter('plugin_action_links', array($settings, 'duo_add_link'), 10, 2);
+    $plugin_name = plugin_basename(__FILE__);
+    add_filter('plugin_action_links_'.$plugin_name, array($settings, 'duo_add_link'), 10, 2);
 }
 
 

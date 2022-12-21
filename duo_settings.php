@@ -135,7 +135,7 @@ class Settings {
 
     function duo_settings_text() {
         echo "<p>See the <a target='_blank' href='https://www.duosecurity.com/docs/wordpress'>Duo for WordPress guide</a> to enable Duo two-factor authentication for your WordPress logins.</p>";
-        echo '<p>You can retrieve your client id, client secret, and API hostname by logging in to the Duo Admin Panel.</p>';
+        echo '<p>You can retrieve your Client ID, Client Secret, and API hostname by logging in to the Duo Admin Panel.</p>';
         echo '<p>Note: After enabling the plugin, you will be immediately prompted for second factor authentication.</p>';
     }
 
@@ -157,13 +157,8 @@ class Settings {
     }
 
     function duo_add_link($links, $file) {
-        static $this_plugin;
-        if (!$this_plugin) $this_plugin = $this->wordpress_helper->plugin_basename(__FILE__);
-
-        if ($file == $this_plugin) {
-            $settings_link = '<a href="options-general.php?page=duo_universal_wordpress">'.$this->wordpress_helper->translate("Settings", "duo_universal_wordpress").'</a>';
-            array_unshift($links, $settings_link);
-        }
+        $settings_link = '<a href="options-general.php?page=duo_universal_wordpress">'.$this->wordpress_helper->translate("Settings", "duo_universal_wordpress").'</a>';
+        array_unshift($links, $settings_link);
         return $links;
     }
 
