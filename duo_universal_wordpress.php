@@ -2,31 +2,18 @@
 defined('ABSPATH') or die('Direct Access Denied');
 
 /*
-Plugin Name: Duo Universal Two-Factor Authentication
+Plugin Name: Duo Universal
 Plugin URI: http://wordpress.org/extend/plugins/duo-universal-wordpress/
-Description: This plugin enables Duo two-factor authentication for WordPress logins.
+Description: This plugin enables Duo universal authentication for WordPress logins.
 Version: 1.0.0
 Author: Duo Security
 Author URI: http://www.duosecurity.com
-License: GNUGPLv3
+License: Apache-2.0
 */
 
 /*
 Copyright (c) 2022 Cisco Systems, Inc. and/or its affiliates
 All rights reserved.
-
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
-
-This program is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-this program. If not, see <https://www.gnu.org/licenses/>.
-
 */
 
 require_once 'duo_settings.php';
