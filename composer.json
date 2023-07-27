@@ -3,7 +3,7 @@
   "description": "Duo Universal WordPress",
   "homepage": "https://github.com/duosecurity/duo_universal_wordpress",
   "type": "wordpress-plugin",
-  "license": "GPL-2.0+",
+  "license": "Apache-2.0",
   "authors": [
     {
       "name": "Duo Security",
