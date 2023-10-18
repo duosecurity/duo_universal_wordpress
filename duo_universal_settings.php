@@ -266,7 +266,7 @@ class Settings {
         }
 
         if(isset($_POST['duo_roles'])) {
-            $roles = sanitize_roles($_POST['duo_roles']);
+            $roles = $this->sanitize_roles($_POST['duo_roles']);
             $result = $this->wordpress_helper->update_site_option('duo_roles', $roles);
         }
         else {
