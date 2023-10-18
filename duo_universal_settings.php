@@ -37,7 +37,7 @@ class Settings {
         }
 
         foreach ($options as $opt=>$value) {
-            $options[$opt] = sanitize_alphanumeric($value);
+            $options[$opt] = $this->duo_utils->sanitize_alphanumeric($value);
         }
         return $options;
     }
@@ -244,12 +244,12 @@ class Settings {
 
     function duo_update_mu_options() {
         if(isset($_POST['duo_client_id'])) {
-            $client_id = sanitize_alphanumeric($_POST['duo_client_id']);
+            $client_id = $this->duo_utils->sanitize_alphanumeric($_POST['duo_client_id']);
             $result = $this->wordpress_helper->update_site_option('duo_client_id', $client_id);
         }
 
         if(isset($_POST['duo_client_secret'])) {
-            $client_secret = sanitize_alphanumeric($_POST['duo_client_secret']);
+            $client_secret = $this->duo_utils->sanitize_alphanumeric($_POST['duo_client_secret']);
             $result = $this->wordpress_helper->update_site_option('duo_client_secret', $client_secret);
         }
 
@@ -259,7 +259,7 @@ class Settings {
         }
 
         if(isset($_POST['duo_failmode'])) {
-            $failmode = sanitize_alphanumeric($_POST['duo_failmode']);
+            $failmode = $this->duo_utils->sanitize_alphanumeric($_POST['duo_failmode']);
             $result = $this->wordpress_helper->update_site_option('duo_failmode', $failmode);
         } else {
             $result = $this->wordpress_helper->update_site_option('duo_failmode', "open");
@@ -274,7 +274,7 @@ class Settings {
         }
 
         if(isset($_POST['duo_xmlrpc'])) {
-            $xmlrpc = sanitize_alphanumeric($_POST['duo_xmlrpc']);
+            $xmlrpc = $this->duo_utils->sanitize_alphanumeric($_POST['duo_xmlrpc']);
             $result = $this->wordpress_helper->update_site_option('duo_xmlrpc', $xmlrpc);
         }
         else {

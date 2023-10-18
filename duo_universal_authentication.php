@@ -1,7 +1,7 @@
 <?php
 
-require_once 'duo_universal_settings.php';
 require_once 'duo_universal_utilities.php';
+require_once 'duo_universal_settings.php';
 require_once 'duo_universal_wordpress_helper.php';
 require_once 'vendor/autoload.php';
 
@@ -87,7 +87,7 @@ class DuoUniversalWordpressPlugin
 
     function get_page_url()
     {
-        $https_explicitly_enabled = (!empty($_SERVER['HTTPS']) && sanitize_alphanumeric($_SERVER['HTTPS']) != 'off');
+        $https_explicitly_enabled = (!empty($_SERVER['HTTPS']) && $this->duo_utils->sanitize_alphanumeric($_SERVER['HTTPS']) != 'off');
         $port = absint($_SERVER['SERVER_PORT']);
         $protocol = ($https_explicitly_enabled || $port == 443) ? "https://" : "http://";
         return sanitize_url($protocol.$_SERVER['HTTP_HOST'].$this->duo_utils->duo_get_uri());
@@ -154,10 +154,10 @@ class DuoUniversalWordpressPlugin
             $this->duo_debug_log('Doing secondary auth');
 
             // Get authorization token to trade for 2FA
-            $code = sanitize_alphanumeric($_GET["duo_code"]);
+            $code = $this->duo_utils->sanitize_alphanumeric($_GET["duo_code"]);
 
             // Get state to verify consistency and originality
-            $state = sanitize_alphanumeric($_GET["state"]);
+            $state = $this->duo_utils->sanitize_alphanumeric($_GET["state"]);
 
             // Retrieve the previously stored state and username from the session
             $associated_user = $this->get_username_from_oidc_state($state);
