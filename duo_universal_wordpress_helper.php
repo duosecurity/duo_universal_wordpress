@@ -36,6 +36,7 @@ interface WordpressHelperInterface
     public function esc_attr_e($text, $domain='default');
     public function esc_attr($text);
     public function translate($text, $domain='default');
+    public function sanitize_url(string $url, $protocols = null);
 };
 
 class WordpressHelper implements WordpressHelperInterface
@@ -171,5 +172,9 @@ class WordpressHelper implements WordpressHelperInterface
     public function translate($text, $domain='default')
     {
         return __($text, $domain);
+    }
+    public function sanitize_url($url, $protocols = null)
+    {
+        return sanitize_url($url, $protocols);
     }
 }

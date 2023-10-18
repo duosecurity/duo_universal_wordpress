@@ -13,8 +13,11 @@ final class SettingsTest extends TestCase
     {
         $this->duo_client = $this->createMock(Duo\DuoUniversal\Client::class);
         $this->helper = $this->createMock(Duo\DuoUniversalWordpress\WordpressHelper::class);
-        // Simply return the value passed in for filtering unchanged
+        // For filtering and sanitization methods provided by wordpress,
+        // simply return the value passed in for filtering unchanged since we
+        // don't have the wordpress methods in scope
         $this->helper->method('apply_filters')->willReturnArgument(1);
+        $this->helper->method('sanitize_url')->willReturnArgument(0);
         $this->duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\Utilities::class)
                                 ->disableOriginalConstructor()
                                 ->disableOriginalClone()
