@@ -192,7 +192,8 @@ final class UtilitiesTest extends TestCase
     }
 
     /**
-     * Test that sanitize_alphanumeric returns non-scalar values unchanged
+     * Test that sanitize_alphanumeric returns an empty string for
+     * non-scalar values
      */
     public function testSanitizeAlphanumericNonScalar(): void
     {
@@ -201,6 +202,6 @@ final class UtilitiesTest extends TestCase
         $duo_utils = new Duo\DuoUniversalWordpress\Utilities($helper);
 
         $test_value = ['arrays are not scalar'];
-        $this->assertEquals($duo_utils->sanitize_alphanumeric($test_value), $test_value);
+        $this->assertEquals($duo_utils->sanitize_alphanumeric($test_value), '');
     }
 }
