@@ -87,8 +87,8 @@ class DuoUniversalWordpressPlugin
 
     function get_page_url()
     {
-        $https_explicitly_enabled = (!empty($_SERVER['HTTPS']) && sanitize_alphanumeric($_SERVER['HTTPS']) != 'off')
-        $port = absint($_SERVER['SERVER_PORT'])
+        $https_explicitly_enabled = (!empty($_SERVER['HTTPS']) && sanitize_alphanumeric($_SERVER['HTTPS']) != 'off');
+        $port = absint($_SERVER['SERVER_PORT']);
         $protocol = ($https_explicitly_enabled || $port == 443) ? "https://" : "http://";
         return sanitize_url($protocol.$_SERVER['HTTP_HOST'].$this->duo_utils->duo_get_uri());
     }
