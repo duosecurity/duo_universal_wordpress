@@ -3,7 +3,7 @@
 use Duo\DuoUniversal\DuoException;
 use Duo\DuoUniversalWordpress;
 use PHPUnit\Framework\TestCase;
-require_once 'authentication.php';
+require_once 'duoup_authentication.php';
 require_once 'duo_wordpress_helper.php';
 
 final class authenticationTest extends TestCase
@@ -17,7 +17,7 @@ final class authenticationTest extends TestCase
     }
 
     /**
-     * Test that update_user_auth_status creates
+     * Test that duoup_update_user_auth_status creates
      * correct transients
      */
     function testUpdateUserAuthStatus(): void
@@ -28,7 +28,7 @@ final class authenticationTest extends TestCase
         };
         $this->helper->method('set_transient')->willReturnCallback($callback);
         $authentication = new DuoUniversalWordpressPlugin($this->duo_utils, $this->duo_client);
-        $authentication->update_user_auth_status("user", "test_status", "redirect", "oidc_state");
+        $authentication->duoup_update_user_auth_status("user", "test_status", "redirect", "oidc_state");
         $this->assertEquals($map["duo_auth_user_status"], "test_status");
         $this->assertEquals($map["duo_auth_user_redirect_url"], "redirect");
         $this->assertEquals($map["duo_auth_user_oidc_state"], "oidc_state");
@@ -88,11 +88,11 @@ final class authenticationTest extends TestCase
         $user->user_login = "test user";
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods(['get_page_url', 'exit'])
+            ->onlyMethods(['duoup_get_page_url', 'duoup_exit'])
             ->getMock();
-        $authentication->method('get_page_url')->willReturn('fake url');
+        $authentication->method('duoup_get_page_url')->willReturn('fake url');
 
-        $authentication->duo_start_second_factor($user);
+        $authentication->duoup_start_second_factor($user);
 
         $this->assertEquals($this->duo_client->redirect_url, "fake url");
     }
@@ -110,10 +110,10 @@ final class authenticationTest extends TestCase
             ->with($this->equalTo("prompt url"));
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods(['get_page_url', 'exit'])
+            ->onlyMethods(['duoup_get_page_url', 'duoup_exit'])
             ->getMock();
 
-        $authentication->duo_start_second_factor($user);
+        $authentication->duoup_start_second_factor($user);
     }
 
     /**
@@ -129,13 +129,13 @@ final class authenticationTest extends TestCase
         };
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods(['get_page_url', 'exit'])
+            ->onlyMethods(['duoup_get_page_url', 'duoup_exit'])
             ->getMock();
-        $authentication->method('get_page_url')->willReturn("test url");
+        $authentication->method('duoup_get_page_url')->willReturn("test url");
         $this->helper->method('set_transient')->willReturnCallback($callback);
         $this->duo_client->method('generateState')->willReturn("test state");
 
-        $authentication->duo_start_second_factor($user);
+        $authentication->duoup_start_second_factor($user);
 
         $this->assertEquals($map['duo_auth_test user_status'], "in-progress");
         $this->assertEquals($map['duo_auth_test user_redirect_url'], "test url");
@@ -144,7 +144,7 @@ final class authenticationTest extends TestCase
     }
 
     /**
-     * Test that user is logged out after duo_start_second_factor
+     * Test that user is logged out after duoup_start_second_factor
      */
     function testStartSecondFactorLogout(): void
     {
@@ -152,15 +152,15 @@ final class authenticationTest extends TestCase
         $user->user_login = "test user";
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods(['get_page_url', 'exit'])
+            ->onlyMethods(['duoup_get_page_url', 'duoup_exit'])
             ->getMock();
         $this->helper->expects($this->once())->method('wp_logout');
 
-        $authentication->duo_start_second_factor($user);
+        $authentication->duoup_start_second_factor($user);
     }
 
     /**
-     * Test exit is called after duo_start_second_factor
+     * Test exit is called after duoup_start_second_factor
      */
     function testStartSecondFactorExit(): void
     {
@@ -168,15 +168,15 @@ final class authenticationTest extends TestCase
         $user->user_login = "test user";
         $authentication = $this->getMockBuilder(DuoUniversalWordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
-            ->onlyMethods(['get_page_url', 'exit'])
+            ->onlyMethods(['duoup_get_page_url', 'duoup_exit'])
             ->getMock();
-        $authentication->expects($this->once())->method('exit');
+        $authentication->expects($this->once())->method('duoup_exit');
 
-        $authentication->duo_start_second_factor($user);
+        $authentication->duoup_start_second_factor($user);
     }
 
     /**
-     * Test that a user object is returned out of duo_authenticate_user rather
+     * Test that a user object is returned out of duoup_authenticate_user rather
      * then proceeding with authentication
      */
     function testUserIsNotAString(): void
@@ -185,25 +185,25 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log',
-                'get_username_from_oidc_state',
-                'update_user_auth_status',
-                'duo_start_second_factor'
+                'duoup_debug_log',
+                'duoup_get_username_from_oidc_state',
+                'duoup_update_user_auth_status',
+                'duoup_start_second_factor'
                 ]
             )
             ->getMock();
-        $authentication->expects($this->never())->method('duo_start_second_factor');
+        $authentication->expects($this->never())->method('duoup_start_second_factor');
         $user = $this->getMockBuilder(stdClass::class)
             ->setMockClassName('WP_User')
             ->getMock();
         $user->user_login = "test user";
 
-        $result = $authentication->duo_authenticate_user($user);
+        $result = $authentication->duoup_authenticate_user($user);
         $this->assertEquals($result, $user);
     }
 
     /**
-     * Test that duo_authenticate_user returns early if
+     * Test that duoup_authenticate_user returns early if
      * the plugin is not enabled
      */
     function testAuthUserAuthNotEnabled(): void
@@ -217,12 +217,12 @@ final class authenticationTest extends TestCase
             ->getMock();
         $user->user_login = "test user";
 
-        $result = $authentication->duo_authenticate_user($user);
+        $result = $authentication->duoup_authenticate_user($user);
         $this->assertEquals($result, null);
     }
 
     /**
-     * Test that duo_authenticate_user prints error if one is set
+     * Test that duoup_authenticate_user prints error if one is set
      */
     function testAuthUserAPIErrorSet(): void
     {
@@ -230,7 +230,7 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log'
+                'duoup_debug_log'
                 ]
             )
             ->getMock();
@@ -241,12 +241,12 @@ final class authenticationTest extends TestCase
         $_GET['duo_code'] = "testcode";
         $_GET['error'] = "test error";
         $_GET['error_description'] = "test description";
-        $result = $authentication->duo_authenticate_user();
+        $result = $authentication->duoup_authenticate_user();
         $this->assertRegExp("/test description/", $result);
     }
 
     /**
-     * Test that duo_authenticate_user prints error if state is missing
+     * Test that duoup_authenticate_user prints error if state is missing
      */
     function testAuthUserStateMissing(): void
     {
@@ -254,7 +254,7 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log'
+                'duoup_debug_log'
                 ]
             )
             ->getMock();
@@ -263,12 +263,12 @@ final class authenticationTest extends TestCase
         $this->helper->method('WP_Error')->willReturnArgument(1);
 
         $_GET['duo_code'] = "testcode";
-        $result = $authentication->duo_authenticate_user();
+        $result = $authentication->duoup_authenticate_user();
         $this->assertRegExp("/Missing state/", $result);
     }
 
     /**
-     * Test that duo_authenticate_user prints error if user unknown
+     * Test that duoup_authenticate_user prints error if user unknown
      */
     function testAuthUserUserMissing(): void
     {
@@ -276,25 +276,25 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log',
-                'get_username_from_oidc_state'
+                'duoup_debug_log',
+                'duoup_get_username_from_oidc_state'
                 ]
             )
             ->getMock();
-        $authentication->method('get_username_from_oidc_state')->willReturn(null);
+        $authentication->method('duoup_get_username_from_oidc_state')->willReturn(null);
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $this->helper->method('translate')->willReturnArgument(0);
         $this->helper->method('WP_Error')->willReturnArgument(1);
         $_GET['duo_code'] = "testcode";
         $_GET['state'] = "teststate";
 
-        $result = $authentication->duo_authenticate_user();
+        $result = $authentication->duoup_authenticate_user();
 
         $this->assertRegExp("/No saved state/", $result);
     }
 
     /**
-     * Test that duo_authenticate_user prints error if token exchange fails
+     * Test that duoup_authenticate_user prints error if token exchange fails
      */
     function testAuthUserExceptionHandling(): void
     {
@@ -302,27 +302,27 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log',
-                'get_username_from_oidc_state',
-                'get_redirect_url'
+                'duoup_debug_log',
+                'duoup_get_username_from_oidc_state',
+                'duoup_get_redirect_url'
                 ]
             )
             ->getMock();
         $this->helper->method('translate')->willReturnArgument(0);
         $this->helper->method('WP_Error')->willReturnArgument(1);
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
-        $authentication->method('get_username_from_oidc_state')->willReturn("test user");
+        $authentication->method('duoup_get_username_from_oidc_state')->willReturn("test user");
         $this->duo_client->method('exchangeAuthorizationCodeFor2FAResult')->willThrowException(new Duo\DuoUniversal\DuoException("there was a problem"));
         $_GET['duo_code'] = "testcode";
         $_GET['state'] = "teststate";
 
-        $result = $authentication->duo_authenticate_user();
+        $result = $authentication->duoup_authenticate_user();
 
         $this->assertRegExp("/Error decoding Duo result/", $result);
     }
 
     /**
-     * Test that duo_authenticate_user updates user status if everything succeeds
+     * Test that duoup_authenticate_user updates user status if everything succeeds
      */
     function testAuthUserSuccess(): void
     {
@@ -335,26 +335,26 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log',
-                'get_username_from_oidc_state',
-                'get_redirect_url'
+                'duoup_debug_log',
+                'duoup_get_username_from_oidc_state',
+                'duoup_get_redirect_url'
                 ]
             )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
-        $authentication->method('get_username_from_oidc_state')->willReturn("test user");
+        $authentication->method('duoup_get_username_from_oidc_state')->willReturn("test user");
         $this->helper->method("WP_User")->willReturnArgument(1);
         $_GET['duo_code'] = "testcode";
         $_GET['state'] = "teststate";
 
-        $result = $authentication->duo_authenticate_user();
+        $result = $authentication->duoup_authenticate_user();
 
         $this->assertEquals($map["duo_auth_test user_status"], "authenticated");
         $this->assertEquals($result, "test user");
     }
 
     /**
-     * Test that duo_authenticate_user without code starts primary authentication
+     * Test that duoup_authenticate_user without code starts primary authentication
      * if there is no username
      */
     function testAuthUserNoCodeOrUsername(): void
@@ -363,20 +363,20 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log',
+                'duoup_debug_log',
                 ]
             )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
-        $authentication->expects($this->once())->method('duo_debug_log')->with($this->equalTo("Starting primary authentication"));
+        $authentication->expects($this->once())->method('duoup_debug_log')->with($this->equalTo("Starting primary authentication"));
 
-        $result = $authentication->duo_authenticate_user();
+        $result = $authentication->duoup_authenticate_user();
 
         $this->assertEquals($result, null);
     }
 
     /**
-     * Test that duo_authenticate_user without code but with username
+     * Test that duoup_authenticate_user without code but with username
      * returns null if wordpress user cannot be found
      */
     function testAuthUserPrimaryNoUser(): void
@@ -385,16 +385,16 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log',
-                'error_log',
+                'duoup_debug_log',
+                'duoup_error_log',
                 ]
             )
             ->getMock();
-        $authentication->expects($this->once())->method('error_log')->with($this->equalTo("Failed to retrieve WP user test user"));
+        $authentication->expects($this->once())->method('duoup_error_log')->with($this->equalTo("Failed to retrieve WP user test user"));
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $this->helper->method('WP_User')->willReturn(null);
 
-        $result = $authentication->duo_authenticate_user(null, "test user");
+        $result = $authentication->duoup_authenticate_user(null, "test user");
     }
 
     /**
@@ -412,7 +412,7 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log',
+                'duoup_debug_log',
                 ]
             )
             ->getMock();
@@ -425,7 +425,7 @@ final class authenticationTest extends TestCase
         $user->roles = [];
         $this->helper->method('WP_User')->willReturn($user);
 
-        $result = $authentication->duo_authenticate_user(null, "test user");
+        $result = $authentication->duoup_authenticate_user(null, "test user");
 
         $this->assertEquals($result, null);
         $this->assertEquals($map["duo_auth_test user_status"], "authenticated");
@@ -440,7 +440,7 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log',
+                'duoup_debug_log',
                 ]
             )
             ->getMock();
@@ -454,7 +454,7 @@ final class authenticationTest extends TestCase
         $this->helper->method('WP_User')->willReturn($user);
         $this->helper->method('wp_authenticate_username_password')->willReturn("ERROR");
 
-        $result = $authentication->duo_authenticate_user(null, "test user");
+        $result = $authentication->duoup_authenticate_user(null, "test user");
 
         $this->assertEquals($result, "ERROR");
     }
@@ -473,11 +473,11 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log', 'duo_start_second_factor',
+                'duoup_debug_log', 'duoup_start_second_factor',
                 ]
             )
             ->getMock();
-        $authentication->expects($this->once())->method('duo_start_second_factor');
+        $authentication->expects($this->once())->method('duoup_start_second_factor');
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $this->duo_utils->method('duo_role_require_mfa')->willReturn(true);
         $user = $this->getMockBuilder(stdClass::class)
@@ -488,7 +488,7 @@ final class authenticationTest extends TestCase
         $this->helper->method('WP_User')->willReturn($user);
         $this->helper->method('wp_authenticate_username_password')->willReturn($user);
 
-        $result = $authentication->duo_authenticate_user(null, "test user");
+        $result = $authentication->duoup_authenticate_user(null, "test user");
 
         $this->assertEquals($map["duo_auth_test user_status"], "in-progress");
     }
@@ -507,11 +507,11 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log', 'duo_start_second_factor',
+                'duoup_debug_log', 'duoup_start_second_factor',
                 ]
             )
             ->getMock();
-        $authentication->method('duo_start_second_factor')->willThrowException(new Duo\DuoUniversal\DuoException("error during auth"));
+        $authentication->method('duoup_start_second_factor')->willThrowException(new Duo\DuoUniversal\DuoException("error during auth"));
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $this->duo_utils->method('duo_role_require_mfa')->willReturn(true);
         $user = $this->getMockBuilder(stdClass::class)
@@ -523,7 +523,7 @@ final class authenticationTest extends TestCase
         $this->helper->method('wp_authenticate_username_password')->willReturn($user);
         $this->duo_utils->method('duo_get_option')->willReturn('open');
 
-        $result = $authentication->duo_authenticate_user(null, "test user");
+        $result = $authentication->duoup_authenticate_user(null, "test user");
         $this->assertEquals($map["duo_auth_test user_status"], "authenticated");
     }
 
@@ -545,11 +545,11 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log', 'duo_start_second_factor',
+                'duoup_debug_log', 'duoup_start_second_factor',
                 ]
             )
             ->getMock();
-        $authentication->method('duo_start_second_factor')->willThrowException(new Duo\DuoUniversal\DuoException("error during auth"));
+        $authentication->method('duoup_start_second_factor')->willThrowException(new Duo\DuoUniversal\DuoException("error during auth"));
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $this->duo_utils->method('duo_role_require_mfa')->willReturn(true);
         $user = $this->getMockBuilder(stdClass::class)
@@ -563,7 +563,7 @@ final class authenticationTest extends TestCase
         $this->helper->method('wp_authenticate_username_password')->willReturn($user);
         $this->duo_utils->method('duo_get_option')->willReturn('closed');
 
-        $result = $authentication->duo_authenticate_user(null, "test user");
+        $result = $authentication->duoup_authenticate_user(null, "test user");
 
         $this->assertFalse(array_key_exists("duo_auth_test user_status", $map));
         $this->assertRegExp("/2FA Unavailable/", $result);
@@ -578,16 +578,16 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log',
+                'duoup_debug_log',
                 ]
             )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(false);
         $authentication->expects($this->once())
-            ->method('duo_debug_log')
+            ->method('duoup_debug_log')
             ->with($this->equalTo("Duo not enabled, skip auth check."));
 
-        $result = $authentication->duo_verify_auth();
+        $result = $authentication->duoup_duo_verify_auth();
 
         $this->assertEquals($result, null);
     }
@@ -601,7 +601,7 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log',
+                'duoup_debug_log',
                 ]
             )
             ->getMock();
@@ -611,10 +611,10 @@ final class authenticationTest extends TestCase
         $this->helper->method('is_multisite')->willReturn(true);
         $this->helper->method('get_current_site')->willReturn($site);
         $authentication->expects($this->once())
-            ->method('duo_debug_log')
+            ->method('duoup_debug_log')
             ->with($this->equalTo("Duo not enabled on test site"));
 
-        $result = $authentication->duo_verify_auth();
+        $result = $authentication->duoup_duo_verify_auth();
 
         $this->assertEquals($result, null);
     }
@@ -628,15 +628,15 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log',
+                'duoup_debug_log',
                 ]
             )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $this->helper->method("is_user_logged_in")->willReturn(false);
-        $authentication->expects($this->never())->method('duo_debug_log');
+        $authentication->expects($this->never())->method('duoup_debug_log');
 
-        $result = $authentication->duo_verify_auth();
+        $result = $authentication->duoup_duo_verify_auth();
 
         $this->assertEquals($result, null);
     }
@@ -652,7 +652,7 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log', 'duo_start_second_factor'
+                'duoup_debug_log', 'duoup_start_second_factor'
                 ]
             )
             ->getMock();
@@ -661,11 +661,11 @@ final class authenticationTest extends TestCase
         $this->helper->method('wp_get_current_user')->willReturn($user);
         $this->duo_utils->method('duo_role_require_mfa')->willReturn(false);
         $authentication->expects($this->at(1))
-            ->method('duo_debug_log')
+            ->method('duoup_debug_log')
             ->with($this->equalTo("User test user allowed"));
-        $authentication->expects($this->never())->method('duo_start_second_factor');
+        $authentication->expects($this->never())->method('duoup_start_second_factor');
 
-        $result = $authentication->duo_verify_auth();
+        $result = $authentication->duoup_duo_verify_auth();
 
         $this->assertEquals($result, null);
     }
@@ -681,7 +681,7 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log', 'duo_verify_auth_status', 'duo_start_second_factor',
+                'duoup_debug_log', 'duoup_duo_verify_auth_status', 'duoup_start_second_factor',
                 ]
             )
             ->getMock();
@@ -689,13 +689,13 @@ final class authenticationTest extends TestCase
         $this->helper->method("is_user_logged_in")->willReturn(true);
         $this->helper->method('wp_get_current_user')->willReturn($user);
         $this->duo_utils->method('duo_role_require_mfa')->willReturn(true);
-        $authentication->method('duo_verify_auth_status')->willReturn(true);
+        $authentication->method('duoup_duo_verify_auth_status')->willReturn(true);
         $authentication->expects($this->at(2))
-            ->method('duo_debug_log')
+            ->method('duoup_debug_log')
             ->with($this->equalTo("User test user allowed"));
-        $authentication->expects($this->never())->method('duo_start_second_factor');
+        $authentication->expects($this->never())->method('duoup_start_second_factor');
 
-        $result = $authentication->duo_verify_auth();
+        $result = $authentication->duoup_duo_verify_auth();
 
         $this->assertEquals($result, null);
     }
@@ -711,7 +711,7 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log', 'duo_verify_auth_status', 'duo_start_second_factor',
+                'duoup_debug_log', 'duoup_duo_verify_auth_status', 'duoup_start_second_factor',
                 ]
             )
             ->getMock();
@@ -719,10 +719,10 @@ final class authenticationTest extends TestCase
         $this->helper->method("is_user_logged_in")->willReturn(true);
         $this->helper->method('wp_get_current_user')->willReturn($user);
         $this->duo_utils->method('duo_role_require_mfa')->willReturn(true);
-        $authentication->method('duo_verify_auth_status')->willReturn(false);
-        $authentication->expects($this->once())->method('duo_start_second_factor');
+        $authentication->method('duoup_duo_verify_auth_status')->willReturn(false);
+        $authentication->expects($this->once())->method('duoup_start_second_factor');
 
-        $result = $authentication->duo_verify_auth();
+        $result = $authentication->duoup_duo_verify_auth();
 
         $this->assertEquals($result, null);
     }
