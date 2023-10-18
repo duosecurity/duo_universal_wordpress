@@ -82,10 +82,10 @@ class Utilities
             || (!empty($_SERVER['QUERY_STRING']) && !strpos($this->wordpress_helper->sanitize_url($_SERVER['REQUEST_URI']), '?', 0))
         ) {
             $current_uri = $this->wordpress_helper->sanitize_url(substr($_SERVER['PHP_SELF'], 1));
-            $query_string = isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : '';
-            if ($query_string != '') {
-                $current_uri .= '?'.$query_string;
+            if (isset($_SERVER['QUERY_STRING']) {
+                $current_uri = $this->wordpress_helper->sanitize_url($current_uri.'?'.$_SERVER['QUERY_STRING']);
             }
+            
             return $current_uri;
         }
         else {
