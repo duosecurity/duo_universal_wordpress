@@ -15,6 +15,10 @@ final class SettingsTest extends TestCase
         $this->helper = $this->createMock(Duo\DuoUniversalWordpress\WordpressHelper::class);
         $this->duo_utils = $this->createMock(Duo\DuoUniversalWordpress\Utilities::class);
         $this->duo_utils->wordpress_helper = $this->helper;
+
+        // Don't mock out our sanitization methods
+        $real_utils = new Duo\DuoUniversalWordpress\Utilities($helper);
+        $this->duo_utils->sanitize_alphanumeric = $real_utils->sanitize_alphanumeric;
     }
 
     /**
