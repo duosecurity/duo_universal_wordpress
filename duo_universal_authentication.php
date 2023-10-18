@@ -90,7 +90,7 @@ class DuoUniversalWordpressPlugin
         $https_explicitly_enabled = (!empty($_SERVER['HTTPS']) && $this->duo_utils->sanitize_alphanumeric($_SERVER['HTTPS']) != 'off');
         $port = absint($_SERVER['SERVER_PORT']);
         $protocol = ($https_explicitly_enabled || $port == 443) ? "https://" : "http://";
-        return sanitize_url($protocol.$_SERVER['HTTP_HOST'].$this->duo_utils->duo_get_uri());
+        return sanitize_url($protocol.$_SERVER['HTTP_HOST'].$this->duo_utils->duo_get_uri(), ["http", "https"]);
     }
 
     function exit()

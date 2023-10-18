@@ -119,7 +119,7 @@ class Utilities
         $sanitized_key = '';
 
         if ( is_scalar( $key ) ) {
-            $sanitized_key = preg_replace( '/[^a-zA-Z0-9]/', '', $sanitized_key );
+            $sanitized_key = preg_replace( '/[^a-zA-Z0-9]/', '', $key );
         }
         return apply_filters( 'sanitize_alphanumeric', $sanitized_key, $key );
     }
