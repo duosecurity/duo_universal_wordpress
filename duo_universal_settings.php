@@ -31,6 +31,17 @@ class Settings {
 <?php
     }
 
+    function sanitize_roles($options) {
+        if (!is_array($options) || empty($options) || (false === $options)) {
+            return array();
+        }
+
+        foreach ($options as $opt=>$value) {
+            $options[$opt] = sanitize_alphanumeric($value);
+        }
+        return $options;
+    }
+
     function duo_settings_client_id() {
         $client_id = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duo_client_id'));
         echo "<input id='duo_client_id' name='duo_client_id' size='40' type='text' value='$client_id' />";
@@ -233,29 +244,29 @@ class Settings {
 
     function duo_update_mu_options() {
         if(isset($_POST['duo_client_id'])) {
-            $client_id = $_POST['duo_client_id'];
+            $client_id = sanitize_alphanumeric($_POST['duo_client_id']);
             $result = $this->wordpress_helper->update_site_option('duo_client_id', $client_id);
         }
 
         if(isset($_POST['duo_client_secret'])) {
-            $client_secret = $_POST['duo_client_secret'];
+            $client_secret = sanitize_alphanumeric($_POST['duo_client_secret']);
             $result = $this->wordpress_helper->update_site_option('duo_client_secret', $client_secret);
         }
 
         if(isset($_POST['duo_host'])) {
-            $host = $_POST['duo_host'];
+            $host = sanitize_url($_POST['duo_host'], ["https"]);
             $result = $this->wordpress_helper->update_site_option('duo_host', $host);
         }
 
         if(isset($_POST['duo_failmode'])) {
-            $failmode = $_POST['duo_failmode'];
+            $failmode = sanitize_alphanumeric($_POST['duo_failmode']);
             $result = $this->wordpress_helper->update_site_option('duo_failmode', $failmode);
         } else {
             $result = $this->wordpress_helper->update_site_option('duo_failmode', "open");
         }
 
         if(isset($_POST['duo_roles'])) {
-            $roles = $_POST['duo_roles'];
+            $roles = sanitize_roles($_POST['duo_roles']);
             $result = $this->wordpress_helper->update_site_option('duo_roles', $roles);
         }
         else {
@@ -263,7 +274,7 @@ class Settings {
         }
 
         if(isset($_POST['duo_xmlrpc'])) {
-            $xmlrpc = $_POST['duo_xmlrpc'];
+            $xmlrpc = sanitize_alphanumeric($_POST['duo_xmlrpc']);
             $result = $this->wordpress_helper->update_site_option('duo_xmlrpc', $xmlrpc);
         }
         else {

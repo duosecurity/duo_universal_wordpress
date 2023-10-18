@@ -79,16 +79,17 @@ class Utilities
     {
         // Workaround for IIS which may not set REQUEST_URI, or QUERY parameters
         if (!isset($_SERVER['REQUEST_URI'])
-            || (!empty($_SERVER['QUERY_STRING']) && !strpos($_SERVER['REQUEST_URI'], '?', 0))
+            || (!empty($_SERVER['QUERY_STRING']) && !strpos(sanitize_url($_SERVER['REQUEST_URI']), '?', 0))
         ) {
-            $current_uri = substr($_SERVER['PHP_SELF'], 1);
-            if (isset($_SERVER['QUERY_STRING']) AND $_SERVER['QUERY_STRING'] != '') {
-                $current_uri .= '?'.$_SERVER['QUERY_STRING'];
+            $current_uri = sanitize_url(substr($_SERVER['PHP_SELF'], 1));
+            $query_string = isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : '';
+            if ($query_string != '') {
+                $current_uri .= '?'.$query_string;
             }
             return $current_uri;
         }
         else {
-            return $_SERVER['REQUEST_URI'];
+            return sanitize_url($_SERVER['REQUEST_URI']);
         }
     }
 
@@ -108,6 +109,19 @@ class Utilities
         if ($DuoDebug) {
             error_log('Duo debug: ' . $message);
         }
+    }
+
+    /**
+     * Sanitize alphanumeric keys. Similar to sanitize_key(), but preserves
+     * case and disallows hyphens and underscores.
+     */
+    function sanitize_alphanumeric( $key ) {
+        $sanitized_key = '';
+
+        if ( is_scalar( $key ) ) {
+            $sanitized_key = preg_replace( '/[^a-zA-Z0-9]/', '', $sanitized_key );
+        }
+        return apply_filters( 'sanitize_alphanumeric', $sanitized_key, $key );
     }
 }
 

@@ -87,8 +87,10 @@ class DuoUniversalWordpressPlugin
 
     function get_page_url()
     {
-        $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-        return $protocol.$_SERVER['HTTP_HOST'].$this->duo_utils->duo_get_uri();
+        $https_explicitly_enabled = (!empty($_SERVER['HTTPS']) && sanitize_alphanumeric($_SERVER['HTTPS']) != 'off')
+        $port = absint($_SERVER['SERVER_PORT'])
+        $protocol = ($https_explicitly_enabled || $port == 443) ? "https://" : "http://";
+        return sanitize_url($protocol.$_SERVER['HTTP_HOST'].$this->duo_utils->duo_get_uri());
     }
 
     function exit()
@@ -131,7 +133,7 @@ class DuoUniversalWordpressPlugin
         if (isset($_GET['duo_code'])) {
             //secondary auth
             if (isset($_GET["error"])) {
-                $error_msg = $_GET["error"] . ":" . $_GET["error_description"];
+                $error_msg = htmlspecialchars($_GET["error"]) . ":" . htmlspecialchars($_GET["error_description"]);
                 $error = $this->wordpress_helper->WP_Error(
                     'Duo authentication failed',
                     $this->wordpress_helper->translate("<strong>ERROR</strong>: $error_msg")
@@ -152,10 +154,10 @@ class DuoUniversalWordpressPlugin
             $this->duo_debug_log('Doing secondary auth');
 
             // Get authorization token to trade for 2FA
-            $code = $_GET["duo_code"];
+            $code = sanitize_alphanumeric($_GET["duo_code"]);
 
             // Get state to verify consistency and originality
-            $state = $_GET["state"];
+            $state = sanitize_alphanumeric($_GET["state"]);
 
             // Retrieve the previously stored state and username from the session
             $associated_user = $this->get_username_from_oidc_state($state);
