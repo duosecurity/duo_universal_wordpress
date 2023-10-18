@@ -79,9 +79,9 @@ class Utilities
     {
         // Workaround for IIS which may not set REQUEST_URI, or QUERY parameters
         if (!isset($_SERVER['REQUEST_URI'])
-            || (!empty($_SERVER['QUERY_STRING']) && !strpos(sanitize_url($_SERVER['REQUEST_URI']), '?', 0))
+            || (!empty($_SERVER['QUERY_STRING']) && !strpos($this->wordpress_helper->sanitize_url($_SERVER['REQUEST_URI']), '?', 0))
         ) {
-            $current_uri = sanitize_url(substr($_SERVER['PHP_SELF'], 1));
+            $current_uri = $this->wordpress_helper->sanitize_url(substr($_SERVER['PHP_SELF'], 1));
             $query_string = isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : '';
             if ($query_string != '') {
                 $current_uri .= '?'.$query_string;
@@ -89,7 +89,7 @@ class Utilities
             return $current_uri;
         }
         else {
-            return sanitize_url($_SERVER['REQUEST_URI']);
+            return $this->wordpress_helper->sanitize_url($_SERVER['REQUEST_URI']);
         }
     }
 

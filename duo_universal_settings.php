@@ -254,7 +254,7 @@ class Settings {
         }
 
         if(isset($_POST['duo_host'])) {
-            $host = sanitize_url($_POST['duo_host'], ["https"]);
+            $host = $this->wordpress_helper->sanitize_url($_POST['duo_host'], ["https"]);
             $result = $this->wordpress_helper->update_site_option('duo_host', $host);
         }
 
