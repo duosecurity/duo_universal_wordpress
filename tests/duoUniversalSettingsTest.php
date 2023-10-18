@@ -17,7 +17,7 @@ final class SettingsTest extends TestCase
         $this->duo_utils->wordpress_helper = $this->helper;
 
         // Don't mock out our sanitization methods
-        $real_utils = new Duo\DuoUniversalWordpress\Utilities($helper);
+        $real_utils = new Duo\DuoUniversalWordpress\Utilities($this->helper);
         $this->duo_utils->sanitize_alphanumeric = $real_utils->sanitize_alphanumeric;
     }
 
