@@ -187,7 +187,7 @@ final class UtilitiesTest extends TestCase
         $helper->method('apply_filters')->willReturnArgument(1);
         $duo_utils = new Duo\DuoUniversalWordpress\Utilities($helper);
 
-        $test_string = 'aBc-123_$%^'
+        $test_string = 'aBc-123_$%^';
         $this->assertEquals($duo_utils->sanitize_alphanumeric($test_string), 'aBc123');
     }
 
