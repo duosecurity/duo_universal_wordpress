@@ -536,9 +536,9 @@ final class SettingsTest extends TestCase
             'duo_client_id' => 'DIAAAAAAAAAAAAAAAAAA',
             'duo_client_secret' => 'aBcD123s3cr3t4uandme',
             'duo_host' => 'mock_host',
-            'duo_failmode' => 'mock_failmode',
+            'duo_failmode' => 'mockfailmode',
             'duo_roles' => $duo_roles,
-            'duo_xmlrpc' => 'mock_xmlrpc'
+            'duo_xmlrpc' => 'mockxmlrpc'
         );
 
         $this->helper
@@ -548,9 +548,9 @@ final class SettingsTest extends TestCase
                 ['duo_client_id', 'DIAAAAAAAAAAAAAAAAAA'],
                 ['duo_client_secret', 'aBcD123s3cr3t4uandme'],
                 ['duo_host', 'mock_host'],
-                ['duo_failmode', 'mock_failmode'],
+                ['duo_failmode', 'mockfailmode'],
                 ['duo_roles', $duo_roles],
-                ['duo_xmlrpc', 'mock_xmlrpc'],
+                ['duo_xmlrpc', 'mockxmlrpc'],
             );
         $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
         $settings->duo_update_mu_options();
