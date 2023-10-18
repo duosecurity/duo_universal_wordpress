@@ -176,4 +176,31 @@ final class UtilitiesTest extends TestCase
         $duo_utils = new Duo\DuoUniversalWordpress\Utilities($helper);
         $this->assertEquals($duo_utils->duo_get_option("test"), 'value');
     }
+
+    /**
+     * Test that sanitize_alphanumeric preserves case and removes all
+     * non-alphanumeric characters
+     */
+    public function testSanitizeAlphanumeric(): void
+    {
+        $helper = $this->createMock(Duo\DuoUniversalWordpress\WordpressHelper::class);
+        $helper->method('apply_filters')->willReturnArgument(1);
+        $duo_utils = new Duo\DuoUniversalWordpress\Utilities($helper);
+
+        $test_string = 'aBc-123_$%^'
+        $this->assertEquals($duo_utils->sanitize_alphanumeric($test_string), 'aBc123');
+    }
+
+    /**
+     * Test that sanitize_alphanumeric returns non-scalar values unchanged
+     */
+    public function testSanitizeAlphanumericNonScalar(): void
+    {
+        $helper = $this->createMock(Duo\DuoUniversalWordpress\WordpressHelper::class);
+        $helper->method('apply_filters')->willReturnArgument(1);
+        $duo_utils = new Duo\DuoUniversalWordpress\Utilities($helper);
+
+        $test_value = ['arrays are not scalar'];
+        $this->assertEquals($duo_utils->sanitize_alphanumeric($test_value), $test_value);
+    }
 }

@@ -574,5 +574,26 @@ final class SettingsTest extends TestCase
         $settings->duo_update_mu_options();
     }
 
+    /**
+     * Test that sanitize_roles sanitizes each role via sanitize_alphanumeric
+     */
+    public function testSanitizeRoles(): void
+    {
+        $helper = $this->createMock(Duo\DuoUniversalWordpress\WordpressHelper::class);
+        $helper->method('apply_filters')->willReturnArgument(1);
+        $duo_utils = new Duo\DuoUniversalWordpress\Utilities($helper);
+        $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
+
+        $duo_roles = array(
+            "Editor" => "editor_1",
+            "Author" => "Author_!2",
+        );
+        $result = $settings->sanitize_roles($duo_roles);
+
+        $this->assertEquals($result, array(
+            "Editor" => "editor1",
+            "Author" => "Author2",
+        ));
+    }
 
 }
