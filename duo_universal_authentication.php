@@ -1,8 +1,8 @@
 <?php
 
-require_once 'duo_settings.php';
-require_once 'utilities.php';
-require_once 'duo_wordpress_helper.php';
+require_once 'duo_universal_settings.php';
+require_once 'duo_universal_utilities.php';
+require_once 'duo_universal_wordpress_helper.php';
 require_once 'vendor/autoload.php';
 
 use Duo\DuoUniversal\Client;
