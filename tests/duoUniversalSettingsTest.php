@@ -531,7 +531,7 @@ final class SettingsTest extends TestCase
         );
         $_POST = array(
             'duo_client_id' => 'DIAAAAAAAAAAAAAAAAAA',
-            'duo_client_secret' => 'aBc123s3cr3t4uandme!',
+            'duo_client_secret' => 'aBcD123s3cr3t4uandme',
             'duo_host' => 'mock_host',
             'duo_failmode' => 'mock_failmode',
             'duo_roles' => $duo_roles,
@@ -543,7 +543,7 @@ final class SettingsTest extends TestCase
             ->method('update_site_option')
             ->withConsecutive(
                 ['duo_client_id', 'DIAAAAAAAAAAAAAAAAAA'],
-                ['duo_client_secret', 'aBc123s3cr3t4uandme!'],
+                ['duo_client_secret', 'aBcD123s3cr3t4uandme'],
                 ['duo_host', 'mock_host'],
                 ['duo_failmode', 'mock_failmode'],
                 ['duo_roles', $duo_roles],
