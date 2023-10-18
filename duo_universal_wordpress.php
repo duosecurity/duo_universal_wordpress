@@ -69,11 +69,11 @@ if($plugin->duo_utils->duo_get_option('duo_xmlrpc', 'off') == 'off') {
 
 /*-------------Register WordPress Hooks-------------*/
 
-$helper->add_action('init', array($plugin, 'duo_verify_auth'), 10);
+$helper->add_action('init', array($plugin, 'duoup_verify_auth'), 10);
 
 $helper->add_action('clear_auth_cookie', array($plugin, 'clear_current_user_auth'), 10);
 
-$helper->add_filter('authenticate', array($plugin, 'duo_authenticate_user'), 10, 3);
+$helper->add_filter('authenticate', array($plugin, 'duoup_authenticate_user'), 10, 3);
 
 //add single-site submenu option
 $helper->add_action('admin_menu', array($settings, 'duo_add_page'));
