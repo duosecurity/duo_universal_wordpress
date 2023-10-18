@@ -121,7 +121,7 @@ class Utilities
         if ( is_scalar( $key ) ) {
             $sanitized_key = preg_replace( '/[^a-zA-Z0-9]/', '', $key );
         }
-        return apply_filters( 'sanitize_alphanumeric', $sanitized_key, $key );
+        return $this->wordpress_helper->apply_filters( 'sanitize_alphanumeric', $sanitized_key, $key );
     }
 }
 

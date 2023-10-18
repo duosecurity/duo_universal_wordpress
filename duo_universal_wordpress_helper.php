@@ -17,6 +17,7 @@ interface WordpressHelperInterface
     public function get_current_site();
     public function is_user_logged_in();
     public function add_filter($hook_name, $callbakc, $priority=10, $accepted_args=1);
+    public function apply_filters($hook_name, $value, $args);
     public function add_action($hook_name, $callback, $priority=10, $accepted_args=1);
     public function WP_Roles();
     public function get_option($key, $default);
@@ -94,6 +95,10 @@ class WordpressHelper implements WordpressHelperInterface
     public function add_filter($hook_name, $callback, $priority=10, $accepted_args=1)
     {
         return add_filter($hook_name, $callback, $priority, $accepted_args);
+    }
+    public function apply_filters($hook_name, $value, $args)
+    {
+        return apply_filters($hook_name, $value, $args);
     }
     public function add_action($hook_name, $callback, $priority=10, $accepted_args=1)
     {
