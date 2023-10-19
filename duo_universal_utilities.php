@@ -1,7 +1,7 @@
 <?php
 namespace Duo\DuoUniversalWordpress;
 
-class DuoUniversalUtilities
+class DuoUniversal_Utilities
 {
     public function __construct(
         $wordpress_helper
