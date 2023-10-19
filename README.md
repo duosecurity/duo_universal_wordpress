@@ -24,6 +24,8 @@ TLS 1.3 support requires PHP 7.3 or higher, curl 7.61.0 or higher, and OpenSSL 1
 
 # Tests
 
+**unittest**
+
 Make sure you have composer installed locally.
 You could run test with following command:
 
@@ -31,6 +33,23 @@ You could run test with following command:
 composer install
 ./vendor/bin/phpunit --process-isolation tests
 ```
+
+**integration test**
+To test this plugin with running instance of workpress.
+Use the provided docker compose file
+```
+composer install
+docker compose up
+```
+Once docker compose running, visit localhost to finish set wordpress.
+
+After wordpress setted up, navigate to plugin page from the left side menu.
+
+Active Duo Universal.
+
+Click on setting, then copy paste required ikey, skey, api_host from your duo integration page.
+
+Upon save changes, you will should see Duo Prompt for 2fa.
 
 # Support
 
