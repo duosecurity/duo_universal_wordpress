@@ -11,8 +11,8 @@ final class authenticationTest extends TestCase
     function setUp(): void
     {
         $this->duo_client = $this->createMock(Duo\DuoUniversal\Client::class);
-        $this->helper = $this->createMock(Duo\DuoUniversalWordpress\WordpressHelper::class);
-        $this->duo_utils = $this->createMock(Duo\DuoUniversalWordpress\Utilities::class);
+        $this->helper = $this->createMock(Duo\DuoUniversalWordpress\DuoUniversalWordpressHelper::class);
+        $this->duo_utils = $this->createMock(Duo\DuoUniversalWordpress\DuoUniversalUtilities::class);
         $this->duo_utils->wordpress_helper = $this->helper;
     }
 

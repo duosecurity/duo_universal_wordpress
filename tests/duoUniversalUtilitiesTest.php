@@ -10,7 +10,7 @@ final class UtilitiesTest extends TestCase
 {
     protected function setUp(): void
     {
-        $helper = new Duo\DuoUniversalWordpress\WordpressHelper();
+        $helper = new Duo\DuoUniversalWordpress\DuoUniversalWordpressHelper();
         $this->wordpress_helper = $helper;
     }
 
@@ -20,7 +20,7 @@ final class UtilitiesTest extends TestCase
      */
     public function testDuoAuthXMLRPCEnabled(): void
     {
-        $command = $this->getMockBuilder(Duo\DuoUniversalWordpress\Utilities::class)
+        $command = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversalUtilities::class)
             ->setConstructorArgs(array($this->wordpress_helper))
             ->onlyMethods(['xmlrpc_enabled'])
             ->getMock();
@@ -36,7 +36,7 @@ final class UtilitiesTest extends TestCase
      */
     public function testDuoAuthMissingOptions(): void
     {
-        $command = $this->getMockBuilder(Duo\DuoUniversalWordpress\Utilities::class)
+        $command = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversalUtilities::class)
             ->setConstructorArgs(array($this->wordpress_helper))
             ->onlyMethods(['duo_debug_log', 'duo_get_option'])
             ->getMock();
@@ -52,7 +52,7 @@ final class UtilitiesTest extends TestCase
      */
     public function testDuoAuthHappyPath(): void
     {
-        $command = $this->getMockBuilder(Duo\DuoUniversalWordpress\Utilities::class)
+        $command = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversalUtilities::class)
             ->setConstructorArgs(array($this->wordpress_helper))
             ->onlyMethods(['duo_debug_log', 'duo_get_option', 'xmlrpc_enabled'])
             ->getMock();
@@ -78,7 +78,7 @@ final class UtilitiesTest extends TestCase
             )
         );
 
-        $command = $this->getMockBuilder(Duo\DuoUniversalWordpress\Utilities::class)
+        $command = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversalUtilities::class)
             ->setConstructorArgs(array($this->wordpress_helper))
             ->onlyMethods(['duo_get_option', 'duo_get_roles'])
             ->getMock();
@@ -105,7 +105,7 @@ final class UtilitiesTest extends TestCase
             ->getMock();
         $roles->method('get_names')->willReturn($duo_roles);
 
-        $command = $this->getMockBuilder(Duo\DuoUniversalWordpress\Utilities::class)
+        $command = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversalUtilities::class)
             ->setConstructorArgs(array($this->wordpress_helper))
             ->onlyMethods(['duo_get_roles', 'duo_get_option'])
             ->getMock();
@@ -132,7 +132,7 @@ final class UtilitiesTest extends TestCase
             ->getMock();
         $roles->method('get_names')->willReturn($duo_roles);
 
-        $command = $this->getMockBuilder(Duo\DuoUniversalWordpress\Utilities::class)
+        $command = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversalUtilities::class)
             ->setConstructorArgs(array($this->wordpress_helper))
             ->onlyMethods(['duo_get_roles', 'duo_get_option'])
             ->getMock();
@@ -157,7 +157,7 @@ final class UtilitiesTest extends TestCase
         $helper->method('is_multisite')->willReturn(false);
         $helper->expects($this->once())->method('get_option')->willReturn("value");
 
-        $duo_utils = new Duo\DuoUniversalWordpress\Utilities($helper);
+        $duo_utils = new Duo\DuoUniversalWordpress\DuoUniversalUtilities($helper);
         $this->assertEquals($duo_utils->duo_get_option("test"), 'value');
     }
 
@@ -173,7 +173,7 @@ final class UtilitiesTest extends TestCase
         $helper->method('is_multisite')->willReturn(true);
         $helper->expects($this->once())->method('get_site_option')->willReturn("value");
 
-        $duo_utils = new Duo\DuoUniversalWordpress\Utilities($helper);
+        $duo_utils = new Duo\DuoUniversalWordpress\DuoUniversalUtilities($helper);
         $this->assertEquals($duo_utils->duo_get_option("test"), 'value');
     }
 }

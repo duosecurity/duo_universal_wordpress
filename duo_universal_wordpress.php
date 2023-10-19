@@ -27,8 +27,8 @@ use Duo\DuoUniversalWordpress;
 
 $GLOBALS['DuoDebug'] = false;
 
-$helper = new Duo\DuoUniversalWordpress\WordpressHelper();
-$utils = new Duo\DuoUniversalWordpress\Utilities($helper);
+$helper = new Duo\DuoUniversalWordpress\DuoUniversalWordpressHelper();
+$utils = new Duo\DuoUniversalWordpress\DuoUniversalUtilities($helper);
 
 if ($utils->duo_auth_enabled()) {
     try {
@@ -51,7 +51,7 @@ $plugin = new DuoUniversalWordpressPlugin(
     $duo_client
 );
 
-$settings = new Duo\DuoUniversalWordpress\Settings(
+$settings = new Duo\DuoUniversalWordpress\DuoUniversalSettings(
     $utils
 );
 

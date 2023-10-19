@@ -4,7 +4,7 @@ require_once('duo_universal_utilities.php');
 require_once('duo_universal_wordpress_helper.php');
 const SECRET_PLACEHOLDER = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
-class Settings {
+class DuoUniversalSettings {
     public function __construct(
         $duo_utils
     ) {
