@@ -97,19 +97,19 @@ final class UtilitiesTest extends TestCase
      */
     public function testDuoRoleRequireRoleDisabled(): void
     {
-        $duo_roles = array(
+        $duoup_roles = array(
             "other" => true
         );
         $roles = $this->getMockBuilder(stdClass::class)
             ->addMethods(['get_names'])
             ->getMock();
-        $roles->method('get_names')->willReturn($duo_roles);
+        $roles->method('get_names')->willReturn($duoup_roles);
 
         $command = $this->getMockBuilder(Duo\DuoUniversalWordpress\Utilities::class)
             ->setConstructorArgs(array($this->wordpress_helper))
             ->onlyMethods(['duo_get_roles', 'duo_get_option'])
             ->getMock();
-        $command->method('duo_get_option')->willReturn($duo_roles);
+        $command->method('duo_get_option')->willReturn($duoup_roles);
         $command->method('duo_get_roles')->willReturn($roles);
 
         $user = new stdClass();
@@ -124,19 +124,19 @@ final class UtilitiesTest extends TestCase
      */
     public function testDuoRoleRequireRoleEnabled(): void
     {
-        $duo_roles = array(
+        $duoup_roles = array(
             "test" => true
         );
         $roles = $this->getMockBuilder(stdClass::class)
             ->addMethods(['get_names'])
             ->getMock();
-        $roles->method('get_names')->willReturn($duo_roles);
+        $roles->method('get_names')->willReturn($duoup_roles);
 
         $command = $this->getMockBuilder(Duo\DuoUniversalWordpress\Utilities::class)
             ->setConstructorArgs(array($this->wordpress_helper))
             ->onlyMethods(['duo_get_roles', 'duo_get_option'])
             ->getMock();
-        $command->method('duo_get_option')->willReturn($duo_roles);
+        $command->method('duo_get_option')->willReturn($duoup_roles);
         $command->method('duo_get_roles')->willReturn($roles);
 
         $user = new stdClass();

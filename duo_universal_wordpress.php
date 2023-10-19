@@ -33,9 +33,9 @@ $utils = new Duo\DuoUniversalWordpress\Utilities($helper);
 if ($utils->duo_auth_enabled()) {
     try {
         $duo_client = new Client(
-            $utils->duo_get_option('duo_client_id'),
-            $utils->duo_get_option('duo_client_secret'),
-            $utils->duo_get_option('duo_host'),
+            $utils->duo_get_option('duoup_client_id'),
+            $utils->duo_get_option('duoup_client_secret'),
+            $utils->duo_get_option('duoup_api_host'),
             "",
         );
     } catch (Exception $e) {
@@ -63,7 +63,7 @@ if (!$settings->wordpress_helper->is_multisite()) {
 
 /*-------------XML-RPC Features-----------------*/
 
-if($plugin->duo_utils->duo_get_option('duo_xmlrpc', 'off') == 'off') {
+if($plugin->duo_utils->duo_get_option('duoup_xmlrpc', 'off') == 'off') {
     $helper->add_filter('xmlrpc_enabled', '__return_false');
 }
 
