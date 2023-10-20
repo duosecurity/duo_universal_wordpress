@@ -13,6 +13,13 @@ final class SettingsTest extends TestCase
     {
         $this->duo_client = $this->createMock(Duo\DuoUniversal\Client::class);
         $this->helper = $this->createMock(Duo\DuoUniversalWordpress\WordpressHelper::class);
+        // For filtering and sanitization methods provided by wordpress,
+        // simply return the value passed in for filtering unchanged since we
+        // don't have the wordpress methods in scope
+        $this->helper->method('apply_filters')->willReturnArgument(1);
+        $this->helper->method('sanitize_url')->willReturnArgument(0);
+        $this->helper->method('sanitize_text_field')->willReturnArgument(0);
+        $this->helper->method('esc_attr')->willReturnArgument(0);
         $this->duo_utils = $this->createMock(Duo\DuoUniversalWordpress\Utilities::class);
         $this->duo_utils->wordpress_helper = $this->helper;
     }
@@ -148,14 +155,8 @@ final class SettingsTest extends TestCase
      */
     public function testDuoClientSecretValidateDummyDoesntSave(): void
     {
-        $helper = $this->getMockBuilder(stdClass::class)
-            ->addMethods(['add_settings_error', 'esc_attr'])
-            ->getMock();
-        $helper->method('esc_attr')->willReturnArgument(0);
-        $duo_utils = $this->createMock(Duo\DuoUniversalWordpress\Utilities::class);
-        $duo_utils->wordpress_helper = $helper;
-        $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
-        $duo_utils->method('duo_get_option')->willReturn("current secret that is 40 character long");
+        $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
+        $this->duo_utils->method('duo_get_option')->willReturn("current secret that is 40 character long");
 
         $result = $settings->duo_client_secret_validate(Duo\DuoUniversalWordpress\SECRET_PLACEHOLDER);
 
@@ -186,14 +187,8 @@ final class SettingsTest extends TestCase
     public function testDuoClientSecretValidateInvalidNoClear(): void
     {
         $original_secret = "current secret that is 40 character long";
-        $helper = $this->getMockBuilder(stdClass::class)
-            ->addMethods(['add_settings_error', 'esc_attr'])
-            ->getMock();
-        $helper->method('esc_attr')->willReturnArgument(0);
-        $duo_utils = $this->createMock(Duo\DuoUniversalWordpress\Utilities::class);
-        $duo_utils->method('duo_get_option')->willReturn($original_secret);
-        $duo_utils->wordpress_helper = $helper;
-        $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
+        $this->duo_utils->method('duo_get_option')->willReturn($original_secret);
+        $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
         $client_secret = "bad secret";
 
         $result = $settings->duo_client_secret_validate($client_secret);
@@ -313,17 +308,10 @@ final class SettingsTest extends TestCase
             ->addMethods(['get_names'])
             ->getMock();
         $roles->method('get_names')->willReturn($duo_roles);
-        $helper = $this->getMockBuilder(stdClass::class)
-            ->addMethods(['before_last_bar'])
-            ->getMock();
-        $helper->method('before_last_bar')->willReturnArgument(0);
-        $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\Utilities::class)
-            ->setConstructorArgs(array($helper))
-            ->onlyMethods(['duo_get_roles'])
-            ->getMock();
 
-        $duo_utils->method('duo_get_roles')->willReturn($roles);
-        $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
+        $this->helper->method('before_last_bar')->willReturnArgument(0);
+        $this->duo_utils->method('duo_get_roles')->willReturn($roles);
+        $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
 
         $input = array(
             "Editor" => "role"
@@ -514,32 +502,38 @@ final class SettingsTest extends TestCase
     /**
      * Test duo_update_mu_option update site options with values from $_POST
      */
-    public function testDuoMultisidteUpdateWithPostValues(): void
+    public function testDuoMultisiteUpdateWithPostValues(): void
     {
         $this->old_POST = $_POST;
         $duo_roles = array(
             "Editor" => "editor",
             "Author" => "author",
         );
+        $roles = $this->getMockBuilder(stdClass::class)
+            ->addMethods(['get_names'])
+            ->getMock();
+        $roles->method('get_names')->willReturn($duo_roles);
+        $this->duo_utils->method('duo_get_roles')->willReturn($roles);
+
         $_POST = array(
-            'duo_client_id' => 'mock_id',
-            'duo_client_secret' => 'mock_secret',
+            'duo_client_id' => 'DIAAAAAAAAAAAAAAAAAA',
+            'duo_client_secret' => str_repeat('aBc123As3cr3t4uandme', 2),
             'duo_host' => 'mock_host',
-            'duo_failmode' => 'mock_failmode',
+            'duo_failmode' => 'closed',
             'duo_roles' => $duo_roles,
-            'duo_xmlrpc' => 'mock_xmlrpc'
+            'duo_xmlrpc' => 'off'
         );
 
         $this->helper
             ->expects($this->exactly(6))
             ->method('update_site_option')
             ->withConsecutive(
-                ['duo_client_id', 'mock_id'],
-                ['duo_client_secret', 'mock_secret'],
+                ['duo_client_id', 'DIAAAAAAAAAAAAAAAAAA'],
+                ['duo_client_secret', str_repeat('aBc123As3cr3t4uandme', 2)],
                 ['duo_host', 'mock_host'],
-                ['duo_failmode', 'mock_failmode'],
+                ['duo_failmode', 'closed'],
                 ['duo_roles', $duo_roles],
-                ['duo_xmlrpc', 'mock_xmlrpc'],
+                ['duo_xmlrpc', 'off'],
             );
         $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
         $settings->duo_update_mu_options();
@@ -549,7 +543,7 @@ final class SettingsTest extends TestCase
     /**
      * Test duo_update_mu_option update site options with empty $_POST
      */
-    public function testDuoMultisidteUpdateWithEmptyPostValue(): void
+    public function testDuoMultisiteUpdateWithEmptyPostValue(): void
     {
         $this->helper
             ->expects($this->exactly(3))
@@ -562,6 +556,5 @@ final class SettingsTest extends TestCase
         $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
         $settings->duo_update_mu_options();
     }
-
 
 }

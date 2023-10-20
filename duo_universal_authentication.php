@@ -87,8 +87,14 @@ class DuoUniversalWordpressPlugin
 
     function get_page_url()
     {
-        $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-        return $protocol.$_SERVER['HTTP_HOST'].$this->duo_utils->duo_get_uri();
+        // Per PHP documentation, HTTPS will be set to a non-empty value when
+        // the script was queried through HTTPS. However, IIS will set the
+        // value to 'off' HTTPS was not used, so we have to check that special
+        // case.
+        $https_used = (!empty($_SERVER['HTTPS']) && strtolower($this->wordpress_helper->sanitize_text_field($_SERVER['HTTPS'])) != 'off');
+        $port = absint($_SERVER['SERVER_PORT']);
+        $protocol = ($https_used || $port == 443) ? "https://" : "http://";
+        return $this->wordpress_helper->sanitize_url($protocol.$_SERVER['HTTP_HOST'].$this->duo_utils->duo_get_uri(), ["http", "https"]);
     }
 
     function exit()
@@ -131,7 +137,7 @@ class DuoUniversalWordpressPlugin
         if (isset($_GET['duo_code'])) {
             //secondary auth
             if (isset($_GET["error"])) {
-                $error_msg = $_GET["error"] . ":" . $_GET["error_description"];
+                $error_msg = $this->wordpress_helper->sanitize_text_field($_GET["error"]) . ":" . $this->wordpress_helper->sanitize_text_field($_GET["error_description"]);
                 $error = $this->wordpress_helper->WP_Error(
                     'Duo authentication failed',
                     $this->wordpress_helper->translate("<strong>ERROR</strong>: $error_msg")
@@ -152,10 +158,10 @@ class DuoUniversalWordpressPlugin
             $this->duo_debug_log('Doing secondary auth');
 
             // Get authorization token to trade for 2FA
-            $code = $_GET["duo_code"];
+            $code = $this->wordpress_helper->sanitize_text_field($_GET["duo_code"]);
 
             // Get state to verify consistency and originality
-            $state = $_GET["state"];
+            $state = $this->wordpress_helper->sanitize_text_field($_GET["state"]);
 
             // Retrieve the previously stored state and username from the session
             $associated_user = $this->get_username_from_oidc_state($state);
