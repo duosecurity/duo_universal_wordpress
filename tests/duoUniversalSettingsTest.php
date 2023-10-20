@@ -18,13 +18,8 @@ final class SettingsTest extends TestCase
         // don't have the wordpress methods in scope
         $this->helper->method('apply_filters')->willReturnArgument(1);
         $this->helper->method('sanitize_url')->willReturnArgument(0);
-        $this->duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\Utilities::class)
-                                ->disableOriginalConstructor()
-                                ->disableOriginalClone()
-                                ->disableArgumentCloning()
-                                ->disallowMockingUnknownTypes()
-                                ->setMethodsExcept(['sanitize_alphanumeric'])
-                                ->getMock();
+        $this->helper->method('sanitize_text_field')->willReturnArgument(0);
+        $this->duo_utils = $this->createMock(Duo\DuoUniversalWordpress\Utilities::class);
         $this->duo_utils->wordpress_helper = $this->helper;
     }
 
@@ -533,24 +528,24 @@ final class SettingsTest extends TestCase
             "Author" => "author",
         );
         $_POST = array(
-            'duo_client_id' => 'DIAAAAAAAAAAAAAAAAAA',
-            'duo_client_secret' => 'aBcD123s3cr3t4uandme',
+            'duo_client_id' => 'mock_id',
+            'duo_client_secret' => 'mock_secret',
             'duo_host' => 'mock_host',
-            'duo_failmode' => 'mockfailmode',
+            'duo_failmode' => 'mock_failmode',
             'duo_roles' => $duo_roles,
-            'duo_xmlrpc' => 'mockxmlrpc'
+            'duo_xmlrpc' => 'mock_xmlrpc'
         );
 
         $this->helper
             ->expects($this->exactly(6))
             ->method('update_site_option')
             ->withConsecutive(
-                ['duo_client_id', 'DIAAAAAAAAAAAAAAAAAA'],
-                ['duo_client_secret', 'aBcD123s3cr3t4uandme'],
+                ['duo_client_id', 'mock_id'],
+                ['duo_client_secret', 'mock_secret'],
                 ['duo_host', 'mock_host'],
-                ['duo_failmode', 'mockfailmode'],
+                ['duo_failmode', 'mock_failmode'],
                 ['duo_roles', $duo_roles],
-                ['duo_xmlrpc', 'mockxmlrpc'],
+                ['duo_xmlrpc', 'mock_xmlrpc'],
             );
         $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
         $settings->duo_update_mu_options();
@@ -572,28 +567,6 @@ final class SettingsTest extends TestCase
             );
         $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
         $settings->duo_update_mu_options();
-    }
-
-    /**
-     * Test that sanitize_roles sanitizes each role via sanitize_alphanumeric
-     */
-    public function testSanitizeRoles(): void
-    {
-        $helper = $this->createMock(Duo\DuoUniversalWordpress\WordpressHelper::class);
-        $helper->method('apply_filters')->willReturnArgument(1);
-        $duo_utils = new Duo\DuoUniversalWordpress\Utilities($helper);
-        $settings = new Duo\DuoUniversalWordpress\Settings($duo_utils);
-
-        $duo_roles = array(
-            "Editor" => "editor_1",
-            "Author" => "Author_!2",
-        );
-        $result = $settings->sanitize_roles($duo_roles);
-
-        $this->assertEquals($result, array(
-            "Editor" => "editor1",
-            "Author" => "Author2",
-        ));
     }
 
 }

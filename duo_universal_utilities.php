@@ -110,19 +110,6 @@ class Utilities
             error_log('Duo debug: ' . $message);
         }
     }
-
-    /**
-     * Sanitize alphanumeric keys. Similar to sanitize_key(), but preserves
-     * case and disallows hyphens and underscores.
-     */
-    function sanitize_alphanumeric( $key ) {
-        $sanitized_key = '';
-
-        if ( is_scalar( $key ) ) {
-            $sanitized_key = preg_replace( '/[^a-zA-Z0-9]/', '', $key );
-        }
-        return $this->wordpress_helper->apply_filters( 'sanitize_alphanumeric', $sanitized_key, $key );
-    }
 }
 
 ?>
