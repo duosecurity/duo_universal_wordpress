@@ -85,7 +85,17 @@ class Settings {
     }
 
     function duo_host_validate($host) {
-        return $this->wordpress_helper->sanitize_text_field($host);
+        $host = $this->wordpress_helper->sanitize_text_field($host);
+        if (!preg_match('/^api-[a-zA-Z\d\.-]*/', $host) or str_starts_with($host, 'api-api-')) {
+            $this->wordpress_helper->add_settings_error('duo_host', '', 'Host is not valid');
+            $current_host = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duo_host'));
+            if ($current_host) {
+                return $current_host;
+            }
+            return "";
+        }
+
+        return $host;
     }
 
     function duo_settings_failmode() {

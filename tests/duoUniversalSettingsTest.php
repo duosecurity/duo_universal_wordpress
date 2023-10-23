@@ -197,6 +197,62 @@ final class SettingsTest extends TestCase
     }
 
     /**
+     * Test that a valid api host validates
+     */
+    public function testDuoHostValidateValid(): void
+    {
+        $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
+        $host = 'api-duo1.duo.test';
+        $result = $settings->duo_host_validate($host);
+        $this->assertEquals($result, $host);
+    }
+
+    /**
+     * Test that an invalid host is rejected and the original host value is
+     * returned/preserved
+     */
+    public function testDuoHostInvalid(): void
+    {
+        $original_host = 'api-duo1.duo.test';
+        $this->duo_utils->method('duo_get_option')->willReturn($original_host);
+        $this->helper->method('add_settings_error')->willReturn(null);
+
+        $this->helper->expects($this->once())
+            ->method('add_settings_error')
+            ->with('duo_host', '', 'Host is not valid');
+
+        // All duo API hostnames start with 'api-'
+        $invalid_host = 'api.duo.test';
+        $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
+        $result = $settings->duo_host_validate($invalid_host);
+
+        // The original valid host value should be returned/preserved
+        $this->assertEquals($result, $original_host);
+    }
+
+    /**
+     * Test that in the case a host value has multiple 'api-' prefixes
+     * it is reported as a invalid host.
+     */
+    public function testDuoHostDoubleApiPrefix(): void
+    {
+        $original_host = 'api-duo1.duo.test';
+        $this->duo_utils->method('duo_get_option')->willReturn($original_host);
+        $this->helper->method('add_settings_error')->willReturn(null);
+
+        $this->helper->expects($this->once())
+            ->method('add_settings_error')
+            ->with('duo_host', '', 'Host is not valid');
+
+        $invalid_host = 'api-api-duo1.duo.test';
+        $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
+        $result = $settings->duo_host_validate($invalid_host);
+
+        // The original valid host value should be returned/preserved
+        $this->assertEquals($result, $original_host);
+    }
+
+    /**
      * Test that the host shows up in output
      */
     public function testSettingsHostOutput(): void
@@ -292,6 +348,33 @@ final class SettingsTest extends TestCase
         $output = $this->getActualOutput();
 
         $this->expectOutputRegex('/checked/');
+    }
+
+    public function testDuoFailmodeValid(): void
+    {
+        $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
+        $failmode = 'closed';
+        $result = $settings->duo_failmode_validate($failmode);
+        $this->assertEquals($result, $failmode);
+    }
+
+    public function testDuoFailmodeInvalid(): void
+    {
+        $original_failmode = 'closed';
+        $this->duo_utils->method('duo_get_option')->willReturn($original_failmode);
+        $this->helper->method('add_settings_error')->willReturn(null);
+
+        $this->helper->expects($this->once())
+            ->method('add_settings_error')
+            ->with('duo_failmode', '', 'Failmode value is not valid');
+
+        // All duo API hostnames start with 'api-'
+        $invalid_failmode = 'foobar';
+        $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
+        $result = $settings->duo_failmode_validate($invalid_failmode);
+
+        // The original valid host value should be returned/preserved
+        $this->assertEquals($result, $original_failmode);
     }
 
     /**
@@ -518,7 +601,7 @@ final class SettingsTest extends TestCase
         $_POST = array(
             'duo_client_id' => 'DIAAAAAAAAAAAAAAAAAA',
             'duo_client_secret' => str_repeat('aBc123As3cr3t4uandme', 2),
-            'duo_host' => 'mock_host',
+            'duo_host' => 'api-duo1.duo.test',
             'duo_failmode' => 'closed',
             'duo_roles' => $duo_roles,
             'duo_xmlrpc' => 'off'
@@ -530,7 +613,7 @@ final class SettingsTest extends TestCase
             ->withConsecutive(
                 ['duo_client_id', 'DIAAAAAAAAAAAAAAAAAA'],
                 ['duo_client_secret', str_repeat('aBc123As3cr3t4uandme', 2)],
-                ['duo_host', 'mock_host'],
+                ['duo_host', 'api-duo1.duo.test'],
                 ['duo_failmode', 'closed'],
                 ['duo_roles', $duo_roles],
                 ['duo_xmlrpc', 'off'],
