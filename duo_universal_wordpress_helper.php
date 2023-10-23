@@ -17,6 +17,7 @@ interface WordpressHelperInterface
     public function get_current_site();
     public function is_user_logged_in();
     public function add_filter($hook_name, $callbakc, $priority=10, $accepted_args=1);
+    public function apply_filters($hook_name, $value, $args);
     public function add_action($hook_name, $callback, $priority=10, $accepted_args=1);
     public function WP_Roles();
     public function get_option($key, $default);
@@ -35,6 +36,8 @@ interface WordpressHelperInterface
     public function esc_attr_e($text, $domain='default');
     public function esc_attr($text);
     public function translate($text, $domain='default');
+    public function sanitize_url($url, $protocols = null);
+    public function sanitize_text_field($str);
 };
 
 class WordpressHelper implements WordpressHelperInterface
@@ -94,6 +97,10 @@ class WordpressHelper implements WordpressHelperInterface
     public function add_filter($hook_name, $callback, $priority=10, $accepted_args=1)
     {
         return add_filter($hook_name, $callback, $priority, $accepted_args);
+    }
+    public function apply_filters($hook_name, $value, $args)
+    {
+        return apply_filters($hook_name, $value, $args);
     }
     public function add_action($hook_name, $callback, $priority=10, $accepted_args=1)
     {
@@ -166,5 +173,13 @@ class WordpressHelper implements WordpressHelperInterface
     public function translate($text, $domain='default')
     {
         return __($text, $domain);
+    }
+    public function sanitize_url($url, $protocols = null)
+    {
+        return sanitize_url($url, $protocols);
+    }
+    public function sanitize_text_field($str)
+    {
+        return sanitize_text_field($str);
     }
 }

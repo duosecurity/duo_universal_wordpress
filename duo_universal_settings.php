@@ -37,6 +37,7 @@ class Settings {
     }
 
     function duo_client_id_validate($client_id) {
+        $client_id = $this->wordpress_helper->sanitize_text_field($client_id);
         if (strlen($client_id) != 20) {
             $this->wordpress_helper->add_settings_error('duo_client_id', '', 'Client ID is not valid');
             $current_id = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duo_client_id'));
@@ -60,6 +61,7 @@ class Settings {
     }
 
     function duo_client_secret_validate($client_secret){
+        $client_secret = $this->wordpress_helper->sanitize_text_field($client_secret);
         $current_secret = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duo_client_secret'));
         if (strlen($client_secret) != 40) {
             $this->wordpress_helper->add_settings_error('duo_client_secret', '', 'Client secret is not valid');
@@ -82,6 +84,20 @@ class Settings {
         echo "<input id='duo_host' name='duo_host' size='40' type='text' value='$host' />";
     }
 
+    function duo_host_validate($host) {
+        $host = $this->wordpress_helper->sanitize_text_field($host);
+        if (!preg_match('/^api-[a-zA-Z\d\.-]*/', $host) or str_starts_with($host, 'api-api-')) {
+            $this->wordpress_helper->add_settings_error('duo_host', '', 'Host is not valid');
+            $current_host = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duo_host'));
+            if ($current_host) {
+                return $current_host;
+            }
+            return "";
+        }
+
+        return $host;
+    }
+
     function duo_settings_failmode() {
         $failmode = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duo_failmode', 'open'));
         echo '<select id="duo_failmode" name="duo_failmode" />';
@@ -96,6 +112,16 @@ class Settings {
             echo '<option value="closed" selected>Closed</option';
         }
         echo '</select>';
+    }
+
+    function duo_failmode_validate($failmode) {
+        $failmode = $this->wordpress_helper->sanitize_text_field($failmode);
+        if (!in_array($failmode, array('open', 'closed'))) {
+            $this->wordpress_helper->add_settings_error('duo_failmode', '', 'Failmode value is not valid');
+            $current_failmode = $this->duo_utils->duo_get_option('duo_failmode', 'open');
+            return $current_failmode;
+        }
+        return $failmode;
     }
 
     function duo_settings_roles() {
@@ -128,6 +154,8 @@ class Settings {
         foreach ($options as $opt=>$value) {
             if (!array_key_exists($opt, $valid_roles)) {
                 unset($options[$opt]);
+            } else {
+                $options[$opt] = $this->wordpress_helper->sanitize_text_field($value);
             }
         }
         return $options;
@@ -149,7 +177,7 @@ class Settings {
     }
 
     function duo_xmlrpc_validate($option) {
-
+        $option = $this->wordpress_helper->sanitize_text_field($option);
         if($option == 'off') {
             return $option;
         }
@@ -207,8 +235,8 @@ class Settings {
 
             $this->wordpress_helper->register_setting('duo_universal_settings', 'duo_client_id', array($this, 'duo_client_id_validate'));
             $this->wordpress_helper->register_setting('duo_universal_settings', 'duo_client_secret', array($this, 'duo_client_secret_validate'));
-            $this->wordpress_helper->register_setting('duo_universal_settings', 'duo_host');
-            $this->wordpress_helper->register_setting('duo_universal_settings', 'duo_failmode');
+            $this->wordpress_helper->register_setting('duo_universal_settings', 'duo_host', array($this, 'duo_host_validate'));
+            $this->wordpress_helper->register_setting('duo_universal_settings', 'duo_failmode', array($this, 'duo_failmode_validate'));
             $this->wordpress_helper->register_setting('duo_universal_settings', 'duo_roles', array($this, 'duo_roles_validate'));
             $this->wordpress_helper->register_setting('duo_universal_settings', 'duo_xmlrpc', array($this, 'duo_xmlrpc_validate'));
         }
@@ -233,29 +261,29 @@ class Settings {
 
     function duo_update_mu_options() {
         if(isset($_POST['duo_client_id'])) {
-            $client_id = $_POST['duo_client_id'];
+            $client_id = $this->duo_client_id_validate($_POST['duo_client_id']);
             $result = $this->wordpress_helper->update_site_option('duo_client_id', $client_id);
         }
 
         if(isset($_POST['duo_client_secret'])) {
-            $client_secret = $_POST['duo_client_secret'];
+            $client_secret = $this->duo_client_secret_validate($_POST['duo_client_secret']);
             $result = $this->wordpress_helper->update_site_option('duo_client_secret', $client_secret);
         }
 
         if(isset($_POST['duo_host'])) {
-            $host = $_POST['duo_host'];
+            $host = $this->duo_host_validate($_POST['duo_host']);
             $result = $this->wordpress_helper->update_site_option('duo_host', $host);
         }
 
         if(isset($_POST['duo_failmode'])) {
-            $failmode = $_POST['duo_failmode'];
+            $failmode = $this->duo_failmode_validate($_POST['duo_failmode']);
             $result = $this->wordpress_helper->update_site_option('duo_failmode', $failmode);
         } else {
             $result = $this->wordpress_helper->update_site_option('duo_failmode', "open");
         }
 
         if(isset($_POST['duo_roles'])) {
-            $roles = $_POST['duo_roles'];
+            $roles = $this->duo_roles_validate($_POST['duo_roles']);
             $result = $this->wordpress_helper->update_site_option('duo_roles', $roles);
         }
         else {
@@ -263,7 +291,7 @@ class Settings {
         }
 
         if(isset($_POST['duo_xmlrpc'])) {
-            $xmlrpc = $_POST['duo_xmlrpc'];
+            $xmlrpc = $this->duo_xmlrpc_validate($_POST['duo_xmlrpc']);
             $result = $this->wordpress_helper->update_site_option('duo_xmlrpc', $xmlrpc);
         }
         else {
