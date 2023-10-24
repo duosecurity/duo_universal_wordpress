@@ -201,7 +201,7 @@ final class SettingsTest extends TestCase
      */
     public function testDuoHostValidateValid(): void
     {
-        $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
+        $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $host = 'api-duo1.duo.test';
         $result = $settings->duo_host_validate($host);
         $this->assertEquals($result, $host);
@@ -223,7 +223,7 @@ final class SettingsTest extends TestCase
 
         // All duo API hostnames start with 'api-'
         $invalid_host = 'api.duo.test';
-        $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
+        $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $result = $settings->duo_host_validate($invalid_host);
 
         // The original valid host value should be returned/preserved
@@ -245,7 +245,7 @@ final class SettingsTest extends TestCase
             ->with('duo_host', '', 'Host is not valid');
 
         $invalid_host = 'api-api-duo1.duo.test';
-        $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
+        $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $result = $settings->duo_host_validate($invalid_host);
 
         // The original valid host value should be returned/preserved
@@ -352,7 +352,7 @@ final class SettingsTest extends TestCase
 
     public function testDuoFailmodeValid(): void
     {
-        $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
+        $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $failmode = 'closed';
         $result = $settings->duo_failmode_validate($failmode);
         $this->assertEquals($result, $failmode);
@@ -370,7 +370,7 @@ final class SettingsTest extends TestCase
 
         // All duo API hostnames start with 'api-'
         $invalid_failmode = 'foobar';
-        $settings = new Duo\DuoUniversalWordpress\Settings($this->duo_utils);
+        $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $result = $settings->duo_failmode_validate($invalid_failmode);
 
         // The original valid host value should be returned/preserved
