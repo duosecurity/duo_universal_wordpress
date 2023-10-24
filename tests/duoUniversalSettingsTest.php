@@ -203,7 +203,7 @@ final class SettingsTest extends TestCase
     {
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $host = 'api-duo1.duo.test';
-        $result = $settings->duo_host_validate($host);
+        $result = $settings->duoup_api_host_validate($host);
         $this->assertEquals($result, $host);
     }
 
@@ -224,7 +224,7 @@ final class SettingsTest extends TestCase
         // All duo API hostnames start with 'api-'
         $invalid_host = 'api.duo.test';
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
-        $result = $settings->duo_host_validate($invalid_host);
+        $result = $settings->duoup_api_host_validate($invalid_host);
 
         // The original valid host value should be returned/preserved
         $this->assertEquals($result, $original_host);
@@ -246,7 +246,7 @@ final class SettingsTest extends TestCase
 
         $invalid_host = 'api-api-duo1.duo.test';
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
-        $result = $settings->duo_host_validate($invalid_host);
+        $result = $settings->duoup_api_host_validate($invalid_host);
 
         // The original valid host value should be returned/preserved
         $this->assertEquals($result, $original_host);
@@ -354,7 +354,7 @@ final class SettingsTest extends TestCase
     {
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $failmode = 'closed';
-        $result = $settings->duo_failmode_validate($failmode);
+        $result = $settings->duoup_failmode_validate($failmode);
         $this->assertEquals($result, $failmode);
     }
 
@@ -366,12 +366,12 @@ final class SettingsTest extends TestCase
 
         $this->helper->expects($this->once())
             ->method('add_settings_error')
-            ->with('duo_failmode', '', 'Failmode value is not valid');
+            ->with('duoup_failmode', '', 'Failmode value is not valid');
 
         // All duo API hostnames start with 'api-'
         $invalid_failmode = 'foobar';
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
-        $result = $settings->duo_failmode_validate($invalid_failmode);
+        $result = $settings->duoup_failmode_validate($invalid_failmode);
 
         // The original valid host value should be returned/preserved
         $this->assertEquals($result, $original_failmode);

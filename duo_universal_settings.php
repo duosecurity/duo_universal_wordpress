@@ -84,7 +84,7 @@ class DuoUniversal_Settings {
         echo "<input id='duoup_api_host' name='duoup_api_host' size='40' type='text' value='$host' />";
     }
 
-    function duo_host_validate($host) {
+    function duoup_api_host_validate($host) {
         $host = $this->wordpress_helper->sanitize_text_field($host);
         if (!preg_match('/^api-[a-zA-Z\d\.-]*/', $host) or str_starts_with($host, 'api-api-')) {
             $this->wordpress_helper->add_settings_error('duoup_api_host', '', 'Host is not valid');
@@ -114,11 +114,11 @@ class DuoUniversal_Settings {
         echo '</select>';
     }
 
-    function duo_failmode_validate($failmode) {
+    function duoup_failmode_validate($failmode) {
         $failmode = $this->wordpress_helper->sanitize_text_field($failmode);
         if (!in_array($failmode, array('open', 'closed'))) {
-            $this->wordpress_helper->add_settings_error('duo_failmode', '', 'Failmode value is not valid');
-            $current_failmode = $this->duo_utils->duo_get_option('duo_failmode', 'open');
+            $this->wordpress_helper->add_settings_error('duoup_failmode', '', 'Failmode value is not valid');
+            $current_failmode = $this->duo_utils->duo_get_option('duoup_failmode', 'open');
             return $current_failmode;
         }
         return $failmode;
@@ -234,8 +234,8 @@ class DuoUniversal_Settings {
 
             $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_client_id', array($this, 'duoup_client_id_validate'));
             $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_client_secret', array($this, 'duoup_client_secret_validate'));
-            $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_api_host', array($this, 'duo_host_validate'));
-            $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_failmode', array($this, 'duo_failmode_validate'));
+            $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_api_host', array($this, 'duoup_api_host_validate'));
+            $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_failmode', array($this, 'duoup_failmode_validate'));
             $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_roles', array($this, 'duoup_roles_validate'));
             $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_xmlrpc', array($this, 'duoup_xmlrpc_validate'));
         }
@@ -270,12 +270,12 @@ class DuoUniversal_Settings {
         }
 
         if(isset($_POST['duoup_api_host'])) {
-            $host = $this->duo_host_validate($_POST['duoup_api_host']);
+            $host = $this->duoup_api_host_validate($_POST['duoup_api_host']);
             $result = $this->wordpress_helper->update_site_option('duoup_api_host', $host);
         }
 
         if(isset($_POST['duoup_failmode'])) {
-            $failmode = $this->duo_failmode_validate($_POST['duoup_failmode']);
+            $failmode = $this->duoup_failmode_validate($_POST['duoup_failmode']);
             $result = $this->wordpress_helper->update_site_option('duoup_failmode', $failmode);
         } else {
             $result = $this->wordpress_helper->update_site_option('duoup_failmode', "open");
