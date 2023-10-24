@@ -390,7 +390,7 @@ final class SettingsTest extends TestCase
         $roles = $this->getMockBuilder(stdClass::class)
             ->addMethods(['get_names'])
             ->getMock();
-        $roles->method('get_names')->willReturn($duo_roles);
+        $roles->method('get_names')->willReturn($duoup_roles);
 
         $this->helper->method('before_last_bar')->willReturnArgument(0);
         $this->duo_utils->method('duo_get_roles')->willReturn($roles);
@@ -595,7 +595,7 @@ final class SettingsTest extends TestCase
         $roles = $this->getMockBuilder(stdClass::class)
             ->addMethods(['get_names'])
             ->getMock();
-        $roles->method('get_names')->willReturn($duo_roles);
+        $roles->method('get_names')->willReturn($duoup_roles);
         $this->duo_utils->method('duo_get_roles')->willReturn($roles);
 
         $_POST = array(
@@ -603,7 +603,7 @@ final class SettingsTest extends TestCase
             'duoup_client_secret' => str_repeat('aBc123As3cr3t4uandme', 2),
             'duoup_api_host' => 'api-duo1.duo.test',
             'duoup_failmode' => 'closed',
-            'duoup_roles' => $duo_roles,
+            'duoup_roles' => $duoup_roles,
             'duoup_xmlrpc' => 'off'
         );
 
@@ -615,7 +615,7 @@ final class SettingsTest extends TestCase
                 ['duoup_client_secret', str_repeat('aBc123As3cr3t4uandme', 2)],
                 ['duoup_api_host', 'api-duo1.duo.test'],
                 ['duoup_failmode', 'closed'],
-                ['duoup_roles', $duo_roles],
+                ['duoup_roles', $duoup_roles],
                 ['duoup_xmlrpc', 'off'],
             );
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
