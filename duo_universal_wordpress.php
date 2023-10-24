@@ -27,8 +27,8 @@ use Duo\DuoUniversalWordpress;
 
 $GLOBALS['DuoDebug'] = false;
 
-$helper = new Duo\DuoUniversalWordpress\WordpressHelper();
-$utils = new Duo\DuoUniversalWordpress\Utilities($helper);
+$helper = new Duo\DuoUniversalWordpress\DuoUniversal_WordpressHelper();
+$utils = new Duo\DuoUniversalWordpress\DuoUniversal_Utilities($helper);
 
 if ($utils->duo_auth_enabled()) {
     try {
@@ -46,12 +46,12 @@ if ($utils->duo_auth_enabled()) {
     $duo_client = null;
 }
 
-$plugin = new DuoUniversalWordpressPlugin(
+$plugin = new DuoUniversal_WordpressPlugin(
     $utils,
     $duo_client
 );
 
-$settings = new Duo\DuoUniversalWordpress\Settings(
+$settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings(
     $utils
 );
 
@@ -79,7 +79,7 @@ $helper->add_filter('authenticate', array($plugin, 'duo_authenticate_user'), 10,
 $helper->add_action('admin_menu', array($settings, 'duo_add_page'));
 $helper->add_action('admin_init', array($settings, 'duo_admin_init'));
 
-// Custom fields in network settings
+// Custom fields in multi-site network settings
 $helper->add_action('wpmu_options', array($settings, 'duo_mu_options'));
 $helper->add_action('update_wpmu_options', array($settings, 'duo_update_mu_options'));
 ?>
