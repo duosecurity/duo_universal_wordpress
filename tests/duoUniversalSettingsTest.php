@@ -219,7 +219,7 @@ final class SettingsTest extends TestCase
 
         $this->helper->expects($this->once())
             ->method('add_settings_error')
-            ->with('duo_host', '', 'Host is not valid');
+            ->with('duoup_api_host', '', 'Host is not valid');
 
         // All duo API hostnames start with 'api-'
         $invalid_host = 'api.duo.test';
@@ -242,7 +242,7 @@ final class SettingsTest extends TestCase
 
         $this->helper->expects($this->once())
             ->method('add_settings_error')
-            ->with('duo_host', '', 'Host is not valid');
+            ->with('duoup_api_host', '', 'Host is not valid');
 
         $invalid_host = 'api-api-duo1.duo.test';
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);

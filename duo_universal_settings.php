@@ -62,7 +62,7 @@ class DuoUniversal_Settings {
 
     function duoup_client_secret_validate($client_secret){
         $client_secret = $this->wordpress_helper->sanitize_text_field($client_secret);
-        $current_secret = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duo_client_secret'));
+        $current_secret = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duoup_client_secret'));
         if (strlen($client_secret) != 40) {
             $this->wordpress_helper->add_settings_error('duoup_client_secret', '', 'Client secret is not valid');
             if ($current_secret) {
@@ -87,7 +87,7 @@ class DuoUniversal_Settings {
     function duo_host_validate($host) {
         $host = $this->wordpress_helper->sanitize_text_field($host);
         if (!preg_match('/^api-[a-zA-Z\d\.-]*/', $host) or str_starts_with($host, 'api-api-')) {
-            $this->wordpress_helper->add_settings_error('duo_host', '', 'Host is not valid');
+            $this->wordpress_helper->add_settings_error('duoup_api_host', '', 'Host is not valid');
             $current_host = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duo_host'));
             if ($current_host) {
                 return $current_host;
@@ -232,12 +232,12 @@ class DuoUniversal_Settings {
             $this->wordpress_helper->add_settings_field('duoup_roles', 'Enable for roles:', array($this, 'duo_settings_roles'), 'duo_universal_settings', 'duo_universal_settings');
             $this->wordpress_helper->add_settings_field('duoup_xmlrpc', 'Disable XML-RPC (recommended)', array($this, 'duo_settings_xmlrpc'), 'duo_universal_settings', 'duo_universal_settings');
 
-            $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_client_id', array($this, 'duo_client_id_validate'));
-            $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_client_secret', array($this, 'duo_client_secret_validate'));
+            $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_client_id', array($this, 'duoup_client_id_validate'));
+            $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_client_secret', array($this, 'duoup_client_secret_validate'));
             $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_api_host', array($this, 'duo_host_validate'));
             $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_failmode', array($this, 'duo_failmode_validate'));
-            $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_roles', array($this, 'duo_roles_validate'));
-            $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_xmlrpc', array($this, 'duo_xmlrpc_validate'));
+            $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_roles', array($this, 'duoup_roles_validate'));
+            $this->wordpress_helper->register_setting('duo_universal_settings', 'duoup_xmlrpc', array($this, 'duoup_xmlrpc_validate'));
         }
     }
 
@@ -259,14 +259,14 @@ class DuoUniversal_Settings {
     }
 
     function duo_update_mu_options() {
-        if(isset($_POST['duo_client_id'])) {
-            $client_id = $this->duo_client_id_validate($_POST['duoup_client_id']);
-            $result = $this->wordpress_helper->update_site_option('duo_client_id', $client_id);
+        if(isset($_POST['duoup_client_id'])) {
+            $client_id = $this->duoup_client_id_validate($_POST['duoup_client_id']);
+            $result = $this->wordpress_helper->update_site_option('duoup_client_id', $client_id);
         }
 
-        if(isset($_POST['duo_client_secret'])) {
-            $client_secret = $this->duo_client_secret_validate($_POST['duoup_client_secret']);
-            $result = $this->wordpress_helper->update_site_option('duo_client_secret', $client_secret);
+        if(isset($_POST['duoup_client_secret'])) {
+            $client_secret = $this->duoup_client_secret_validate($_POST['duoup_client_secret']);
+            $result = $this->wordpress_helper->update_site_option('duoup_client_secret', $client_secret);
         }
 
         if(isset($_POST['duoup_api_host'])) {
@@ -276,21 +276,21 @@ class DuoUniversal_Settings {
 
         if(isset($_POST['duoup_failmode'])) {
             $failmode = $this->duo_failmode_validate($_POST['duoup_failmode']);
-            $result = $this->wordpress_helper->update_site_option('duoupup_failmode', $failmode);
+            $result = $this->wordpress_helper->update_site_option('duoup_failmode', $failmode);
         } else {
             $result = $this->wordpress_helper->update_site_option('duoup_failmode', "open");
         }
       
         if(isset($_POST['duoup_roles'])) {
-            $roles = $this->duo_roles_validate($_POST['duoup_roles']);
+            $roles = $this->duoup_roles_validate($_POST['duoup_roles']);
             $result = $this->wordpress_helper->update_site_option('duoup_roles', $roles);
         }
         else {
             $result = $this->wordpress_helper->update_site_option('duoup_roles', []);
         }
 
-        if(isset($_POST['duo_xmlrpc'])) {
-            $xmlrpc = $this->duo_xmlrpc_validate($_POST['duoup_xmlrpc']);
+        if(isset($_POST['duoup_xmlrpc'])) {
+            $xmlrpc = $this->duoup_xmlrpc_validate($_POST['duoup_xmlrpc']);
             $result = $this->wordpress_helper->update_site_option('duoup_xmlrpc', $xmlrpc);
         }
         else {
