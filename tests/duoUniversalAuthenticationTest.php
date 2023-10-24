@@ -12,6 +12,13 @@ final class authenticationTest extends TestCase
     {
         $this->duo_client = $this->createMock(Duo\DuoUniversal\Client::class);
         $this->helper = $this->createMock(Duo\DuoUniversalWordpress\DuoUniversal_WordpressHelper::class);
+        // For filtering and sanitization methods provided by wordpress,
+        // simply return the value passed in for filtering unchanged since we
+        // don't have the wordpress methods in scope
+        $this->helper->method('apply_filters')->willReturnArgument(1);
+        $this->helper->method('sanitize_url')->willReturnArgument(0);
+        $this->helper->method('sanitize_text_field')->willReturnArgument(0);
+        $this->helper->method('esc_attr')->willReturnArgument(0);
         $this->duo_utils = $this->createMock(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class);
         $this->duo_utils->wordpress_helper = $this->helper;
     }

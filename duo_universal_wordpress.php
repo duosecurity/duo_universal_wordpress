@@ -79,7 +79,7 @@ $helper->add_filter('authenticate', array($plugin, 'duo_authenticate_user'), 10,
 $helper->add_action('admin_menu', array($settings, 'duo_add_page'));
 $helper->add_action('admin_init', array($settings, 'duo_admin_init'));
 
-// Custom fields in network settings
+// Custom fields in multi-site network settings
 $helper->add_action('wpmu_options', array($settings, 'duo_mu_options'));
 $helper->add_action('update_wpmu_options', array($settings, 'duo_update_mu_options'));
 ?>
