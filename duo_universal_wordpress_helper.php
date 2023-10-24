@@ -1,7 +1,7 @@
 <?php
 namespace Duo\DuoUniversalWordpress;
 
-interface WordpressHelperInterface
+interface DuoUniversal_WordpressHelperInterface
 {
     public function set_transient($name, $value, $expiration);
     public function get_transient($name);
@@ -40,7 +40,7 @@ interface WordpressHelperInterface
     public function sanitize_text_field($str);
 };
 
-class WordpressHelper implements WordpressHelperInterface
+class DuoUniversal_WordpressHelper implements DuoUniversal_WordpressHelperInterface
 {
     public function set_transient($name, $value, $expiration)
     {

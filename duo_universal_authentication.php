@@ -12,7 +12,7 @@ use Duo\DuoUniversalWordpress;
 // expire in 48hrs
 const DUO_TRANSIENT_EXPIRATION = 48*60*60;
 
-class DuoUniversalWordpressPlugin
+class DuoUniversal_WordpressPlugin
 {
     public function __construct(
         $duo_utils,
