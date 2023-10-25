@@ -33,7 +33,7 @@ class DuoUniversal_Settings {
 
     function duo_settings_client_id() {
         $client_id = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duoup_client_id'));
-        echo "<input id='duoup_client_id' name='duoup_client_id' size='40' type='text' value='$client_id' />";
+        echo "<input id='duoup_client_id' name='duoup_client_id' size='40' type='text' value='".$this->wordpress_helper->esc_attr($client_id)."' />";
     }
 
     function duoup_client_id_validate($client_id) {
@@ -57,7 +57,7 @@ class DuoUniversal_Settings {
         } else {
             $value = "";
         }
-        echo "<input id='duoup_client_secret' name='duoup_client_secret' size='40' type='password' value='$value' autocomplete='off' />";
+        echo "<input id='duoup_client_secret' name='duoup_client_secret' size='40' type='password' value='".$this->wordpress_helper->esc_attr($value)."' autocomplete='off' />";
     }
 
     function duoup_client_secret_validate($client_secret){
@@ -81,7 +81,7 @@ class DuoUniversal_Settings {
 
     function duo_settings_host() {
         $host = $this->wordpress_helper->esc_attr($this->duo_utils->duo_get_option('duoup_api_host'));
-        echo "<input id='duoup_api_host' name='duoup_api_host' size='40' type='text' value='$host' />";
+        echo "<input id='duoup_api_host' name='duoup_api_host' size='40' type='text' value='".$this->wordpress_helper->esc_attr($host)."' />";
     }
 
     function duoup_api_host_validate($host) {
@@ -136,9 +136,15 @@ class DuoUniversal_Settings {
 
         foreach ($wp_roles->get_names() as $key=>$role) {
             //create checkbox for each role
-?>
-            <input id="duoup_roles" name='duoup_roles[<?php echo $key; ?>]' type='checkbox' value='<?php echo $role; ?>'  <?php if(in_array($role, $selected)) echo 'checked'; ?> /> <?php echo $role; ?> <br />
-<?php
+            echo ("".
+            '<input id="duoup_roles" '.
+                'name="duoup_roles['.$this->wordpress_helper->esc_attr($key).']" '.
+                'type="checkbox" '.
+                'value="'.$this->wordpress_helper->esc_attr($role).'" '.
+                (in_array($role, $selected) ? 'checked' : '').
+            '/>'.
+            $this->wordpress_helper->esc_html($role) .
+            '<br />');
         }
     }
 
@@ -172,7 +178,7 @@ class DuoUniversal_Settings {
         if($this->duo_utils->duo_get_option('duoup_xmlrpc', 'off') == 'off') {
             $val = "checked";
         }
-        echo "<input id='duoup_xmlrpc' name='duoup_xmlrpc' type='checkbox' value='off' $val /> Yes<br />";
+        echo "<input id='duoup_xmlrpc' name='duoup_xmlrpc' type='checkbox' value='off' ".$this->wordpress_helper->esc_attr($val)." /> Yes<br />";
         echo "Using XML-RPC bypasses two-factor authentication and makes your website less secure. We recommend only using the WordPress web interface for managing your WordPress website.";
     }
   
