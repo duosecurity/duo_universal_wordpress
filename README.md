@@ -10,6 +10,10 @@ License: Apache-2.0
 
 This WordPress plugin allows you to quickly add Duo Universal authentication to any WordPress login.
 
+This plugin reaches out to Duo's MFA cloud service for the configured user roles which provides an additional layer of authentication.
+For more information about Duo's privacy policy see https://duo.com/legal/cisco-online-privacy-statement
+Duo's terms of service can be found here https://duo.com/legal/terms
+
 # Usage
 
 Documentation: <http://www.duosecurity.com/docs/universal_wordpress>
@@ -37,10 +41,12 @@ composer install
 **integration test**
 To test this plugin with running instance of workpress.
 Use the provided docker compose file
+
 ```
 composer install
 docker compose up
 ```
+
 Once docker compose running, visit localhost to finish set wordpress.
 
 After wordpress setted up, navigate to plugin page from the left side menu.
