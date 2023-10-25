@@ -405,6 +405,36 @@ final class authenticationTest extends TestCase
     }
 
     /**
+     * Test that duo_authenticate_user works with email
+     */
+    function testAuthUserPrimaryEmail(): void
+    {
+        $authentication = $this->getMockBuilder(DuoUniversal_WordpressPlugin::class)
+            ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
+            ->onlyMethods(
+                [
+                'duo_debug_log',
+                ]
+            )
+            ->getMock();
+        $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
+        $this->duo_utils->method('duo_role_require_mfa')->willReturn(true);
+        $user = $this->getMockBuilder(stdClass::class)
+            ->setMockClassName('WP_User')
+            ->getMock();
+        $user->user_login = "test user";
+        $user->roles = [];
+        $this->helper->method('WP_User')->willReturn($user);
+        $this->helper->method('wp_authenticate_username_password')->willReturn(null);
+        $this->helper->method('wp_authenticate_email_password')->willReturn("EMAIL");
+        $this->helper->expects($this->once())->method('wp_authenticate_email_password');
+
+        $result = $authentication->duo_authenticate_user(null, "test user");
+
+        $this->assertEquals($result, "EMAIL");
+    }
+
+    /**
      * Test that primary auth with a role that doesn't require 2FA
      * is authenticated
      */
@@ -460,6 +490,7 @@ final class authenticationTest extends TestCase
         $user->roles = [];
         $this->helper->method('WP_User')->willReturn($user);
         $this->helper->method('wp_authenticate_username_password')->willReturn("ERROR");
+        $this->helper->method('wp_authenticate_email_password')->willReturn("ERROR");
 
         $result = $authentication->duo_authenticate_user(null, "test user");
 

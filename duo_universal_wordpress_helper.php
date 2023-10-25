@@ -13,6 +13,7 @@ interface DuoUniversal_WordpressHelperInterface
     public function WP_User($id, $name='', $site_id='');
     public function remove_action($hook_name, $callback, $priority);
     public function wp_authenticate_username_password($user, $username, $password);
+    public function wp_authenticate_email_password($user, $email, $password);
     public function is_multisite();
     public function get_current_site();
     public function is_user_logged_in();
@@ -81,6 +82,10 @@ class DuoUniversal_WordpressHelper implements DuoUniversal_WordpressHelperInterf
     public function wp_authenticate_username_password($user, $username, $password)
     {
         return wp_authenticate_username_password($user, $username, $password);
+    }
+    public function wp_authenticate_email_password($user, $email, $password)
+    {
+        return wp_authenticate_email_password($user, $email, $password);
     }
     public function is_multisite()
     {
