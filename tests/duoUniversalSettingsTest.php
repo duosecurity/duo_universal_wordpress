@@ -81,7 +81,7 @@ final class SettingsTest extends TestCase
         $this->helper->method('add_settings_error')->willReturn(null);
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
 
-        $result = $settings->duo_client_id_validate("invalid id");
+        $result = $settings->duoup_client_id_validate("invalid id");
 
         $this->assertEquals($result, "");
     }
@@ -97,7 +97,7 @@ final class SettingsTest extends TestCase
         $this->duo_utils->method('duo_get_option')->willReturn($id);
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
 
-        $result = $settings->duo_client_id_validate("invalid id");
+        $result = $settings->duoup_client_id_validate("invalid id");
 
         $this->assertEquals($id, $result);
     }
@@ -111,7 +111,7 @@ final class SettingsTest extends TestCase
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $client_id = "DIXXXXXXXXXXXXXXXXXX";
 
-        $result = $settings->duo_client_id_validate($client_id);
+        $result = $settings->duoup_client_id_validate($client_id);
 
         $this->assertEquals($result, $client_id);
     }
@@ -145,7 +145,7 @@ final class SettingsTest extends TestCase
         $duo_utils->wordpress_helper = $this->helper;
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($duo_utils);
 
-        $result = $settings->duo_client_secret_validate("invalid secret");
+        $result = $settings->duoup_client_secret_validate("invalid secret");
 
         $this->assertEquals($result, "");
     }
@@ -158,7 +158,7 @@ final class SettingsTest extends TestCase
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $this->duo_utils->method('duo_get_option')->willReturn("current secret that is 40 character long");
 
-        $result = $settings->duo_client_secret_validate(Duo\DuoUniversalWordpress\SECRET_PLACEHOLDER);
+        $result = $settings->duoup_client_secret_validate(Duo\DuoUniversalWordpress\SECRET_PLACEHOLDER);
 
         $this->assertEquals($result, "current secret that is 40 character long");
     }
@@ -176,7 +176,7 @@ final class SettingsTest extends TestCase
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($duo_utils);
         $client_secret = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
-        $result = $settings->duo_client_secret_validate($client_secret);
+        $result = $settings->duoup_client_secret_validate($client_secret);
 
         $this->assertEquals($result, $client_secret);
     }
@@ -191,7 +191,7 @@ final class SettingsTest extends TestCase
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $client_secret = "bad secret";
 
-        $result = $settings->duo_client_secret_validate($client_secret);
+        $result = $settings->duoup_client_secret_validate($client_secret);
 
         $this->assertEquals($result, $original_secret);
     }
@@ -203,7 +203,7 @@ final class SettingsTest extends TestCase
     {
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $host = 'api-duo1.duo.test';
-        $result = $settings->duo_host_validate($host);
+        $result = $settings->duoup_api_host_validate($host);
         $this->assertEquals($result, $host);
     }
 
@@ -219,12 +219,12 @@ final class SettingsTest extends TestCase
 
         $this->helper->expects($this->once())
             ->method('add_settings_error')
-            ->with('duo_host', '', 'Host is not valid');
+            ->with('duoup_api_host', '', 'Host is not valid');
 
         // All duo API hostnames start with 'api-'
         $invalid_host = 'api.duo.test';
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
-        $result = $settings->duo_host_validate($invalid_host);
+        $result = $settings->duoup_api_host_validate($invalid_host);
 
         // The original valid host value should be returned/preserved
         $this->assertEquals($result, $original_host);
@@ -242,11 +242,11 @@ final class SettingsTest extends TestCase
 
         $this->helper->expects($this->once())
             ->method('add_settings_error')
-            ->with('duo_host', '', 'Host is not valid');
+            ->with('duoup_api_host', '', 'Host is not valid');
 
         $invalid_host = 'api-api-duo1.duo.test';
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
-        $result = $settings->duo_host_validate($invalid_host);
+        $result = $settings->duoup_api_host_validate($invalid_host);
 
         // The original valid host value should be returned/preserved
         $this->assertEquals($result, $original_host);
@@ -294,14 +294,14 @@ final class SettingsTest extends TestCase
      */
     public function testSettingsRoles(): void
     {
-        $duo_roles = array(
+        $duoup_roles = array(
             "uses_2fa" => true,
             "skip_2fa" => false
         );
         $roles = $this->getMockBuilder(stdClass::class)
             ->addMethods(['get_names'])
             ->getMock();
-        $roles->method('get_names')->willReturn($duo_roles);
+        $roles->method('get_names')->willReturn($duoup_roles);
         $this->helper->method('before_last_bar')->willReturnArgument(0);
         $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class)
             ->setConstructorArgs(array($this->helper))
@@ -317,13 +317,13 @@ final class SettingsTest extends TestCase
 
         $this->assertEquals(
             1, preg_match(
-                "/name='duo_roles\[uses_2fa\]' type='checkbox' value='1'  checked/",
+                "/name='duoup_roles\[uses_2fa\]' type='checkbox' value='1'  checked/",
                 $output
             )
         );
         $this->assertEquals(
             1, preg_match(
-                "/name='duo_roles\[skip_2fa\]' type='checkbox' value=''/",
+                "/name='duoup_roles\[skip_2fa\]' type='checkbox' value=''/",
                 $output
             )
         );
@@ -354,7 +354,7 @@ final class SettingsTest extends TestCase
     {
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $failmode = 'closed';
-        $result = $settings->duo_failmode_validate($failmode);
+        $result = $settings->duoup_failmode_validate($failmode);
         $this->assertEquals($result, $failmode);
     }
 
@@ -366,12 +366,12 @@ final class SettingsTest extends TestCase
 
         $this->helper->expects($this->once())
             ->method('add_settings_error')
-            ->with('duo_failmode', '', 'Failmode value is not valid');
+            ->with('duoup_failmode', '', 'Failmode value is not valid');
 
         // All duo API hostnames start with 'api-'
         $invalid_failmode = 'foobar';
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
-        $result = $settings->duo_failmode_validate($invalid_failmode);
+        $result = $settings->duoup_failmode_validate($invalid_failmode);
 
         // The original valid host value should be returned/preserved
         $this->assertEquals($result, $original_failmode);
@@ -383,14 +383,14 @@ final class SettingsTest extends TestCase
      */
     public function testDuoRolesValidateGood(): void
     {
-        $duo_roles = array(
+        $duoup_roles = array(
             "Editor" => "editor",
             "Author" => "author",
         );
         $roles = $this->getMockBuilder(stdClass::class)
             ->addMethods(['get_names'])
             ->getMock();
-        $roles->method('get_names')->willReturn($duo_roles);
+        $roles->method('get_names')->willReturn($duoup_roles);
 
         $this->helper->method('before_last_bar')->willReturnArgument(0);
         $this->duo_utils->method('duo_get_roles')->willReturn($roles);
@@ -400,7 +400,7 @@ final class SettingsTest extends TestCase
             "Editor" => "role"
         );
 
-        $result = $settings->duo_roles_validate($input);
+        $result = $settings->duoup_roles_validate($input);
 
         $this->assertEquals($result, $input);
     }
@@ -414,9 +414,9 @@ final class SettingsTest extends TestCase
         $this->duo_utils->wordpress_helper = null;
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
 
-        $this->assertEmpty($settings->duo_roles_validate(1));
-        $this->assertEmpty($settings->duo_roles_validate(array()));
-        $this->assertEmpty($settings->duo_roles_validate(false));
+        $this->assertEmpty($settings->duoup_roles_validate(1));
+        $this->assertEmpty($settings->duoup_roles_validate(array()));
+        $this->assertEmpty($settings->duoup_roles_validate(false));
     }
 
     /**
@@ -425,14 +425,14 @@ final class SettingsTest extends TestCase
      */
     public function testDuoRolesValidateBadOptionsAreRemoved(): void
     {
-        $duo_roles = array(
+        $duoup_roles = array(
             "Editor" => "editor",
             "Author" => "author",
         );
         $roles = $this->getMockBuilder(stdClass::class)
             ->addMethods(['get_names'])
             ->getMock();
-        $roles->method('get_names')->willReturn($duo_roles);
+        $roles->method('get_names')->willReturn($duoup_roles);
         $helper = $this->getMockBuilder(stdClass::class)
             ->addMethods(['before_last_bar'])
             ->getMock();
@@ -445,7 +445,7 @@ final class SettingsTest extends TestCase
         $duo_utils->method('duo_get_roles')->willReturn($roles);
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($duo_utils);
 
-        $result = $settings->duo_roles_validate(
+        $result = $settings->duoup_roles_validate(
             array(
             "Missing" => "role",
             )
@@ -511,14 +511,14 @@ final class SettingsTest extends TestCase
      */
     public function testDuoAdminInitForMultisite(): void
     {
-        $duo_roles = array(
+        $duoup_roles = array(
             "Editor" => "editor",
             "Author" => "author",
         );
         $roles = $this->getMockBuilder(stdClass::class)
             ->addMethods(['get_names'])
             ->getMock();
-        $roles->method('get_names')->willReturn($duo_roles);
+        $roles->method('get_names')->willReturn($duoup_roles);
         $this->duo_utils->method('duo_get_roles')->willReturn($roles);
 
         $this->helper->method('is_multisite')->willReturn(true);
@@ -532,12 +532,12 @@ final class SettingsTest extends TestCase
         $settings->expects($this->exactly(6))
             ->method('duo_add_site_option')
             ->withConsecutive(
-                ['duo_client_id', ''],
-                ['duo_client_secret', ''],
-                ['duo_host', ''],
-                ['duo_failmode', ''],
-                ['duo_roles', $duo_roles],
-                ['duo_xmlrpc', 'off'],
+                ['duoup_client_id', ''],
+                ['duoup_client_secret', ''],
+                ['duoup_api_host', ''],
+                ['duoup_failmode', ''],
+                ['duoup_roles', $duoup_roles],
+                ['duoup_xmlrpc', 'off'],
             );
 
         $settings->duo_admin_init();
@@ -561,23 +561,23 @@ final class SettingsTest extends TestCase
             ->expects($this->exactly(6))
             ->method('add_settings_field')
             ->withConsecutive(
-                ['duo_client_id', 'Client ID', array($settings, 'duo_settings_client_id'), 'duo_universal_settings', 'duo_universal_settings'],
-                ['duo_client_secret', 'Client Secret', array($settings, 'duo_settings_client_secret'), 'duo_universal_settings', 'duo_universal_settings'],
-                ['duo_host', 'API hostname', array($settings, 'duo_settings_host'), 'duo_universal_settings', 'duo_universal_settings'],
-                ['duo_failmode', 'Failmode', array($settings, 'duo_settings_failmode'), 'duo_universal_settings', 'duo_universal_settings'],
-                ['duo_roles', 'Enable for roles:', array($settings, 'duo_settings_roles'), 'duo_universal_settings', 'duo_universal_settings'],
-                ['duo_xmlrpc', 'Disable XML-RPC (recommended)', array($settings, 'duo_settings_xmlrpc'), 'duo_universal_settings', 'duo_universal_settings']
+                ['duoup_client_id', 'Client ID', array($settings, 'duo_settings_client_id'), 'duo_universal_settings', 'duo_universal_settings'],
+                ['duoup_client_secret', 'Client Secret', array($settings, 'duo_settings_client_secret'), 'duo_universal_settings', 'duo_universal_settings'],
+                ['duoup_api_host', 'API hostname', array($settings, 'duo_settings_host'), 'duo_universal_settings', 'duo_universal_settings'],
+                ['duoup_failmode', 'Failmode', array($settings, 'duo_settings_failmode'), 'duo_universal_settings', 'duo_universal_settings'],
+                ['duoup_roles', 'Enable for roles:', array($settings, 'duo_settings_roles'), 'duo_universal_settings', 'duo_universal_settings'],
+                ['duoup_xmlrpc', 'Disable XML-RPC (recommended)', array($settings, 'duo_settings_xmlrpc'), 'duo_universal_settings', 'duo_universal_settings']
             );
         $this->helper
             ->expects($this->exactly(6))
             ->method('register_setting')
             ->withConsecutive(
-                ['duo_universal_settings', 'duo_client_id', array($settings, 'duo_client_id_validate')],
-                ['duo_universal_settings', 'duo_client_secret', array($settings, 'duo_client_secret_validate')],
-                ['duo_universal_settings', 'duo_host'],
-                ['duo_universal_settings', 'duo_failmode'],
-                ['duo_universal_settings', 'duo_roles', array($settings, 'duo_roles_validate')],
-                ['duo_universal_settings', 'duo_xmlrpc', array($settings, 'duo_xmlrpc_validate')]
+                ['duo_universal_settings', 'duoup_client_id', array($settings, 'duoup_client_id_validate')],
+                ['duo_universal_settings', 'duoup_client_secret', array($settings, 'duoup_client_secret_validate')],
+                ['duo_universal_settings', 'duoup_api_host'],
+                ['duo_universal_settings', 'duoup_failmode'],
+                ['duo_universal_settings', 'duoup_roles', array($settings, 'duoup_roles_validate')],
+                ['duo_universal_settings', 'duoup_xmlrpc', array($settings, 'duoup_xmlrpc_validate')]
             );
         $settings->duo_admin_init();
     }
@@ -588,35 +588,35 @@ final class SettingsTest extends TestCase
     public function testDuoMultisiteUpdateWithPostValues(): void
     {
         $this->old_POST = $_POST;
-        $duo_roles = array(
+        $duoup_roles = array(
             "Editor" => "editor",
             "Author" => "author",
         );
         $roles = $this->getMockBuilder(stdClass::class)
             ->addMethods(['get_names'])
             ->getMock();
-        $roles->method('get_names')->willReturn($duo_roles);
+        $roles->method('get_names')->willReturn($duoup_roles);
         $this->duo_utils->method('duo_get_roles')->willReturn($roles);
 
         $_POST = array(
-            'duo_client_id' => 'DIAAAAAAAAAAAAAAAAAA',
-            'duo_client_secret' => str_repeat('aBc123As3cr3t4uandme', 2),
-            'duo_host' => 'api-duo1.duo.test',
-            'duo_failmode' => 'closed',
-            'duo_roles' => $duo_roles,
-            'duo_xmlrpc' => 'off'
+            'duoup_client_id' => 'DIAAAAAAAAAAAAAAAAAA',
+            'duoup_client_secret' => str_repeat('aBc123As3cr3t4uandme', 2),
+            'duoup_api_host' => 'api-duo1.duo.test',
+            'duoup_failmode' => 'closed',
+            'duoup_roles' => $duoup_roles,
+            'duoup_xmlrpc' => 'off'
         );
 
         $this->helper
             ->expects($this->exactly(6))
             ->method('update_site_option')
             ->withConsecutive(
-                ['duo_client_id', 'DIAAAAAAAAAAAAAAAAAA'],
-                ['duo_client_secret', str_repeat('aBc123As3cr3t4uandme', 2)],
-                ['duo_host', 'api-duo1.duo.test'],
-                ['duo_failmode', 'closed'],
-                ['duo_roles', $duo_roles],
-                ['duo_xmlrpc', 'off'],
+                ['duoup_client_id', 'DIAAAAAAAAAAAAAAAAAA'],
+                ['duoup_client_secret', str_repeat('aBc123As3cr3t4uandme', 2)],
+                ['duoup_api_host', 'api-duo1.duo.test'],
+                ['duoup_failmode', 'closed'],
+                ['duoup_roles', $duoup_roles],
+                ['duoup_xmlrpc', 'off'],
             );
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $settings->duo_update_mu_options();
@@ -632,9 +632,9 @@ final class SettingsTest extends TestCase
             ->expects($this->exactly(3))
             ->method('update_site_option')
             ->withConsecutive(
-                ['duo_failmode', 'open'],
-                ['duo_roles', []],
-                ['duo_xmlrpc', 'on'],
+                ['duoup_failmode', 'open'],
+                ['duoup_roles', []],
+                ['duoup_xmlrpc', 'on'],
             );
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $settings->duo_update_mu_options();

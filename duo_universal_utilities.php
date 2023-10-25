@@ -29,8 +29,8 @@ class DuoUniversal_Utilities
             return false; //allows the XML-RPC protocol for remote publishing
         }
 
-        if ($this->duo_get_option('duo_client_id', '') == '' || $this->duo_get_option('duo_client_secret', '') == ''
-            || $this->duo_get_option('duo_host', '') == ''
+        if ($this->duo_get_option('duoup_client_id', '') == '' || $this->duo_get_option('duoup_client_secret', '') == ''
+            || $this->duo_get_option('duoup_api_host', '') == ''
         ) {
             return false;
         }
@@ -45,7 +45,7 @@ class DuoUniversal_Utilities
             $all_roles[$k] = $r;
         }
 
-        $duo_roles = $this->duo_get_option('duo_roles', $all_roles);
+        $duoup_roles = $this->duo_get_option('duoup_roles', $all_roles);
 
         /*
          * WordPress < 3.3 does not include the roles by default
@@ -68,7 +68,7 @@ class DuoUniversal_Utilities
         }
 
         foreach ($user->roles as $role) {
-            if (array_key_exists($role, $duo_roles)) {
+            if (array_key_exists($role, $duoup_roles)) {
                 return true;
             }
         }

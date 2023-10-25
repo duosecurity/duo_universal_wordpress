@@ -222,7 +222,7 @@ class DuoUniversal_WordpressPlugin
                     $this->duo_start_second_factor($user);
                 } catch (Duo\DuoUniversal\DuoException $e) {
                     $this->duo_debug_log($e->getMessage());
-                    if ($this->duo_utils->duo_get_option("duo_failmode") == "open") {
+                    if ($this->duo_utils->duo_get_option("duoup_failmode") == "open") {
                         // If we're failing open, errors in 2FA still allow for success
                         $this->duo_debug_log("Login 'Successful', but 2FA Not Performed. Confirm Duo client/secret/host values are correct");
                         $this->update_user_auth_status($user->user_login, "authenticated");

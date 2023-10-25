@@ -7,19 +7,19 @@ if (!defined('WP_UNINSTALL_PLUGIN') ) {
 }
 //Delete Duo credentials in wp_options
 // TODO these will need to be renamed as well
-delete_option('duo_client_id');
-delete_option('duo_client_secret');
-delete_option('duo_host');
-delete_option('duo_roles');
-delete_option('duo_failmode');
-delete_option('duo_xmlrpc');
+delete_option('duoup_client_id');
+delete_option('duoup_client_secret');
+delete_option('duoup_api_host');
+delete_option('duoup_roles');
+delete_option('duoup_failmode');
+delete_option('duoup_xmlrpc');
 
 //Delete Duo credentials in wp_sitemeta
-delete_site_option('duo_client_id');
-delete_site_option('duo_client_secret');
-delete_site_option('duo_host');
-delete_site_option('duo_roles');
-delete_site_option('duo_failmode');
-delete_site_option('duo_xmlrpc');
+delete_site_option('duoup_client_id');
+delete_site_option('duoup_client_secret');
+delete_site_option('duoup_api_host');
+delete_site_option('duoup_roles');
+delete_site_option('duoup_failmode');
+delete_site_option('duoup_xmlrpc');
 
 ?>
