@@ -213,6 +213,11 @@ class DuoUniversal_WordpressPlugin
             $this->wordpress_helper->remove_action('authenticate', 'wp_authenticate_username_password', 20);
             $user = $this->wordpress_helper->wp_authenticate_username_password(null, $username, $password);
             if (!is_a($user, 'WP_User')) {
+                // maybe we got an email
+                $user = $this->wordpress_helper->wp_authenticate_email_password(null, $username, $password );
+            }
+
+            if (!is_a($user, 'WP_User')) {
                 // on error, return said error (and skip the remaining plugin chain)
                 return $user;
             } else {
