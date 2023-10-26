@@ -317,13 +317,13 @@ final class SettingsTest extends TestCase
 
         $this->assertEquals(
             1, preg_match(
-                '/name="duoup_roles\[uses_2fa\]" type="checkbox" value="1" checked/',
+                "/name='duoup_roles\[uses_2fa\]' type='checkbox' value='1' checked/",
                 $output
             )
         );
         $this->assertEquals(
             1, preg_match(
-                '/name="duoup_roles\[skip_2fa\]" type="checkbox" value=""/',
+                "/name='duoup_roles\[skip_2fa\]' type='checkbox' value=''/",
                 $output
             )
         );
