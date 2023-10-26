@@ -3,8 +3,8 @@
 use Duo\DuoUniversal\DuoException;
 use Duo\DuoUniversalWordpress;
 use PHPUnit\Framework\TestCase;
-require_once 'duo_universal_settings.php';
-require_once 'duo_universal_wordpress_helper.php';
+require_once 'class-duo-universal-settings.php';
+require_once 'class-duo-universal-wordpress-helper.php';
 
 final class SettingsTest extends TestCase
 {
