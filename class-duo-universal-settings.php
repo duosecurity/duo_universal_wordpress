@@ -1,8 +1,8 @@
 <?php
 namespace Duo\DuoUniversalWordpress;
 
-require_once 'duo_universal_utilities.php';
-require_once 'duo_universal_wordpress_helper.php';
+require_once 'class-duo-universal-utilities.php';
+require_once 'class-duo-universal-wordpress-helper.php';
 const SECRET_PLACEHOLDER = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
 class DuoUniversal_Settings {
