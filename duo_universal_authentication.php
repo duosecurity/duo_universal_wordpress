@@ -117,7 +117,7 @@ class DuoUniversal_WordpressPlugin {
 		}
 
 		if ( ! $this->duo_utils->duo_auth_enabled() ) {
-				$this->duo_debug_log( 'Duo not enabled, skipping 2FA.' );
+			$this->duo_debug_log( 'Duo not enabled, skipping 2FA.' );
 			return;
 		}
 

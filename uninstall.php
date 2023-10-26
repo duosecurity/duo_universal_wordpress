@@ -3,7 +3,7 @@
 defined( 'ABSPATH' ) or die( 'Direct Access Denied' );
 // if uninstall not called from WordPress exit
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-		exit();
+	exit();
 }
 // Delete Duo credentials in wp_options
 // TODO these will need to be renamed as well
