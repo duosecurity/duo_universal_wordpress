@@ -36,6 +36,7 @@ interface DuoUniversal_WordpressHelperInterface
     public function update_site_option($option, $value);
     public function esc_attr_e($text, $domain='default');
     public function esc_attr($text);
+    public function esc_html($text);
     public function translate($text, $domain='default');
     public function sanitize_url($url, $protocols = null);
     public function sanitize_text_field($str);
@@ -174,6 +175,10 @@ class DuoUniversal_WordpressHelper implements DuoUniversal_WordpressHelperInterf
     public function esc_attr($text)
     {
         return esc_attr($text);
+    }
+    public function esc_html($text)
+    {
+        return esc_html($text);
     }
     public function translate($text, $domain='default')
     {

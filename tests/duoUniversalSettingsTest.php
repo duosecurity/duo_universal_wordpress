@@ -317,7 +317,7 @@ final class SettingsTest extends TestCase
 
         $this->assertEquals(
             1, preg_match(
-                "/name='duoup_roles\[uses_2fa\]' type='checkbox' value='1'  checked/",
+                "/name='duoup_roles\[uses_2fa\]' type='checkbox' value='1' checked/",
                 $output
             )
         );
@@ -335,13 +335,16 @@ final class SettingsTest extends TestCase
      */
     public function testDuoSettingsXMLRPC(): void
     {
-        $helper = $this->createStub(stdClass::class);
+        $helper = $this->getMockBuilder(stdClass::class)
+            ->addMethods(['esc_attr'])
+            ->getMock();
         $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class)
             ->setConstructorArgs(array($helper))
             ->onlyMethods(['duo_get_option'])
             ->getMock();
 
         $duo_utils->method('duo_get_option')->willReturn('off');
+        $helper->method('esc_attr')->willReturnArgument(0);
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($duo_utils);
 
         $result = $settings->duo_settings_xmlrpc();
