@@ -16,11 +16,11 @@ Copyright (c) 2022 Cisco Systems, Inc. and/or its affiliates
 All rights reserved.
 */
 
-require_once 'class-duo-universal-settings.php';
-require_once 'class-duo-universal-utilities.php';
-require_once 'class-duo-universal-wordpress-helper.php';
+require_once 'class-duouniversal-settings.php';
+require_once 'class-duouniversal-utilities.php';
+require_once 'class-duouniversal-wordpresshelper.php';
 require_once 'vendor/autoload.php';
-require_once 'class-duo-universal-authentication.php';
+require_once 'class-duouniversal-wordpressplugin.php';
 
 use Duo\DuoUniversal\Client;
 use Duo\DuoUniversalWordpress;
