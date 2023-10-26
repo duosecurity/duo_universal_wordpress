@@ -72,6 +72,28 @@ compose file. Defaults to the host machine's platform. The image used for the
 `db` service does not have `linux/arm64/v8` support. On such hosts (e.g. Apple
 Silicon Macs), set this to `linux/amd64`.
 
+#### Wordpress CLI
+The wordpress installation includes the `wp` command line tool. Note that all
+commands must be run with `--allow-root` when shelled into the container as
+`root`.
+
+Some helpful commands:
+
+* `wp core multisite-convert`: converts the installation to multi-site. Note
+that there is not a good way to undo this.
+* `wp plugin deactivate duo_universal_wordpress`: deactivate the duo plugin. 
+Helpful if you've locked yourself out or can't complete 2FA for some reason.
+* `wp plugin activate duo_universal_wordpress`: activate the duo plugin
+* `wp plugin list`: list all plugins
+
+#### Gotchas
+By default, the dev container limits uploads to 2MB. This is too small for 
+builds of the plugin, so to upload a build instead of using the mirrored 
+build, you'll need to increase the limit.
+
+* Create or edit `/var/www/html/.htaccess` and set `php_value upload_max_filesize 128M` (or whatever value you want)
+* For some reason this caps it out at 8 MB regardless of how high the value is set, but that's big enough for the plugin.
+
 ### Debug
 Add `define( 'WP_DEBUG_LOG', true );` to `/var/www/html/wp-config.php`. Debug
 logging will be printed to `/var/www/html/debug.log`.
