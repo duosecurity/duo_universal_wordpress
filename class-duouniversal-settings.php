@@ -39,7 +39,7 @@ class DuoUniversal_Settings {
 
 	function duoup_client_id_validate( $client_id ) {
 		$client_id = $this->wordpress_helper->sanitize_text_field( $client_id );
-		if ( strlen( $client_id ) != 20 ) {
+		if ( strlen( $client_id ) !== 20 ) {
 			$this->wordpress_helper->add_settings_error( 'duoup_client_id', '', 'Client ID is not valid' );
 			$current_id = $this->wordpress_helper->esc_attr( $this->duo_utils->duo_get_option( 'duoup_client_id' ) );
 			if ( $current_id ) {
@@ -64,14 +64,14 @@ class DuoUniversal_Settings {
 	function duoup_client_secret_validate( $client_secret ) {
 		$client_secret  = $this->wordpress_helper->sanitize_text_field( $client_secret );
 		$current_secret = $this->wordpress_helper->esc_attr( $this->duo_utils->duo_get_option( 'duoup_client_secret' ) );
-		if ( strlen( $client_secret ) != 40 ) {
+		if ( strlen( $client_secret ) !== 40 ) {
 			$this->wordpress_helper->add_settings_error( 'duoup_client_secret', '', 'Client secret is not valid' );
 			if ( $current_secret ) {
 				return $current_secret;
 			} else {
 				return '';
 			}
-		} elseif ( $client_secret == SECRET_PLACEHOLDER ) {
+		} elseif ( $client_secret === SECRET_PLACEHOLDER ) {
 				return $current_secret;
 		} else {
 			return $client_secret;
@@ -85,7 +85,7 @@ class DuoUniversal_Settings {
 
 	function duoup_api_host_validate( $host ) {
 		$host = $this->wordpress_helper->sanitize_text_field( $host );
-		if ( ! preg_match( '/^api-[a-zA-Z\d\.-]*/', $host ) or str_starts_with( $host, 'api-api-' ) ) {
+		if ( ! preg_match( '/^api-[a-zA-Z\d\.-]*/', $host ) || str_starts_with( $host, 'api-api-' ) ) {
 			$this->wordpress_helper->add_settings_error( 'duoup_api_host', '', 'Host is not valid' );
 			$current_host = $this->wordpress_helper->esc_attr( $this->duo_utils->duo_get_option( 'duo_host' ) );
 			if ( $current_host ) {
@@ -100,7 +100,7 @@ class DuoUniversal_Settings {
 	function duo_settings_failmode() {
 		$failmode = $this->wordpress_helper->esc_attr( $this->duo_utils->duo_get_option( 'duoup_failmode', 'open' ) );
 		echo '<select id="duoup_failmode" name="duoup_failmode" />';
-		if ( $failmode == 'open' ) {
+		if ( $failmode === 'open' ) {
 			echo '<option value="open" selected>Open</option>';
 			echo '<option value="closed">Closed</option';
 		} else {
@@ -171,7 +171,7 @@ class DuoUniversal_Settings {
 
 	function duo_settings_xmlrpc() {
 		$val = '';
-		if ( $this->duo_utils->duo_get_option( 'duoup_xmlrpc', 'off' ) == 'off' ) {
+		if ( $this->duo_utils->duo_get_option( 'duoup_xmlrpc', 'off' ) === 'off' ) {
 			$val = 'checked';
 		}
 		echo "<input id='duoup_xmlrpc' name='duoup_xmlrpc' type='checkbox' value='off' {$this->wordpress_helper->esc_attr($val)} /> Yes<br />";
@@ -180,7 +180,7 @@ class DuoUniversal_Settings {
 
 	function duoup_xmlrpc_validate( $option ) {
 		$option = $this->wordpress_helper->sanitize_text_field( $option );
-		if ( $option == 'off' ) {
+		if ( $option === 'off' ) {
 			return $option;
 		}
 		return 'on';
