@@ -112,13 +112,13 @@ class DuoUniversal_WordpressPlugin {
 
 	function duo_authenticate_user( $user = '', $username = '', $password = '' ) {
 		// play nicely with other plugins if they have higher priority than us
-		if ( is_a( $user, 'WP_User' ) ) {
-			return $user;
-		}
+//		if ( is_a( $user, 'WP_User' ) ) {
+//			return $user;
+//		}
 
 		if ( ! $this->duo_utils->duo_auth_enabled() ) {
 			$this->duo_debug_log( 'Duo not enabled, skipping 2FA.' );
-			return;
+			return $user;
 		}
 
 		if ( isset( $_GET['duo_code'] ) ) {
@@ -182,27 +182,27 @@ class DuoUniversal_WordpressPlugin {
 			return $user;
 		}
 
-		if ( strlen( $username ) > 0 ) {
-			// primary auth
-			// Don't use get_user_by(). It doesn't return a WP_User object if WordPress version < 3.3
-			$user = $this->wordpress_helper->WP_User( 0, $username );
-			if ( ! $user ) {
-				$this->error_log( "Failed to retrieve WP user $username" );
-				return;
-			}
-			if ( ! $this->duo_utils->duo_role_require_mfa( $user ) ) {
-				$this->duo_debug_log( "Skipping 2FA for user: $username with roles: " . print_r( $user->roles, true ) );
-				$this->update_user_auth_status( $user->user_login, 'authenticated' );
-				return;
-			}
-
-			$this->duo_debug_log( 'Doing primary authentication' );
-			$this->wordpress_helper->remove_action( 'authenticate', 'wp_authenticate_username_password', 20 );
-			$user = $this->wordpress_helper->wp_authenticate_username_password( null, $username, $password );
-			if ( ! is_a( $user, 'WP_User' ) ) {
-				// maybe we got an email
-				$user = $this->wordpress_helper->wp_authenticate_email_password( null, $username, $password );
-			}
+//		if ( strlen( $username ) > 0 ) {
+//			// primary auth
+//			// Don't use get_user_by(). It doesn't return a WP_User object if WordPress version < 3.3
+//			$user = $this->wordpress_helper->WP_User( 0, $username );
+//			if ( ! $user ) {
+//				$this->error_log( "Failed to retrieve WP user $username" );
+//				return;
+//			}
+//			if ( ! $this->duo_utils->duo_role_require_mfa( $user ) ) {
+//				$this->duo_debug_log( "Skipping 2FA for user: $username with roles: " . print_r( $user->roles, true ) );
+//				$this->update_user_auth_status( $user->user_login, 'authenticated' );
+//				return;
+//			}
+//
+//			$this->duo_debug_log( 'Doing primary authentication' );
+//			$this->wordpress_helper->remove_action( 'authenticate', 'wp_authenticate_username_password', 20 );
+//			$user = $this->wordpress_helper->wp_authenticate_username_password( null, $username, $password );
+//			if ( ! is_a( $user, 'WP_User' ) ) {
+//				// maybe we got an email
+//				$user = $this->wordpress_helper->wp_authenticate_email_password( null, $username, $password );
+//			}
 
 			if ( ! is_a( $user, 'WP_User' ) ) {
 				// on error, return said error (and skip the remaining plugin chain)
@@ -231,8 +231,8 @@ class DuoUniversal_WordpressPlugin {
 					}
 				}
 			}
-		}
-		$this->duo_debug_log( 'Starting primary authentication' );
+//		}
+//		$this->duo_debug_log( 'Starting primary authentication' );
 	}
 
 	function duo_verify_auth() {
