@@ -1,4 +1,16 @@
 <?php
+/**
+ * Utility functions
+ *
+ * Provides a number of commonly-used utility functions for used
+ * throughout the plugin.
+ *
+ * @link https://duo.com/docs/wordpress
+ *
+ * @package Duo Universal
+ * @since 1.0.0
+ */
+
 namespace Duo\DuoUniversalWordpress;
 
 class DuoUniversal_Utilities {
@@ -16,8 +28,8 @@ class DuoUniversal_Utilities {
 	function duo_get_roles() {
 		global $wp_roles;
 		// $wp_roles may not be initially set if WordPress < 3.3
-		$wp_roles = isset( $wp_roles ) ? $wp_roles : $this->wordpress_helper->WP_Roles();
-		return $wp_roles;
+		$roles = isset( $wp_roles ) ? $wp_roles : $this->wordpress_helper->WP_Roles();
+		return $roles;
 	}
 
 	function duo_auth_enabled() {
@@ -26,7 +38,7 @@ class DuoUniversal_Utilities {
 			return false; // allows the XML-RPC protocol for remote publishing
 		}
 
-		if ( $this->duo_get_option( 'duoup_client_id', '' ) === '' || $this->duo_get_option( 'duoup_client_secret', '' ) == ''
+		if ( $this->duo_get_option( 'duoup_client_id', '' ) === '' || $this->duo_get_option( 'duoup_client_secret', '' ) === ''
 			|| $this->duo_get_option( 'duoup_api_host', '' ) === ''
 		) {
 			return false;
@@ -90,11 +102,11 @@ class DuoUniversal_Utilities {
 		}
 	}
 
-	function duo_get_option( $key, $default = '' ) {
+	function duo_get_option( $key, $default_value = '' ) {
 		if ( $this->wordpress_helper->is_multisite() ) {
-			return $this->wordpress_helper->get_site_option( $key, $default );
+			return $this->wordpress_helper->get_site_option( $key, $default_value );
 		} else {
-			return $this->wordpress_helper->get_option( $key, $default );
+			return $this->wordpress_helper->get_option( $key, $default_value );
 		}
 	}
 

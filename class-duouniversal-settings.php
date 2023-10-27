@@ -1,4 +1,16 @@
 <?php
+/**
+ * Handle settings for plugin
+ *
+ * This class handles the sanitization, validation and display
+ * of the various settings associated with this plugin.
+ *
+ * @link https://duo.com/docs/wordpress
+ *
+ * @package Duo Universal
+ * @since 1.0.0
+ */
+
 namespace Duo\DuoUniversalWordpress;
 
 require_once 'class-duouniversal-utilities.php';
@@ -71,7 +83,7 @@ class DuoUniversal_Settings {
 			} else {
 				return '';
 			}
-		} elseif ( $client_secret === SECRET_PLACEHOLDER ) {
+		} elseif ( SECRET_PLACEHOLDER === $client_secret ) {
 				return $current_secret;
 		} else {
 			return $client_secret;
@@ -100,7 +112,7 @@ class DuoUniversal_Settings {
 	function duo_settings_failmode() {
 		$failmode = $this->wordpress_helper->esc_attr( $this->duo_utils->duo_get_option( 'duoup_failmode', 'open' ) );
 		echo '<select id="duoup_failmode" name="duoup_failmode" />';
-		if ( $failmode === 'open' ) {
+		if ( 'open' === $failmode ) {
 			echo '<option value="open" selected>Open</option>';
 			echo '<option value="closed">Closed</option';
 		} else {
@@ -180,13 +192,13 @@ class DuoUniversal_Settings {
 
 	function duoup_xmlrpc_validate( $option ) {
 		$option = $this->wordpress_helper->sanitize_text_field( $option );
-		if ( $option === 'off' ) {
+		if ( 'off' === $option ) {
 			return $option;
 		}
 		return 'on';
 	}
 
-	function duo_add_link( $links, $file ) {
+	function duo_add_link( $links ) {
 		$settings_link = '<a href="options-general.php?page=duo_universal_wordpress">' . $this->wordpress_helper->translate( 'Settings', 'duo_universal_wordpress' ) . '</a>';
 		array_unshift( $links, $settings_link );
 		return $links;
