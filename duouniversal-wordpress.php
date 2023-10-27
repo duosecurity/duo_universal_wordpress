@@ -2,10 +2,11 @@
 /**
  * Duo Universal WordPress
  *
- * @package    duo_universal_wordpress
+ * @package    Duo Universal
  * @author     Duo Security
  * @copyright  2023 Cisco Systems, Inc. and/or its affiliates
  * @license    Apache-2.0
+ * @link https://duo.com/docs/wordpress
  *
  * Plugin Name: Duo Universal
  * Plugin URI: http://wordpress.org/extend/plugins/duo-universal-wordpress/

@@ -1,4 +1,15 @@
 <?php
+/**
+ * Authentication flow handler
+ *
+ * Provides a class for handling user authentication including
+ * during login as well as tracking login state.
+ *
+ * @link https://duo.com/docs/wordpress
+ *
+ * @package Duo Universal
+ * @since 1.0.0
+ */
 
 require_once 'class-duouniversal-settings.php';
 require_once 'class-duouniversal-utilities.php';
@@ -237,10 +248,10 @@ class DuoUniversal_WordpressPlugin {
 		$this->duo_debug_log( 'Starting primary authentication' );
 	}
 
+    /**
+     * Verify the user is authenticated with Duo. Start 2FA otherwise
+     */
 	function duo_verify_auth() {
-		/*
-		Verify the user is authenticated with Duo. Start 2FA otherwise
-		*/
 		if ( ! $this->duo_utils->duo_auth_enabled() ) {
 			// XXX do we still need this skipping logic?
 			if ( $this->wordpress_helper->is_multisite() ) {

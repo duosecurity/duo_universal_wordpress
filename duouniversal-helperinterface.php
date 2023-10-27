@@ -1,4 +1,16 @@
 <?php
+/**
+ * Interface for WordPress wrapper
+ *
+ * Gives a common interface for wordpress implementations and adapters
+ * as well as serving as a list of all wordpress functions used by this plugin.
+ *
+ * @link https://duo.com/docs/wordpress
+ *
+ * @package Duo Universal
+ * @since 1.0.0
+ */
+
 namespace Duo\DuoUniversalWordpress;
 
 interface DuoUniversal_WordpressHelperInterface {

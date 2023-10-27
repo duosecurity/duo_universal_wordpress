@@ -1,4 +1,16 @@
 <?php
+/**
+ * Handle settings for plugin
+ *
+ * This class handles the sanitization, validation and display
+ * of the various settings associated with this plugin.
+ *
+ * @link https://duo.com/docs/wordpress
+ *
+ * @package Duo Universal
+ * @since 1.0.0
+ */
+
 namespace Duo\DuoUniversalWordpress;
 
 require_once 'class-duouniversal-utilities.php';

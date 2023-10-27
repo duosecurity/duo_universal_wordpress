@@ -1,4 +1,16 @@
 <?php
+/**
+ * Utility functions
+ *
+ * Provides a number of commonly-used utility functions for used
+ * throughout the plugin.
+ *
+ * @link https://duo.com/docs/wordpress
+ *
+ * @package Duo Universal
+ * @since 1.0.0
+ */
+
 namespace Duo\DuoUniversalWordpress;
 
 class DuoUniversal_Utilities {

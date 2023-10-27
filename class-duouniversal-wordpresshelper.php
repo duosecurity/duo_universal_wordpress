@@ -1,4 +1,16 @@
 <?php
+/**
+ * Wraps WordPress builtin functions to add a layer of separate
+ *
+ * Provides transparent wrappers on existing wordpress methods
+ * to allow for easier mocking and testing of functions.
+ *
+ * @link https://duo.com/docs/wordpress
+ *
+ * @package Duo Universal
+ * @since 1.0.0
+ */
+
 namespace Duo\DuoUniversalWordpress;
 
 require_once 'duouniversal-helperinterface.php';
