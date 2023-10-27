@@ -1,2 +1,4 @@
 vendor
 .direnv/
+.idea/
+.env
