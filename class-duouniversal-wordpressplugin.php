@@ -9,7 +9,7 @@ use Duo\DuoUniversal\Client;
 use Duo\DuoUniversalWordpress;
 
 
-// expire in 48hrs
+// expire in 48hrs.
 const DUO_TRANSIENT_EXPIRATION = 48 * 60 * 60;
 
 class DuoUniversal_WordpressPlugin {
@@ -22,16 +22,18 @@ class DuoUniversal_WordpressPlugin {
 		$this->duo_utils        = $duo_utils;
 		$this->wordpress_helper = $duo_utils->wordpress_helper;
 	}
-	// Sets a user's auth state
-	// user: username of the user to update
-	// status: whether or not an authentication is in progress or is completed ("in-progress" or "authenticated")
+	/**
+	 * Sets a user's auth state
+	 * user: username of the user to update
+	 * status: whether or not an authentication is in progress or is completed ("in-progress" or "authenticated")
+	 **/
 	function update_user_auth_status( $user, $status, $redirect_url = '', $oidc_state = null ) {
 		$this->wordpress_helper->set_transient( 'duo_auth_' . $user . '_status', $status, DUO_TRANSIENT_EXPIRATION );
 		if ( $redirect_url ) {
 			$this->wordpress_helper->set_transient( 'duo_auth_' . $user . '_redirect_url', $redirect_url, DUO_TRANSIENT_EXPIRATION );
 		}
 		if ( $oidc_state ) {
-			// we need to track the state in two places so we can clean up later
+			// we need to track the state in two places so we can clean up later.
 			$this->wordpress_helper->set_transient( 'duo_auth_' . $user . '_oidc_state', $oidc_state, DUO_TRANSIENT_EXPIRATION );
 			$this->wordpress_helper->set_transient( "duo_auth_state_$oidc_state", $user, DUO_TRANSIENT_EXPIRATION );
 		}
@@ -67,7 +69,7 @@ class DuoUniversal_WordpressPlugin {
 			$this->wordpress_helper->delete_transient( "duo_auth_state_$oidc_state" );
 			$this->wordpress_helper->delete_transient( 'duo_auth_' . $username . '_redirect_url' );
 		} catch ( Exception $e ) {
-			// there's not much we can do but we shouldn't fail the logout because of this
+			// there's not much we can do but we shouldn't fail the logout because of this.
 			$this->duo_debug_log( $e->getMessage() );
 		}
 	}
@@ -84,7 +86,7 @@ class DuoUniversal_WordpressPlugin {
 		// case.
 		$https_used = ( ! empty( $_SERVER['HTTPS'] ) && strtolower( $this->wordpress_helper->sanitize_text_field( $_SERVER['HTTPS'] ) ) !== 'off' );
 		$port       = absint( $_SERVER['SERVER_PORT'] );
-		$protocol   = ( $https_used || $port === 443 ) ? 'https://' : 'http://';
+		$protocol   = ( $https_used || 443 === $port ) ? 'https://' : 'http://';
 		return $this->wordpress_helper->sanitize_url( $protocol . $_SERVER['HTTP_HOST'] . $this->duo_utils->duo_get_uri(), array( 'http', 'https' ) );
 	}
 
@@ -111,7 +113,7 @@ class DuoUniversal_WordpressPlugin {
 	}
 
 	function duo_authenticate_user( $user = '', $username = '', $password = '' ) {
-		// play nicely with other plugins if they have higher priority than us
+		// play nicely with other plugins if they have higher priority than us.
 		if ( is_a( $user, 'WP_User' ) ) {
 			return $user;
 		}
@@ -122,7 +124,7 @@ class DuoUniversal_WordpressPlugin {
 		}
 
 		if ( isset( $_GET['duo_code'] ) ) {
-			// secondary auth
+			// doing secondary auth.
 			if ( isset( $_GET['error'] ) ) {
 				$error_msg = $this->wordpress_helper->sanitize_text_field( $_GET['error'] ) . ':' . $this->wordpress_helper->sanitize_text_field( $_GET['error_description'] );
 				$error     = $this->wordpress_helper->WP_Error(
@@ -144,13 +146,13 @@ class DuoUniversal_WordpressPlugin {
 			}
 			$this->duo_debug_log( 'Doing secondary auth' );
 
-			// Get authorization token to trade for 2FA
+			// Get authorization token to trade for 2FA.
 			$code = $this->wordpress_helper->sanitize_text_field( $_GET['duo_code'] );
 
-			// Get state to verify consistency and originality
+			// Get state to verify consistency and originality.
 			$state = $this->wordpress_helper->sanitize_text_field( $_GET['state'] );
 
-			// Retrieve the previously stored state and username from the session
+			// Retrieve the previously stored state and username from the session.
 			$associated_user = $this->get_username_from_oidc_state( $state );
 
 			if ( empty( $associated_user ) ) {
@@ -163,7 +165,7 @@ class DuoUniversal_WordpressPlugin {
 				return $error;
 			}
 			try {
-				// Update redirect URL to be one associated with initial authentication
+				// Update redirect URL to be one associated with initial authentication.
 				$this->duo_client->redirect_url = $this->get_redirect_url( $associated_user );
 				$decoded_token                  = $this->duo_client->exchangeAuthorizationCodeFor2FAResult( $code, $associated_user );
 			} catch ( Duo\DuoUniversal\DuoException $e ) {
@@ -183,8 +185,8 @@ class DuoUniversal_WordpressPlugin {
 		}
 
 		if ( strlen( $username ) > 0 ) {
-			// primary auth
-			// Don't use get_user_by(). It doesn't return a WP_User object if WordPress version < 3.3
+			// primary auth.
+			// Don't use get_user_by(). It doesn't return a WP_User object if WordPress version < 3.3.
 			$user = $this->wordpress_helper->WP_User( 0, $username );
 			if ( ! $user ) {
 				$this->error_log( "Failed to retrieve WP user $username" );
@@ -200,12 +202,12 @@ class DuoUniversal_WordpressPlugin {
 			$this->wordpress_helper->remove_action( 'authenticate', 'wp_authenticate_username_password', 20 );
 			$user = $this->wordpress_helper->wp_authenticate_username_password( null, $username, $password );
 			if ( ! is_a( $user, 'WP_User' ) ) {
-				// maybe we got an email
+				// maybe we got an email?
 				$user = $this->wordpress_helper->wp_authenticate_email_password( null, $username, $password );
 			}
 
 			if ( ! is_a( $user, 'WP_User' ) ) {
-				// on error, return said error (and skip the remaining plugin chain)
+				// on error, return said error (and skip the remaining plugin chain).
 				return $user;
 			} else {
 				$this->duo_debug_log( "Primary auth succeeded, starting second factor for $username" );
@@ -215,7 +217,7 @@ class DuoUniversal_WordpressPlugin {
 				} catch ( Duo\DuoUniversal\DuoException $e ) {
 					$this->duo_debug_log( $e->getMessage() );
 					if ( $this->duo_utils->duo_get_option( 'duoup_failmode' ) === 'open' ) {
-						// If we're failing open, errors in 2FA still allow for success
+						// If we're failing open, errors in 2FA still allow for success.
 						$this->duo_debug_log( "Login 'Successful', but 2FA Not Performed. Confirm Duo client/secret/host values are correct" );
 						$this->update_user_auth_status( $user->user_login, 'authenticated' );
 						return $user;
