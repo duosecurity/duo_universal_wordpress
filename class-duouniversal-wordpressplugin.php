@@ -248,9 +248,9 @@ class DuoUniversal_WordpressPlugin {
 		$this->duo_debug_log( 'Starting primary authentication' );
 	}
 
-    /**
-     * Verify the user is authenticated with Duo. Start 2FA otherwise
-     */
+	/**
+	 * Verify the user is authenticated with Duo. Start 2FA otherwise
+	 */
 	function duo_verify_auth() {
 		if ( ! $this->duo_utils->duo_auth_enabled() ) {
 			// XXX do we still need this skipping logic?

@@ -2,8 +2,8 @@
 /**
  * Interface for WordPress wrapper
  *
- * Gives a common interface for wordpress implementations and adapters
- * as well as serving as a list of all wordpress functions used by this plugin.
+ * Gives a common interface for WordPress implementations and adapters
+ * as well as serving as a list of all WordPress functions used by this plugin.
  *
  * @link https://duo.com/docs/wordpress
  *

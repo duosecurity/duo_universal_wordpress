@@ -2,7 +2,7 @@
 /**
  * Wraps WordPress builtin functions to add a layer of separate
  *
- * Provides transparent wrappers on existing wordpress methods
+ * Provides transparent wrappers on existing WordPress methods
  * to allow for easier mocking and testing of functions.
  *
  * @link https://duo.com/docs/wordpress
