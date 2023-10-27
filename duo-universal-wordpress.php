@@ -1,5 +1,5 @@
 <?php
-defined( 'ABSPATH' ) or die( 'Direct Access Denied' );
+defined( 'ABSPATH' ) || die( 'Direct Access Denied' );
 
 /*
 Plugin Name: Duo Universal
@@ -25,7 +25,7 @@ require_once 'class-duouniversal-wordpressplugin.php';
 use Duo\DuoUniversal\Client;
 use Duo\DuoUniversalWordpress;
 
-$GLOBALS['DuoDebug'] = false;
+$GLOBALS['duo_debug'] = false;
 
 $helper = new Duo\DuoUniversalWordpress\DuoUniversal_WordpressHelper();
 $utils  = new Duo\DuoUniversalWordpress\DuoUniversal_Utilities( $helper );
@@ -63,7 +63,7 @@ if ( ! $settings->wordpress_helper->is_multisite() ) {
 
 /*-------------XML-RPC Features-----------------*/
 
-if ( $plugin->duo_utils->duo_get_option( 'duoup_xmlrpc', 'off' ) == 'off' ) {
+if ( $plugin->duo_utils->duo_get_option( 'duoup_xmlrpc', 'off' ) === 'off' ) {
 	$helper->add_filter( 'xmlrpc_enabled', '__return_false' );
 }
 

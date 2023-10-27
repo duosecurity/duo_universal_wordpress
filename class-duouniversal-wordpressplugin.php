@@ -46,7 +46,7 @@ class DuoUniversal_WordpressPlugin {
 	}
 
 	function duo_verify_auth_status( $user ) {
-		return ( $this->get_user_auth_status( $user ) == 'authenticated' );
+		return ( $this->get_user_auth_status( $user ) === 'authenticated' );
 	}
 
 	function get_username_from_oidc_state( $oidc_state ) {
@@ -82,9 +82,9 @@ class DuoUniversal_WordpressPlugin {
 		// the script was queried through HTTPS. However, IIS will set the
 		// value to 'off' HTTPS was not used, so we have to check that special
 		// case.
-		$https_used = ( ! empty( $_SERVER['HTTPS'] ) && strtolower( $this->wordpress_helper->sanitize_text_field( $_SERVER['HTTPS'] ) ) != 'off' );
+		$https_used = ( ! empty( $_SERVER['HTTPS'] ) && strtolower( $this->wordpress_helper->sanitize_text_field( $_SERVER['HTTPS'] ) ) !== 'off' );
 		$port       = absint( $_SERVER['SERVER_PORT'] );
-		$protocol   = ( $https_used || $port == 443 ) ? 'https://' : 'http://';
+		$protocol   = ( $https_used || $port === 443 ) ? 'https://' : 'http://';
 		return $this->wordpress_helper->sanitize_url( $protocol . $_SERVER['HTTP_HOST'] . $this->duo_utils->duo_get_uri(), array( 'http', 'https' ) );
 	}
 
@@ -214,7 +214,7 @@ class DuoUniversal_WordpressPlugin {
 					$this->duo_start_second_factor( $user );
 				} catch ( Duo\DuoUniversal\DuoException $e ) {
 					$this->duo_debug_log( $e->getMessage() );
-					if ( $this->duo_utils->duo_get_option( 'duoup_failmode' ) == 'open' ) {
+					if ( $this->duo_utils->duo_get_option( 'duoup_failmode' ) === 'open' ) {
 						// If we're failing open, errors in 2FA still allow for success
 						$this->duo_debug_log( "Login 'Successful', but 2FA Not Performed. Confirm Duo client/secret/host values are correct" );
 						$this->update_user_auth_status( $user->user_login, 'authenticated' );
