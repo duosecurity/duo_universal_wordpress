@@ -3,6 +3,8 @@
 use Duo\DuoUniversal\DuoException;
 use Duo\DuoUniversalWordpress;
 use PHPUnit\Framework\TestCase;
+use WP_Mock;
+
 require_once 'class-duouniversal-settings.php';
 require_once 'class-duouniversal-wordpresshelper.php';
 
