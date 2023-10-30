@@ -3,10 +3,11 @@
 use Duo\DuoUniversal\DuoException;
 use Duo\DuoUniversalWordpress;
 use PHPUnit\Framework\TestCase;
+use WP_Mock\Tools\TestCase as WPTestCase;
 require_once 'class-duouniversal-wordpressplugin.php';
 require_once 'class-duouniversal-wordpresshelper.php';
 
-final class authenticationTest extends TestCase
+final class authenticationTest extends WPTestCase
 {
     function setUp(): void
     {
@@ -15,10 +16,8 @@ final class authenticationTest extends TestCase
         // For filtering and sanitization methods provided by wordpress,
         // simply return the value passed in for filtering unchanged since we
         // don't have the wordpress methods in scope
-        $this->helper->method('apply_filters')->willReturnArgument(1);
-        $this->helper->method('sanitize_url')->willReturnArgument(0);
-        $this->helper->method('sanitize_text_field')->willReturnArgument(0);
-        $this->helper->method('esc_attr')->willReturnArgument(0);
+        WP_Mock::passthruFunction('sanitize_url');
+        WP_Mock::passthruFunction('sanitize_text_field');
         $this->duo_utils = $this->createMock(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class);
         $this->duo_utils->wordpress_helper = $this->helper;
     }
@@ -33,7 +32,7 @@ final class authenticationTest extends TestCase
         $callback = function ($key, $value, $expiration) use (&$map) {
             $map[$key] = $value;
         };
-        $this->helper->method('set_transient')->willReturnCallback($callback);
+        WP_Mock::userFunction('set_transient', ['return' => $callback]);
         $authentication = new DuoUniversal_WordpressPlugin($this->duo_utils, $this->duo_client);
         $authentication->update_user_auth_status("user", "test_status", "redirect", "oidc_state");
         $this->assertEquals($map["duo_auth_user_status"], "test_status");
@@ -50,9 +49,9 @@ final class authenticationTest extends TestCase
     {
         $user = $this->createMock(stdClass::class);
         $user->user_login = "test user";
-        $this->helper->method('delete_transient')->willThrowException(new Exception());
-        $this->helper->method('get_transient')->willReturn('test user');
-        $this->helper->method('wp_get_current_user')->willReturn($user);
+        WP_Mock::userFunction('delete_transient', ['return' => function() { throw (new Exception()); } ]);
+        WP_Mock::userFunction('get_transient', ['return' => 'test user']);
+        WP_Mock::userFunction('wp_get_current_user', [ 'return' => $user ]);
         $this->duo_utils->expects($this->once())->method('duo_debug_log');
         $authentication = new DuoUniversal_WordpressPlugin($this->duo_utils, $this->duo_client);
 
@@ -75,9 +74,9 @@ final class authenticationTest extends TestCase
         $delete_callback = function ($key) use (&$map) {
             unset($map[$key]);
         };
-        $this->helper->method('delete_transient')->willReturnCallback($delete_callback);
-        $this->helper->method('get_transient')->willReturn('state');
-        $this->helper->method('wp_get_current_user')->willReturn($user);
+        WP_mock::userFunction('delete_transient', ['return' => $delete_callback ]);
+        WP_Mock::userFunction('get_transient', ['return' => 'state']);
+        WP_Mock::userFunction('wp_get_current_user', [ 'return' => $user ]);
         $this->duo_utils->expects($this->never())->method('duo_debug_log');
         $authentication = new DuoUniversal_WordpressPlugin($this->duo_utils, $this->duo_client);
 
@@ -98,6 +97,9 @@ final class authenticationTest extends TestCase
             ->onlyMethods(['get_page_url', 'exit'])
             ->getMock();
         $authentication->method('get_page_url')->willReturn('fake url');
+        WP_Mock::passthruFunction('wp_redirect');
+        WP_Mock::passthruFunction('set_transient');
+        WP_Mock::userFunction('wp_logout')->once();
 
         $authentication->duo_start_second_factor($user);
 
@@ -112,15 +114,16 @@ final class authenticationTest extends TestCase
         $user = $this->createMock(stdClass::class);
         $user->user_login = "test user";
         $this->duo_client->method('createAuthUrl')->willReturn("prompt url");
-        $this->helper->expects($this->once())
-            ->method('wp_redirect')
-            ->with($this->equalTo("prompt url"));
+        WP_Mock::userFunction('wp_redirect')->with("prompt url")->once();
         $authentication = $this->getMockBuilder(DuoUniversal_WordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(['get_page_url', 'exit'])
             ->getMock();
+        WP_Mock::passthruFunction('set_transient');
+        WP_Mock::userFunction('wp_logout')->once();
 
         $authentication->duo_start_second_factor($user);
+        $this->assertConditionsMet(); 
     }
 
     /**
@@ -139,7 +142,9 @@ final class authenticationTest extends TestCase
             ->onlyMethods(['get_page_url', 'exit'])
             ->getMock();
         $authentication->method('get_page_url')->willReturn("test url");
-        $this->helper->method('set_transient')->willReturnCallback($callback);
+        WP_Mock::passthruFunction('wp_redirect');
+        WP_Mock::userFunction('set_transient', ['return' => $callback]);
+        WP_Mock::userFunction('wp_logout')->once();
         $this->duo_client->method('generateState')->willReturn("test state");
 
         $authentication->duo_start_second_factor($user);
@@ -161,9 +166,12 @@ final class authenticationTest extends TestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(['get_page_url', 'exit'])
             ->getMock();
-        $this->helper->expects($this->once())->method('wp_logout');
+        WP_Mock::userFunction('wp_logout')->once();
+        WP_Mock::passthruFunction('set_transient');
+        WP_Mock::passthruFunction('wp_redirect');
 
         $authentication->duo_start_second_factor($user);
+        $this->assertConditionsMet(); 
     }
 
     /**
@@ -178,6 +186,9 @@ final class authenticationTest extends TestCase
             ->onlyMethods(['get_page_url', 'exit'])
             ->getMock();
         $authentication->expects($this->once())->method('exit');
+        WP_Mock::passthruFunction('set_transient');
+        WP_Mock::passthruFunction('wp_redirect');
+        WP_Mock::userFunction('wp_logout')->once();
 
         $authentication->duo_start_second_factor($user);
     }
@@ -242,8 +253,8 @@ final class authenticationTest extends TestCase
             )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
-        $this->helper->method('translate')->willReturnArgument(0);
-        $this->helper->method('WP_Error')->willReturnArgument(1);
+        WP_Mock::passthruFunction('translate');
+        WP_Mock::userFunction('WP_Error', [ 'return_arg' => 1 ]);
 
         $_GET['duo_code'] = "testcode";
         $_GET['error'] = "test error";
@@ -266,8 +277,8 @@ final class authenticationTest extends TestCase
             )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
-        $this->helper->method('translate')->willReturnArgument(0);
-        $this->helper->method('WP_Error')->willReturnArgument(1);
+        WP_Mock::passthruFunction('translate');
+        WP_Mock::userFunction('WP_Error', ['return_arg' => 1]);
 
         $_GET['duo_code'] = "testcode";
         $result = $authentication->duo_authenticate_user();
@@ -290,8 +301,8 @@ final class authenticationTest extends TestCase
             ->getMock();
         $authentication->method('get_username_from_oidc_state')->willReturn(null);
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
-        $this->helper->method('translate')->willReturnArgument(0);
-        $this->helper->method('WP_Error')->willReturnArgument(1);
+        WP_Mock::passthruFunction('translate');
+        WP_Mock::userFunction('WP_Error', [ 'return_arg' => 1 ]);
         $_GET['duo_code'] = "testcode";
         $_GET['state'] = "teststate";
 
@@ -315,8 +326,8 @@ final class authenticationTest extends TestCase
                 ]
             )
             ->getMock();
-        $this->helper->method('translate')->willReturnArgument(0);
-        $this->helper->method('WP_Error')->willReturnArgument(1);
+        WP_Mock::passthruFunction('translate');
+        WP_Mock::userFunction('WP_Error', [ 'return_arg' => 1 ]);
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $authentication->method('get_username_from_oidc_state')->willReturn("test user");
         $this->duo_client->method('exchangeAuthorizationCodeFor2FAResult')->willThrowException(new Duo\DuoUniversal\DuoException("there was a problem"));
@@ -337,7 +348,7 @@ final class authenticationTest extends TestCase
         $callback = function ($key, $value, $expiration) use (&$map) {
             $map[$key] = $value;
         };
-        $this->helper->method('set_transient')->willReturnCallback($callback);
+        WP_Mock::userFunction('set_transient', ['return' => $callback]);
         $authentication = $this->getMockBuilder(DuoUniversal_WordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
@@ -350,7 +361,7 @@ final class authenticationTest extends TestCase
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $authentication->method('get_username_from_oidc_state')->willReturn("test user");
-        $this->helper->method("WP_User")->willReturnArgument(1);
+        WP_Mock::userFunction('WP_User', [ 'return_arg' => 1 ]);
         $_GET['duo_code'] = "testcode";
         $_GET['state'] = "teststate";
 
@@ -399,7 +410,7 @@ final class authenticationTest extends TestCase
             ->getMock();
         $authentication->expects($this->once())->method('error_log')->with($this->equalTo("Failed to retrieve WP user test user"));
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
-        $this->helper->method('WP_User')->willReturn(null);
+        WP_Mock::userFunction('WP_User', [ 'return' => null ]);
 
         $result = $authentication->duo_authenticate_user(null, "test user");
     }
@@ -424,10 +435,10 @@ final class authenticationTest extends TestCase
             ->getMock();
         $user->user_login = "test user";
         $user->roles = [];
-        $this->helper->method('WP_User')->willReturn($user);
-        $this->helper->method('wp_authenticate_username_password')->willReturn(null);
-        $this->helper->method('wp_authenticate_email_password')->willReturn("EMAIL");
-        $this->helper->expects($this->once())->method('wp_authenticate_email_password');
+        WP_Mock::userFunction('WP_User', [ 'return' => $user ]);
+        WP_Mock::userFunction('wp_authenticate_username_password', [ 'return' => null ]);
+        WP_Mock::userFunction('wp_authenticate_email_password', [ 'return' => "EMAIL"])->once();
+        WP_Mock::passthruFunction('remove_action');
 
         $result = $authentication->duo_authenticate_user(null, "test user");
 
@@ -444,7 +455,7 @@ final class authenticationTest extends TestCase
         $callback = function ($key, $value, $expiration) use (&$map) {
             $map[$key] = $value;
         };
-        $this->helper->method('set_transient')->willReturnCallback($callback);
+        WP_Mock::userFunction('set_transient', ['return' => $callback]);
         $authentication = $this->getMockBuilder(DuoUniversal_WordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
@@ -460,7 +471,7 @@ final class authenticationTest extends TestCase
             ->getMock();
         $user->user_login = "test user";
         $user->roles = [];
-        $this->helper->method('WP_User')->willReturn($user);
+        WP_Mock::userFunction('WP_User', [ 'return' => $user ]);
 
         $result = $authentication->duo_authenticate_user(null, "test user");
 
@@ -488,9 +499,10 @@ final class authenticationTest extends TestCase
             ->getMock();
         $user->user_login = "test user";
         $user->roles = [];
-        $this->helper->method('WP_User')->willReturn($user);
-        $this->helper->method('wp_authenticate_username_password')->willReturn("ERROR");
-        $this->helper->method('wp_authenticate_email_password')->willReturn("ERROR");
+        WP_Mock::userFunction('WP_User', [ 'return' => $user ]);
+        WP_Mock::userFunction('wp_authenticate_username_password', [ 'return' => "ERROR" ]);
+        WP_Mock::userFunction('wp_authenticate_email_password', [ 'return' => "ERROR"]);
+        WP_Mock::passthruFunction('remove_action');
 
         $result = $authentication->duo_authenticate_user(null, "test user");
 
@@ -506,7 +518,7 @@ final class authenticationTest extends TestCase
         $callback = function ($key, $value, $expiration) use (&$map) {
             $map[$key] = $value;
         };
-        $this->helper->method('set_transient')->willReturnCallback($callback);
+        WP_Mock::userFunction('set_transient', ['return' => $callback]);
         $authentication = $this->getMockBuilder(DuoUniversal_WordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
@@ -523,8 +535,9 @@ final class authenticationTest extends TestCase
             ->getMock();
         $user->user_login = "test user";
         $user->roles = [];
-        $this->helper->method('WP_User')->willReturn($user);
-        $this->helper->method('wp_authenticate_username_password')->willReturn($user);
+        WP_Mock::userFunction('WP_User', [ 'return' => $user ]);
+        WP_Mock::userFunction('wp_authenticate_username_password', [ 'return' => $user ]);
+        WP_Mock::passthruFunction('remove_action');
 
         $result = $authentication->duo_authenticate_user(null, "test user");
 
@@ -540,7 +553,7 @@ final class authenticationTest extends TestCase
         $callback = function ($key, $value, $expiration) use (&$map) {
             $map[$key] = $value;
         };
-        $this->helper->method('set_transient')->willReturnCallback($callback);
+        WP_Mock::userFunction('set_transient', ['return' => $callback]);
         $authentication = $this->getMockBuilder(DuoUniversal_WordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
@@ -557,8 +570,9 @@ final class authenticationTest extends TestCase
             ->getMock();
         $user->user_login = "test user";
         $user->roles = [];
-        $this->helper->method('WP_User')->willReturn($user);
-        $this->helper->method('wp_authenticate_username_password')->willReturn($user);
+        WP_Mock::userFunction('WP_User', [ 'return' => $user ]);
+        WP_Mock::userFunction('wp_authenticate_username_password', [ 'return' => $user ]);
+        WP_Mock::passthruFunction('remove_action');
         $this->duo_utils->method('duo_get_option')->willReturn('open');
 
         $result = $authentication->duo_authenticate_user(null, "test user");
@@ -577,8 +591,9 @@ final class authenticationTest extends TestCase
         $delete_callback = function ($key) use (&$map) {
             unset($map[$key]);
         };
-        $this->helper->method('set_transient')->willReturnCallback($callback);
-        $this->helper->method('delete_transient')->willReturnCallback($delete_callback);
+        WP_Mock::userFunction('set_transient', ['return' => $callback]);
+        WP_Mock::userFunction('delete_transient', ['return' => $delete_callback ]);
+        WP_Mock::passthruFunction('get_transient');
         $authentication = $this->getMockBuilder(DuoUniversal_WordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
@@ -595,10 +610,11 @@ final class authenticationTest extends TestCase
             ->getMock();
         $user->user_login = "test user";
         $user->roles = [];
-        $this->helper->method('WP_User')->willReturn($user);
-        $this->helper->method('WP_Error')->willReturnArgument(1);
-        $this->helper->method('translate')->willReturnArgument(0);
-        $this->helper->method('wp_authenticate_username_password')->willReturn($user);
+        WP_Mock::userFunction('WP_User', [ 'return' => $user ]);
+        WP_Mock::userFunction('WP_Error', ['return_arg' => 1]);
+        WP_Mock::passthruFunction('translate');
+        WP_Mock::passthruFunction('remove_action');
+        WP_Mock::userFunction('wp_authenticate_username_password', [ 'return' => $user ]);
         $this->duo_utils->method('duo_get_option')->willReturn('closed');
 
         $result = $authentication->duo_authenticate_user(null, "test user");
@@ -621,6 +637,7 @@ final class authenticationTest extends TestCase
             )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(false);
+        WP_Mock::userFunction('is_multisite', [ 'return' => false ]);
         $authentication->expects($this->once())
             ->method('duo_debug_log')
             ->with($this->equalTo("Duo not enabled, skip auth check."));
@@ -628,6 +645,7 @@ final class authenticationTest extends TestCase
         $result = $authentication->duo_verify_auth();
 
         $this->assertEquals($result, null);
+        $this->assertConditionsMet(); 
     }
 
     /**
@@ -646,8 +664,8 @@ final class authenticationTest extends TestCase
         $site = $this->createMock(stdClass::class);
         $site->site_name = "test site";
         $this->duo_utils->method('duo_auth_enabled')->willReturn(false);
-        $this->helper->method('is_multisite')->willReturn(true);
-        $this->helper->method('get_current_site')->willReturn($site);
+        WP_Mock::userFunction('is_multisite', [ 'return' => true ]);
+        WP_Mock::userFunction('get_current_site', [ 'return' => $site ]);
         $authentication->expects($this->once())
             ->method('duo_debug_log')
             ->with($this->equalTo("Duo not enabled on test site"));
@@ -671,7 +689,7 @@ final class authenticationTest extends TestCase
             )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
-        $this->helper->method("is_user_logged_in")->willReturn(false);
+        WP_Mock::userFunction('is_user_logged_in', [ 'return' => false ]);
         $authentication->expects($this->never())->method('duo_debug_log');
 
         $result = $authentication->duo_verify_auth();
@@ -695,8 +713,8 @@ final class authenticationTest extends TestCase
             )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
-        $this->helper->method("is_user_logged_in")->willReturn(true);
-        $this->helper->method('wp_get_current_user')->willReturn($user);
+        WP_Mock::userFunction('is_user_logged_in', [ 'return' => true ]);
+        WP_Mock::userFunction('wp_get_current_user', [ 'return' => $user ]);
         $this->duo_utils->method('duo_role_require_mfa')->willReturn(false);
         $authentication->expects($this->at(1))
             ->method('duo_debug_log')
@@ -724,8 +742,8 @@ final class authenticationTest extends TestCase
             )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
-        $this->helper->method("is_user_logged_in")->willReturn(true);
-        $this->helper->method('wp_get_current_user')->willReturn($user);
+        WP_Mock::userFunction('is_user_logged_in', [ 'return' => true ]);
+        WP_Mock::userFunction('wp_get_current_user', [ 'return' => $user ]);
         $this->duo_utils->method('duo_role_require_mfa')->willReturn(true);
         $authentication->method('duo_verify_auth_status')->willReturn(true);
         $authentication->expects($this->at(2))
@@ -754,8 +772,8 @@ final class authenticationTest extends TestCase
             )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
-        $this->helper->method("is_user_logged_in")->willReturn(true);
-        $this->helper->method('wp_get_current_user')->willReturn($user);
+        WP_Mock::userFunction('is_user_logged_in', [ 'return' => true ]);
+        WP_Mock::userFunction('wp_get_current_user', [ 'return' => $user ]);
         $this->duo_utils->method('duo_role_require_mfa')->willReturn(true);
         $authentication->method('duo_verify_auth_status')->willReturn(false);
         $authentication->expects($this->once())->method('duo_start_second_factor');
