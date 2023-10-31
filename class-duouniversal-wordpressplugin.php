@@ -13,7 +13,6 @@
 
 require_once 'class-duouniversal-settings.php';
 require_once 'class-duouniversal-utilities.php';
-require_once 'class-duouniversal-wordpresshelper.php';
 require_once 'vendor/autoload.php';
 
 use Duo\DuoUniversal\Client;
@@ -29,9 +28,8 @@ class DuoUniversal_WordpressPlugin {
 		$duo_utils,
 		$duo_client
 	) {
-		$this->duo_client       = $duo_client;
-		$this->duo_utils        = $duo_utils;
-		$this->wordpress_helper = $duo_utils->wordpress_helper;
+		$this->duo_client = $duo_client;
+		$this->duo_utils  = $duo_utils;
 	}
 	/**
 	 * Sets a user's auth state
@@ -191,14 +189,14 @@ class DuoUniversal_WordpressPlugin {
 			}
 			$this->duo_debug_log( "Completed secondary auth for $associated_user" );
 			$this->update_user_auth_status( $associated_user, 'authenticated' );
-			$user = \WP_User( 0, $associated_user );
+			$user = $this->duo_utils->new_WP_user( 0, $associated_user );
 			return $user;
 		}
 
 		if ( strlen( $username ) > 0 ) {
 			// primary auth.
 			// Don't use get_user_by(). It doesn't return a WP_User object if WordPress version < 3.3.
-			$user = \WP_User( 0, $username );
+			$user = $this->duo_utils->new_WP_User( 0, $username );
 			if ( ! $user ) {
 				$this->error_log( "Failed to retrieve WP user $username" );
 				return;

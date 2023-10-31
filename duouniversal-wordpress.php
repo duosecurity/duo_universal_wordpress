@@ -20,7 +20,6 @@ defined( 'ABSPATH' ) || die( 'Direct Access Denied' );
 
 require_once 'class-duouniversal-settings.php';
 require_once 'class-duouniversal-utilities.php';
-require_once 'class-duouniversal-wordpresshelper.php';
 require_once 'vendor/autoload.php';
 require_once 'class-duouniversal-wordpressplugin.php';
 
@@ -29,8 +28,7 @@ use Duo\DuoUniversalWordpress;
 
 $GLOBALS['duo_debug'] = false;
 
-$helper = new Duo\DuoUniversalWordpress\DuoUniversal_WordpressHelper();
-$utils  = new Duo\DuoUniversalWordpress\DuoUniversal_Utilities( $helper );
+$utils = new Duo\DuoUniversalWordpress\DuoUniversal_Utilities();
 
 if ( $utils->duo_auth_enabled() ) {
 	try {
@@ -57,7 +55,7 @@ $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings(
 	$utils
 );
 
-if ( ! $settings->wordpress_helper->is_multisite() ) {
+if ( ! \is_multisite() ) {
 	$plugin_name = plugin_basename( __FILE__ );
 	add_filter( 'plugin_action_links_' . $plugin_name, array( $settings, 'duo_add_link' ), 10, 2 );
 }
@@ -66,21 +64,21 @@ if ( ! $settings->wordpress_helper->is_multisite() ) {
 /*-------------XML-RPC Features-----------------*/
 
 if ( $duoup_plugin->duo_utils->duo_get_option( 'duoup_xmlrpc', 'off' ) === 'off' ) {
-	$helper->add_filter( 'xmlrpc_enabled', '__return_false' );
+	\add_filter( 'xmlrpc_enabled', '__return_false' );
 }
 
 /*-------------Register WordPress Hooks-------------*/
 
-$helper->add_action( 'init', array( $duoup_plugin, 'duo_verify_auth' ), 10 );
+\add_action( 'init', array( $duoup_plugin, 'duo_verify_auth' ), 10 );
 
-$helper->add_action( 'clear_auth_cookie', array( $duoup_plugin, 'clear_current_user_auth' ), 10 );
+\add_action( 'clear_auth_cookie', array( $duoup_plugin, 'clear_current_user_auth' ), 10 );
 
-$helper->add_filter( 'authenticate', array( $duoup_plugin, 'duo_authenticate_user' ), 10, 3 );
+\add_filter( 'authenticate', array( $duoup_plugin, 'duo_authenticate_user' ), 10, 3 );
 
 // add single-site submenu option.
-$helper->add_action( 'admin_menu', array( $settings, 'duo_add_page' ) );
-$helper->add_action( 'admin_init', array( $settings, 'duo_admin_init' ) );
+\add_action( 'admin_menu', array( $settings, 'duo_add_page' ) );
+\add_action( 'admin_init', array( $settings, 'duo_admin_init' ) );
 
 // Custom fields in multi-site network settings.
-$helper->add_action( 'wpmu_options', array( $settings, 'duo_mu_options' ) );
-$helper->add_action( 'update_wpmu_options', array( $settings, 'duo_update_mu_options' ) );
+\add_action( 'wpmu_options', array( $settings, 'duo_mu_options' ) );
+\add_action( 'update_wpmu_options', array( $settings, 'duo_update_mu_options' ) );

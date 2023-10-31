@@ -14,15 +14,13 @@
 namespace Duo\DuoUniversalWordpress;
 
 require_once 'class-duouniversal-utilities.php';
-require_once 'class-duouniversal-wordpresshelper.php';
 const SECRET_PLACEHOLDER = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
 class DuoUniversal_Settings {
 	public function __construct(
 		$duo_utils
 	) {
-		$this->duo_utils        = $duo_utils;
-		$this->wordpress_helper = $duo_utils->wordpress_helper;
+		$this->duo_utils = $duo_utils;
 	}
 	function duo_settings_page() {
 		$this->duo_utils->duo_debug_log( 'Displaying duo setting page' );

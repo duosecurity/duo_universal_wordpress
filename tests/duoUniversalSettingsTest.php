@@ -7,7 +7,6 @@ use WP_Mock\Tools\TestCase as WPTestCase;
 use WP_Mock;
 
 require_once 'class-duouniversal-settings.php';
-require_once 'class-duouniversal-wordpresshelper.php';
 
 final class SettingsTest extends WPTestCase
 {
@@ -15,7 +14,6 @@ final class SettingsTest extends WPTestCase
     function setUp(): void
     {
         $this->duo_client = $this->createMock(Duo\DuoUniversal\Client::class);
-        $this->helper = $this->createMock(Duo\DuoUniversalWordpress\DuoUniversal_WordpressHelper::class);
         // For filtering and sanitization methods provided by wordpress,
         // simply return the value passed in for filtering unchanged since we
         // don't have the wordpress methods in scope
@@ -23,7 +21,6 @@ final class SettingsTest extends WPTestCase
         WP_Mock::passthruFunction('sanitize_text_field');
         WP_Mock::passthruFunction('esc_attr');
         $this->duo_utils = $this->createMock(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class);
-        $this->duo_utils->wordpress_helper = $this->helper;
     }
 
     /**
@@ -66,7 +63,6 @@ final class SettingsTest extends WPTestCase
         WP_Mock::passthruFunction('esc_attr');
 
         $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class)
-            ->setConstructorArgs(array($this->helper))
             ->onlyMethods(['duo_get_option'])
             ->getMock();
         $duo_utils->method('duo_get_option')->willReturn("this-is-a-test-value");
@@ -126,7 +122,6 @@ final class SettingsTest extends WPTestCase
     {
         WP_Mock::passthruFunction('esc_attr');
         $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class)
-            ->setConstructorArgs(array($this->helper))
             ->onlyMethods(['duo_get_option'])
             ->getMock();
         $duo_utils->method('duo_get_option')->willReturn("this-is-a-fake-secret");
@@ -145,7 +140,6 @@ final class SettingsTest extends WPTestCase
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         WP_Mock::passthruFunction('esc_attr');
         $duo_utils = $this->createMock(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class);
-        $duo_utils->wordpress_helper = $this->helper;
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($duo_utils);
 
         $result = $settings->duoup_client_secret_validate("invalid secret");
@@ -175,7 +169,6 @@ final class SettingsTest extends WPTestCase
         WP_Mock::passthruFunction('esc_attr');
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $duo_utils = $this->createMock(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class);
-        $duo_utils->wordpress_helper = $this->helper;
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($duo_utils);
         $client_secret = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
@@ -255,7 +248,6 @@ final class SettingsTest extends WPTestCase
     {
         WP_Mock::passthruFunction('esc_attr');
         $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class)
-            ->setConstructorArgs(array($this->helper))
             ->onlyMethods(['duo_get_option'])
             ->getMock();
         $duo_utils->method('duo_get_option')->willReturn("this-is-a-test-host");
@@ -274,7 +266,6 @@ final class SettingsTest extends WPTestCase
     {
         WP_Mock::passthruFunction('esc_attr');
         $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class)
-            ->setConstructorArgs(array($this->helper))
             ->onlyMethods(['duo_get_option'])
             ->getMock();
         $duo_utils->method('duo_get_option')->willReturn("closed");
@@ -300,7 +291,6 @@ final class SettingsTest extends WPTestCase
         $roles->method('get_names')->willReturn($duoup_roles);
         WP_Mock::passthruFunction('before_last_bar');
         $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class)
-            ->setConstructorArgs(array($this->helper))
             ->onlyMethods(['duo_get_option', 'duo_get_roles'])
             ->getMock();
 
@@ -332,7 +322,6 @@ final class SettingsTest extends WPTestCase
     public function testDuoSettingsXMLRPC(): void
     {
         $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class)
-            ->setConstructorArgs(array($this->helper))
             ->onlyMethods(['duo_get_option'])
             ->getMock();
 
@@ -403,7 +392,6 @@ final class SettingsTest extends WPTestCase
      */
     public function testDuoRolesValidateEmpty(): void
     {
-        $this->duo_utils->wordpress_helper = null;
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
 
         $this->assertEmpty($settings->duoup_roles_validate(1));
@@ -427,7 +415,6 @@ final class SettingsTest extends WPTestCase
         $roles->method('get_names')->willReturn($duoup_roles);
         WP_Mock::passthruFunction('before_last_bar');
         $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class)
-            ->setConstructorArgs(array($this->helper))
             ->onlyMethods(['duo_get_roles'])
             ->getMock();
 
