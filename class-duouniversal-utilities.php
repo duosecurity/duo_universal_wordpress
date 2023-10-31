@@ -15,12 +15,6 @@ namespace Duo\DuoUniversalWordpress;
 
 class DuoUniversal_Utilities {
 
-	public function __construct(
-		$wordpress_helper
-	) {
-		$this->wordpress_helper = $wordpress_helper;
-	}
-
 	function xmlrpc_enabled() {
 		return defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST;
 	}
@@ -61,7 +55,7 @@ class DuoUniversal_Utilities {
 		 * Don't use get_user_by()
 		 */
 		if ( ! isset( $user->roles ) ) {
-			$user = \WP_User( 0, $user->user_login );
+			$user = new \WP_User( 0, $user->user_login );
 		}
 
 		/*

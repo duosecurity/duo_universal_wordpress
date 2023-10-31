@@ -5,21 +5,18 @@ use Duo\DuoUniversalWordpress;
 use PHPUnit\Framework\TestCase;
 use WP_Mock\Tools\TestCase as WPTestCase;
 require_once 'class-duouniversal-wordpressplugin.php';
-require_once 'class-duouniversal-wordpresshelper.php';
 
 final class authenticationTest extends WPTestCase
 {
     function setUp(): void
     {
         $this->duo_client = $this->createMock(Duo\DuoUniversal\Client::class);
-        $this->helper = $this->createMock(Duo\DuoUniversalWordpress\DuoUniversal_WordpressHelper::class);
         // For filtering and sanitization methods provided by wordpress,
         // simply return the value passed in for filtering unchanged since we
         // don't have the wordpress methods in scope
         WP_Mock::passthruFunction('sanitize_url');
         WP_Mock::passthruFunction('sanitize_text_field');
         $this->duo_utils = $this->createMock(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class);
-        $this->duo_utils->wordpress_helper = $this->helper;
     }
 
     /**
