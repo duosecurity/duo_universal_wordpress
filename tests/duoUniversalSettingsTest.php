@@ -294,7 +294,7 @@ final class SettingsTest extends WPTestCase
             ->onlyMethods(['duo_get_option', 'duo_get_roles'])
             ->getMock();
 
-        $duo_utils->method('duo_get_option')->willReturn(["uses_2fa"]);
+        $duo_utils->method('duo_get_option')->willReturn(["uses_2fa" => true]);
         $duo_utils->method('duo_get_roles')->willReturn($roles);
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($duo_utils);
 
@@ -578,6 +578,7 @@ final class SettingsTest extends WPTestCase
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_failmode', 'closed');
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_roles', $duoup_roles);
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_xmlrpc', 'off');
+        WP_Mock::passthruFunction('wp_unslash');
 
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $settings->duo_update_mu_options();

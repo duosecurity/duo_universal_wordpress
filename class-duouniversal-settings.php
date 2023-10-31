@@ -122,7 +122,7 @@ class DuoUniversal_Settings {
 
 	function duoup_failmode_validate( $failmode ) {
 		$failmode = sanitize_text_field( $failmode );
-		if ( ! in_array( $failmode, array( 'open', 'closed' ) ) ) {
+		if ( ! in_array( $failmode, array( 'open', 'closed' ), true ) ) {
 			add_settings_error( 'duoup_failmode', '', 'Failmode value is not valid' );
 			$current_failmode = $this->duo_utils->duo_get_option( 'duoup_failmode', 'open' );
 			return $current_failmode;
@@ -147,7 +147,7 @@ class DuoUniversal_Settings {
 				"name='duoup_roles[" . \esc_attr( $key ) . "]' " .
 				"type='checkbox' " .
 				"value='" . \esc_attr( $role ) . "' " .
-				( in_array( $role, $selected ) ? 'checked' : '' ) .
+				( in_array( $role, $selected, true ) ? 'checked' : '' ) .
 			'/>' .
 			\esc_html( $role ) .
 			'<br />' );
@@ -197,7 +197,7 @@ class DuoUniversal_Settings {
 	}
 
 	function duo_add_link( $links ) {
-		$settings_link = '<a href="options-general.php?page=duo_universal_wordpress">' . \translate( 'Settings', 'duo_universal_wordpress' ) . '</a>';
+		$settings_link = '<a href="options-general.php?page=duo_universal_wordpress">' . \__( 'Settings', 'duo_universal_wordpress' ) . '</a>';
 		array_unshift( $links, $settings_link );
 		return $links;
 	}
@@ -271,36 +271,36 @@ class DuoUniversal_Settings {
 
 	function duo_update_mu_options() {
 		if ( isset( $_POST['duoup_client_id'] ) ) {
-			$client_id = $this->duoup_client_id_validate( $_POST['duoup_client_id'] );
+			$client_id = $this->duoup_client_id_validate( sanitize_text_field( \wp_unslash( $_POST['duoup_client_id'] ) ) );
 			$result    = \update_site_option( 'duoup_client_id', $client_id );
 		}
 
 		if ( isset( $_POST['duoup_client_secret'] ) ) {
-			$client_secret = $this->duoup_client_secret_validate( $_POST['duoup_client_secret'] );
+			$client_secret = $this->duoup_client_secret_validate( sanitize_text_field( \wp_unslash( $_POST['duoup_client_secret'] ) ) );
 			$result        = \update_site_option( 'duoup_client_secret', $client_secret );
 		}
 
 		if ( isset( $_POST['duoup_api_host'] ) ) {
-			$host   = $this->duoup_api_host_validate( $_POST['duoup_api_host'] );
+			$host   = $this->duoup_api_host_validate( sanitize_text_field( \wp_unslash( $_POST['duoup_api_host'] ) ) );
 			$result = \update_site_option( 'duoup_api_host', $host );
 		}
 
 		if ( isset( $_POST['duoup_failmode'] ) ) {
-			$failmode = $this->duoup_failmode_validate( $_POST['duoup_failmode'] );
+			$failmode = $this->duoup_failmode_validate( sanitize_text_field( \wp_unslash( $_POST['duoup_failmode'] ) ) );
 			$result   = \update_site_option( 'duoup_failmode', $failmode );
 		} else {
 			$result = \update_site_option( 'duoup_failmode', 'open' );
 		}
 
 		if ( isset( $_POST['duoup_roles'] ) ) {
-			$roles  = $this->duoup_roles_validate( $_POST['duoup_roles'] );
+			$roles  = $this->duoup_roles_validate( sanitize_text_field( \wp_unslash( $_POST['duoup_roles'] ) ) );
 			$result = \update_site_option( 'duoup_roles', $roles );
 		} else {
 			$result = \update_site_option( 'duoup_roles', array() );
 		}
 
 		if ( isset( $_POST['duoup_xmlrpc'] ) ) {
-			$xmlrpc = $this->duoup_xmlrpc_validate( $_POST['duoup_xmlrpc'] );
+			$xmlrpc = $this->duoup_xmlrpc_validate( sanitize_text_field( \wp_unslash( $_POST['duoup_xmlrpc'] ) ) );
 			$result = \update_site_option( 'duoup_xmlrpc', $xmlrpc );
 		} else {
 			$result = \update_site_option( 'duoup_xmlrpc', 'on' );

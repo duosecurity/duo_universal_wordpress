@@ -93,10 +93,20 @@ class DuoUniversal_WordpressPlugin {
 		// the script was queried through HTTPS. However, IIS will set the
 		// value to 'off' HTTPS was not used, so we have to check that special
 		// case.
-		$https_used = ( ! empty( $_SERVER['HTTPS'] ) && strtolower( \sanitize_text_field( $_SERVER['HTTPS'] ) ) !== 'off' );
-		$port       = absint( $_SERVER['SERVER_PORT'] );
-		$protocol   = ( $https_used || 443 === $port ) ? 'https://' : 'http://';
-		return \sanitize_url( $protocol . $_SERVER['HTTP_HOST'] . $this->duo_utils->duo_get_uri(), array( 'http', 'https' ) );
+		$https_used = ( ! empty( $_SERVER['HTTPS'] ) && strtolower( \sanitize_text_field( wp_unslash( $_SERVER['HTTPS'] ) ) ) !== 'off' );
+
+		if ( ! isset( $_SERVER['SERVER_PORT'] ) ) {
+			throw new Exception( 'Could not determine server port' );
+		}
+
+		$port     = isset( $_SERVER['SERVER_PORT'] ) ? absint( $_SERVER['SERVER_PORT'] ) : null;
+		$protocol = ( $https_used || 443 === $port ) ? 'https://' : 'http://';
+
+		if ( ! isset( $_SERVER['HTTP_HOST'] ) ) {
+			throw new Exception( 'Could not determine host' );
+		}
+		$host = ! empty( $_SERVER['HTTP_HOST'] ) ? \sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : null;
+		return \sanitize_url( $protocol . $host . $this->duo_utils->duo_get_uri(), array( 'http', 'https' ) );
 	}
 
 	function exit() {
@@ -135,42 +145,44 @@ class DuoUniversal_WordpressPlugin {
 		if ( isset( $_GET['duo_code'] ) ) {
 			// doing secondary auth.
 			if ( isset( $_GET['error'] ) ) {
-				$error_msg = \sanitize_text_field( $_GET['error'] ) . ':' . \sanitize_text_field( $_GET['error_description'] );
-				$error     = \WP_Error(
+				$error_msg = \sanitize_text_field( wp_unslash( $_GET['error'] ) );
+				if ( isset( $_GET['error_description'] ) ) {
+					$error_msg .= ': ' . \sanitize_text_field( wp_unslash( $_GET['error_description'] ) );
+				}
+				$error = $this->duo_utils->new_WP_Error(
 					'Duo authentication failed',
-					\translate( "<strong>ERROR</strong>: $error_msg" )
+                    // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+					\__( 'ERROR: ' . $error_msg )
 				);
-				$this->duo_debug_log( $error_msg );
+				$this->duo_debug_log( $error->get_error_message() );
 				return $error;
 			}
 
 			if ( ! isset( $_GET['state'] ) ) {
-				$error_msg = 'Missing state';
-				$error     = \WP_Error(
+				$error = $this->duo_utils->new_WP_Error(
 					'Duo authentication failed',
-					\translate( "<strong>ERROR</strong>: $error_msg" )
+					\__( 'ERROR: Missing state' )
 				);
-				$this->duo_debug_log( $error_msg );
+				$this->duo_debug_log( $error->get_error_message() );
 				return $error;
 			}
 			$this->duo_debug_log( 'Doing secondary auth' );
 
 			// Get authorization token to trade for 2FA.
-			$code = \sanitize_text_field( $_GET['duo_code'] );
+			$code = \sanitize_text_field( wp_unslash( $_GET['duo_code'] ) );
 
 			// Get state to verify consistency and originality.
-			$state = \sanitize_text_field( $_GET['state'] );
+			$state = \sanitize_text_field( wp_unslash( $_GET['state'] ) );
 
 			// Retrieve the previously stored state and username from the session.
 			$associated_user = $this->get_username_from_oidc_state( $state );
 
 			if ( empty( $associated_user ) ) {
-				$error_msg = 'No saved state please login again';
-				$error     = \WP_Error(
+				$error = $this->duo_utils->new_WP_Error(
 					'Duo authentication failed',
-					\translate( "<strong>ERROR</strong>: $error_msg" )
+					\__( 'ERROR: No saved state please login again' )
 				);
-				$this->duo_debug_log( $error_msg );
+				$this->duo_debug_log( $error->get_error_message() );
 				return $error;
 			}
 			try {
@@ -179,12 +191,11 @@ class DuoUniversal_WordpressPlugin {
 				$decoded_token                  = $this->duo_client->exchangeAuthorizationCodeFor2FAResult( $code, $associated_user );
 			} catch ( Duo\DuoUniversal\DuoException $e ) {
 				$this->duo_debug_log( $e->getMessage() );
-				$error_msg = 'Error decoding Duo result. Confirm device clock is correct.';
-				$error     = \WP_Error(
+				$error = $this->duo_utils->new_WP_Error(
 					'Duo authentication failed',
-					\translate( "<strong>ERROR</strong>: $error_msg" )
+					\__( 'ERROR: Error decoding Duo result. Confirm device clock is correct.' )
 				);
-				$this->duo_debug_log( $error_msg );
+				$this->duo_debug_log( $error->get_error_message() );
 				return $error;
 			}
 			$this->duo_debug_log( "Completed secondary auth for $associated_user" );
@@ -232,12 +243,11 @@ class DuoUniversal_WordpressPlugin {
 						$this->update_user_auth_status( $user->user_login, 'authenticated' );
 						return $user;
 					} else {
-						$error_msg = '2FA Unavailable. Confirm Duo client/secret/host values are correct';
-						$error     = \WP_Error(
-							'Duo authentication_failed',
-							\translate( "<strong>Error</strong>: $error_msg" )
+						$error = $this->duo_utils->new_WP_Error(
+							'Duo authentication failed',
+							\__( 'Error: 2FA Unavailable. Confirm Duo client/secret/host values are correct' )
 						);
-						$this->duo_debug_log( $error_msg );
+						$this->duo_debug_log( $error->get_error_message() );
 						$this->clear_user_auth( $user );
 						return $error;
 					}

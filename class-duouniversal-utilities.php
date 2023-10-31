@@ -83,15 +83,22 @@ class DuoUniversal_Utilities {
 		// paths (for which protocols are not required/enforced), and REQUEST_URI
 		// always includes the leading slash in the URI path.
 		if ( ! isset( $_SERVER['REQUEST_URI'] )
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			|| ( ! empty( $_SERVER['QUERY_STRING'] ) && ! strpos( \sanitize_url( $_SERVER['REQUEST_URI'] ), '?', 0 ) )
 		) {
-			$current_uri = \sanitize_url( substr( $_SERVER['PHP_SELF'], 1 ) );
+			if ( ! isset( $_SERVER['PHP_SELF'] ) ) {
+				throw new Exception( 'Could not determine request URI' );
+			}
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+			$current_uri = isset( $_SERVER['PHP_SELF'] ) ? substr( \sanitize_url( $_SERVER['PHP_SELF'] ), 1 ) : null;
 			if ( isset( $_SERVER['QUERY_STRING'] ) ) {
+                // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 				$current_uri = \sanitize_url( $current_uri . '?' . $_SERVER['QUERY_STRING'] );
 			}
 
 			return $current_uri;
 		} else {
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			return \sanitize_url( $_SERVER['REQUEST_URI'] );
 		}
 	}
@@ -113,5 +120,9 @@ class DuoUniversal_Utilities {
 
 	function new_WP_User( $id, $name = '', $site_id = '' ) {
 		return new \WP_User( $id, $name, $site_id );
+	}
+
+	function new_WP_Error( $code, $message = '', $data = '' ) {
+		return new \WP_Error( $code, $message, $data );
 	}
 }
