@@ -154,7 +154,7 @@ final class UtilitiesTest extends TestCase
         WP_Mock::userFunction('is_multisite', [ 'return' => false ]);
         WP_Mock::userFunction('get_option', [ 'return' => "value" ])->once();
 
-        $duo_utils = new Duo\DuoUniversalWordpress\DuoUniversal_Utilities($helper);
+        $duo_utils = new Duo\DuoUniversalWordpress\DuoUniversal_Utilities($this->wordpress_helper);
         $this->assertEquals($duo_utils->duo_get_option("test"), 'value');
     }
 
@@ -167,7 +167,7 @@ final class UtilitiesTest extends TestCase
         WP_Mock::userFunction('is_multisite', [ 'return' => true ]);
         WP_Mock::userFunction('get_site_option', [ 'return' => "value" ])->once();
 
-        $duo_utils = new Duo\DuoUniversalWordpress\DuoUniversal_Utilities($helper);
+        $duo_utils = new Duo\DuoUniversalWordpress\DuoUniversal_Utilities($this->wordpress_helper);
         $this->assertEquals($duo_utils->duo_get_option("test"), 'value');
     }
 }
