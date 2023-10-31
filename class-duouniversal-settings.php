@@ -46,7 +46,7 @@ class DuoUniversal_Settings {
 
 	function duo_settings_client_id() {
 		$client_id = \esc_attr( $this->duo_utils->duo_get_option( 'duoup_client_id' ) );
-		echo "<input id='duoup_client_id' name='duoup_client_id' size='40' type='text' value='{" . \esc_attr( $client_id ) . "' />";
+		echo "<input id='duoup_client_id' name='duoup_client_id' size='40' type='text' value='" . \esc_attr( $client_id ) . "' />";
 	}
 
 	function duoup_client_id_validate( $client_id ) {
