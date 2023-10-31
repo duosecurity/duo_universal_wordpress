@@ -55,7 +55,7 @@ class DuoUniversal_Utilities {
 		 * Don't use get_user_by()
 		 */
 		if ( ! isset( $user->roles ) ) {
-			$user = new \WP_User( 0, $user->user_login );
+			$user = $this->new_WP_User( 0, $user->user_login );
 		}
 
 		/*
@@ -109,5 +109,9 @@ class DuoUniversal_Utilities {
 		if ( $duo_debug ) {
 			error_log( 'Duo debug: ' . $message );
 		}
+	}
+
+	function new_WP_User( $id, $name = '', $site_id = '' ) {
+		return new \WP_User( $id, $name, $site_id );
 	}
 }

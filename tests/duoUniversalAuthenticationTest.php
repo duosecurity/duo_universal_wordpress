@@ -211,6 +211,8 @@ final class authenticationTest extends WPTestCase
         $user = $this->getMockBuilder(stdClass::class)
             ->setMockClassName('WP_User')
             ->getMock();
+
+        $this->duo_utils->method('new_WP_user')->willReturn($user);
         $user->user_login = "test user";
 
         $result = $authentication->duo_authenticate_user($user);
@@ -230,6 +232,7 @@ final class authenticationTest extends WPTestCase
         $user = $this->getMockBuilder(stdClass::class)
             ->setMockClassName('WP_User')
             ->getMock();
+        $this->duo_utils->method('new_WP_user')->willReturn($user);
         $user->user_login = "test user";
 
         $result = $authentication->duo_authenticate_user($user);
@@ -358,7 +361,7 @@ final class authenticationTest extends WPTestCase
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         $authentication->method('get_username_from_oidc_state')->willReturn("test user");
-        WP_Mock::userFunction('WP_User', [ 'return_arg' => 1 ]);
+        $this->duo_utils->method('new_WP_user')->willReturnArgument(1);
         $_GET['duo_code'] = "testcode";
         $_GET['state'] = "teststate";
 
@@ -407,7 +410,7 @@ final class authenticationTest extends WPTestCase
             ->getMock();
         $authentication->expects($this->once())->method('error_log')->with($this->equalTo("Failed to retrieve WP user test user"));
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
-        WP_Mock::userFunction('WP_User', [ 'return' => null ]);
+        $this->duo_utils->method('new_WP_user')->willReturn(null);
 
         $result = $authentication->duo_authenticate_user(null, "test user");
     }
@@ -432,7 +435,7 @@ final class authenticationTest extends WPTestCase
             ->getMock();
         $user->user_login = "test user";
         $user->roles = [];
-        WP_Mock::userFunction('WP_User', [ 'return' => $user ]);
+        $this->duo_utils->method('new_WP_user')->willReturn($user);
         WP_Mock::userFunction('wp_authenticate_username_password', [ 'return' => null ]);
         WP_Mock::userFunction('wp_authenticate_email_password', [ 'return' => "EMAIL"])->once();
         WP_Mock::passthruFunction('remove_action');
@@ -468,7 +471,7 @@ final class authenticationTest extends WPTestCase
             ->getMock();
         $user->user_login = "test user";
         $user->roles = [];
-        WP_Mock::userFunction('WP_User', [ 'return' => $user ]);
+        $this->duo_utils->method('new_WP_user')->willReturn($user);
 
         $result = $authentication->duo_authenticate_user(null, "test user");
 
@@ -496,7 +499,7 @@ final class authenticationTest extends WPTestCase
             ->getMock();
         $user->user_login = "test user";
         $user->roles = [];
-        WP_Mock::userFunction('WP_User', [ 'return' => $user ]);
+        $this->duo_utils->method('new_WP_user')->willReturn($user);
         WP_Mock::userFunction('wp_authenticate_username_password', [ 'return' => "ERROR" ]);
         WP_Mock::userFunction('wp_authenticate_email_password', [ 'return' => "ERROR"]);
         WP_Mock::passthruFunction('remove_action');
@@ -532,7 +535,7 @@ final class authenticationTest extends WPTestCase
             ->getMock();
         $user->user_login = "test user";
         $user->roles = [];
-        WP_Mock::userFunction('WP_User', [ 'return' => $user ]);
+        $this->duo_utils->method('new_WP_user')->willReturn($user);
         WP_Mock::userFunction('wp_authenticate_username_password', [ 'return' => $user ]);
         WP_Mock::passthruFunction('remove_action');
 
@@ -567,7 +570,7 @@ final class authenticationTest extends WPTestCase
             ->getMock();
         $user->user_login = "test user";
         $user->roles = [];
-        WP_Mock::userFunction('WP_User', [ 'return' => $user ]);
+        $this->duo_utils->method('new_WP_user')->willReturn($user);
         WP_Mock::userFunction('wp_authenticate_username_password', [ 'return' => $user ]);
         WP_Mock::passthruFunction('remove_action');
         $this->duo_utils->method('duo_get_option')->willReturn('open');
@@ -607,7 +610,7 @@ final class authenticationTest extends WPTestCase
             ->getMock();
         $user->user_login = "test user";
         $user->roles = [];
-        WP_Mock::userFunction('WP_User', [ 'return' => $user ]);
+        $this->duo_utils->method('new_WP_user')->willReturn($user);
         WP_Mock::userFunction('WP_Error', ['return_arg' => 1]);
         WP_Mock::passthruFunction('translate');
         WP_Mock::passthruFunction('remove_action');
