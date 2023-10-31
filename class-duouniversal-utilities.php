@@ -28,7 +28,7 @@ class DuoUniversal_Utilities {
 	function duo_get_roles() {
 		global $wp_roles;
 		// $wp_roles may not be initially set if WordPress < 3.3
-		$roles = isset( $wp_roles ) ? $wp_roles : $this->wordpress_helper->WP_Roles();
+		$roles = isset( $wp_roles ) ? $wp_roles : \WP_Roles();
 		return $roles;
 	}
 
@@ -61,7 +61,7 @@ class DuoUniversal_Utilities {
 		 * Don't use get_user_by()
 		 */
 		if ( ! isset( $user->roles ) ) {
-			$user = $this->wordpress_helper->WP_User( 0, $user->user_login );
+			$user = \WP_User( 0, $user->user_login );
 		}
 
 		/*
@@ -89,24 +89,24 @@ class DuoUniversal_Utilities {
 		// paths (for which protocols are not required/enforced), and REQUEST_URI
 		// always includes the leading slash in the URI path.
 		if ( ! isset( $_SERVER['REQUEST_URI'] )
-			|| ( ! empty( $_SERVER['QUERY_STRING'] ) && ! strpos( $this->wordpress_helper->sanitize_url( $_SERVER['REQUEST_URI'] ), '?', 0 ) )
+			|| ( ! empty( $_SERVER['QUERY_STRING'] ) && ! strpos( \sanitize_url( $_SERVER['REQUEST_URI'] ), '?', 0 ) )
 		) {
-			$current_uri = $this->wordpress_helper->sanitize_url( substr( $_SERVER['PHP_SELF'], 1 ) );
+			$current_uri = \sanitize_url( substr( $_SERVER['PHP_SELF'], 1 ) );
 			if ( isset( $_SERVER['QUERY_STRING'] ) ) {
-				$current_uri = $this->wordpress_helper->sanitize_url( $current_uri . '?' . $_SERVER['QUERY_STRING'] );
+				$current_uri = \sanitize_url( $current_uri . '?' . $_SERVER['QUERY_STRING'] );
 			}
 
 			return $current_uri;
 		} else {
-			return $this->wordpress_helper->sanitize_url( $_SERVER['REQUEST_URI'] );
+			return \sanitize_url( $_SERVER['REQUEST_URI'] );
 		}
 	}
 
 	function duo_get_option( $key, $default_value = '' ) {
-		if ( $this->wordpress_helper->is_multisite() ) {
-			return $this->wordpress_helper->get_site_option( $key, $default_value );
+		if ( \is_multisite() ) {
+			return \get_site_option( $key, $default_value );
 		} else {
-			return $this->wordpress_helper->get_option( $key, $default_value );
+			return \get_option( $key, $default_value );
 		}
 	}
 
