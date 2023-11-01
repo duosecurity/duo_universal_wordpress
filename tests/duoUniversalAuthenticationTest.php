@@ -120,7 +120,7 @@ final class authenticationTest extends WPTestCase
         WP_Mock::userFunction('wp_logout')->once();
 
         $authentication->duo_start_second_factor($user);
-        $this->assertConditionsMet(); 
+        $this->assertConditionsMet();
     }
 
     /**
@@ -168,7 +168,7 @@ final class authenticationTest extends WPTestCase
         WP_Mock::passthruFunction('wp_redirect');
 
         $authentication->duo_start_second_factor($user);
-        $this->assertConditionsMet(); 
+        $this->assertConditionsMet();
     }
 
     /**
@@ -252,15 +252,20 @@ final class authenticationTest extends WPTestCase
                 ]
             )
             ->getMock();
+        $error = $this->getMockBuilder(stdClass::class)
+            ->setMockClassName('WP_Error')
+            ->addMethods(["get_error_message"])
+            ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
-        WP_Mock::passthruFunction('translate');
-        WP_Mock::userFunction('WP_Error', [ 'return_arg' => 1 ]);
+        $this->duo_utils->method('new_WP_Error')->willReturn($error)->with("Duo authentication failed", "ERROR: test error: test description");
+        WP_Mock::passthruFunction('__');
+        WP_Mock::passthruFunction('wp_unslash');
 
         $_GET['duo_code'] = "testcode";
         $_GET['error'] = "test error";
         $_GET['error_description'] = "test description";
         $result = $authentication->duo_authenticate_user();
-        $this->assertRegExp("/test description/", $result);
+        $this->assertConditionsMet();
     }
 
     /**
@@ -276,13 +281,18 @@ final class authenticationTest extends WPTestCase
                 ]
             )
             ->getMock();
+        $error = $this->getMockBuilder(stdClass::class)
+            ->setMockClassName('WP_Error')
+            ->addMethods(["get_error_message"])
+            ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
-        WP_Mock::passthruFunction('translate');
-        WP_Mock::userFunction('WP_Error', ['return_arg' => 1]);
+        $this->duo_utils->method('new_WP_Error')->willReturn($error)->with("Duo authentication failed", "ERROR: Missing state");
+        WP_Mock::passthruFunction('__');
+        WP_Mock::passthruFunction('wp_unslash');
 
         $_GET['duo_code'] = "testcode";
-        $result = $authentication->duo_authenticate_user();
-        $this->assertRegExp("/Missing state/", $result);
+        $authentication->duo_authenticate_user();
+        $this->assertConditionsMet();
     }
 
     /**
@@ -299,16 +309,21 @@ final class authenticationTest extends WPTestCase
                 ]
             )
             ->getMock();
+        $error = $this->getMockBuilder(stdClass::class)
+            ->setMockClassName('WP_Error')
+            ->addMethods(["get_error_message"])
+            ->getMock();
         $authentication->method('get_username_from_oidc_state')->willReturn(null);
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
-        WP_Mock::passthruFunction('translate');
-        WP_Mock::userFunction('WP_Error', [ 'return_arg' => 1 ]);
+        $this->duo_utils->method('new_WP_Error')->willReturn($error)->with("Duo authentication failed", "ERROR: No saved state please login again");
+        WP_Mock::passthruFunction('__');
+        WP_Mock::passthruFunction('wp_unslash');
         $_GET['duo_code'] = "testcode";
         $_GET['state'] = "teststate";
 
-        $result = $authentication->duo_authenticate_user();
+        $authentication->duo_authenticate_user();
 
-        $this->assertRegExp("/No saved state/", $result);
+        $this->assertConditionsMet();
     }
 
     /**
@@ -326,17 +341,22 @@ final class authenticationTest extends WPTestCase
                 ]
             )
             ->getMock();
-        WP_Mock::passthruFunction('translate');
-        WP_Mock::userFunction('WP_Error', [ 'return_arg' => 1 ]);
+        $error = $this->getMockBuilder(stdClass::class)
+            ->setMockClassName('WP_Error')
+            ->addMethods(["get_error_message"])
+            ->getMock();
+        WP_Mock::passthruFunction('__');
+        WP_Mock::passthruFunction('wp_unslash');
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
+        $this->duo_utils->method('new_WP_Error')->willReturn($error)->with("Duo authentication failed", "ERROR: Error decoding Duo result. Confirm device clock is correct.");
         $authentication->method('get_username_from_oidc_state')->willReturn("test user");
         $this->duo_client->method('exchangeAuthorizationCodeFor2FAResult')->willThrowException(new Duo\DuoUniversal\DuoException("there was a problem"));
         $_GET['duo_code'] = "testcode";
         $_GET['state'] = "teststate";
 
-        $result = $authentication->duo_authenticate_user();
+        $authentication->duo_authenticate_user();
 
-        $this->assertRegExp("/Error decoding Duo result/", $result);
+        $this->assertConditionsMet();
     }
 
     /**
@@ -349,6 +369,7 @@ final class authenticationTest extends WPTestCase
             $map[$key] = $value;
         };
         WP_Mock::userFunction('set_transient', ['return' => $callback]);
+        WP_Mock::passthruFunction('wp_unslash');
         $authentication = $this->getMockBuilder(DuoUniversal_WordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
@@ -608,11 +629,15 @@ final class authenticationTest extends WPTestCase
         $user = $this->getMockBuilder(stdClass::class)
             ->setMockClassName('WP_User')
             ->getMock();
+        $error = $this->getMockBuilder(stdClass::class)
+            ->setMockClassName('WP_Error')
+            ->addMethods(["get_error_message"])
+            ->getMock();
         $user->user_login = "test user";
         $user->roles = [];
         $this->duo_utils->method('new_WP_user')->willReturn($user);
-        WP_Mock::userFunction('WP_Error', ['return_arg' => 1]);
-        WP_Mock::passthruFunction('translate');
+        $this->duo_utils->method('new_WP_Error')->willReturn($error)->with("Duo authentication failed", "Error: 2FA Unavailable. Confirm Duo client/secret/host values are correct");
+        WP_Mock::passthruFunction('__');
         WP_Mock::passthruFunction('remove_action');
         WP_Mock::userFunction('wp_authenticate_username_password', [ 'return' => $user ]);
         $this->duo_utils->method('duo_get_option')->willReturn('closed');
@@ -620,7 +645,7 @@ final class authenticationTest extends WPTestCase
         $result = $authentication->duo_authenticate_user(null, "test user");
 
         $this->assertFalse(array_key_exists("duo_auth_test user_status", $map));
-        $this->assertRegExp("/2FA Unavailable/", $result);
+        $this->assertConditionsMet();
     }
 
     /**
@@ -645,7 +670,7 @@ final class authenticationTest extends WPTestCase
         $result = $authentication->duo_verify_auth();
 
         $this->assertEquals($result, null);
-        $this->assertConditionsMet(); 
+        $this->assertConditionsMet();
     }
 
     /**
