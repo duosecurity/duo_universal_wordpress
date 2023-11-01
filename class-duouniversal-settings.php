@@ -293,7 +293,8 @@ class DuoUniversal_Settings {
 		}
 
 		if ( isset( $_POST['duoup_roles'] ) ) {
-			$roles  = $this->duoup_roles_validate( sanitize_text_field( \wp_unslash( $_POST['duoup_roles'] ) ) );
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$roles  = $this->duoup_roles_validate( \wp_unslash( $_POST['duoup_roles'] ) );
 			$result = \update_site_option( 'duoup_roles', $roles );
 		} else {
 			$result = \update_site_option( 'duoup_roles', array() );
