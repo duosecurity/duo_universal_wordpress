@@ -104,6 +104,34 @@ final class authenticationTest extends WPTestCase
     }
 
     /**
+     * Test that transients are intact after starting second factor logged in
+     */
+    function testDoubleLoginTransients(): void
+    {
+        $transients = array();
+        $user = $this->createMock(stdClass::class);
+        $user->user_login = "test user";
+        $authentication = $this->getMockBuilder(DuoUniversal_WordpressPlugin::class)
+            ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
+            ->onlyMethods(['get_page_url', 'exit'])
+            ->getMock();
+        $authentication->method('get_page_url')->willReturn('fake url');
+        WP_Mock::passthruFunction('wp_redirect');
+        WP_Mock::userFunction('set_transient', [ 'return' => function($name, $value) use (&$transients) {
+            $transients[$name] = $value;
+            return;
+        }]);
+        WP_Mock::userFunction('wp_logout', [ 'return' => function() use (&$transients){
+            $transients = [];
+        }])->once();
+
+        $authentication->duo_start_second_factor($user);
+
+        $this->assertEquals($this->duo_client->redirect_url, "fake url");
+        $this->assertNotEmpty($transients);
+    }
+
+    /**
      * Test that the user is redirected to the prompt url
      */
     function testPromptRedirect(): void
