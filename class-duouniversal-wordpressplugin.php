@@ -206,7 +206,6 @@ class DuoUniversal_WordpressPlugin {
 
 		if ( strlen( $username ) > 0 ) {
 			// primary auth.
-			// Don't use get_user_by(). It doesn't return a WP_User object if WordPress version < 3.3.
 			$this->duo_debug_log( 'Doing primary authentication' );
 			\remove_action( 'authenticate', 'wp_authenticate_username_password', 20 );
 			\remove_action( 'authenticate', 'wp_authenticate_email_password', 20 );
@@ -220,6 +219,7 @@ class DuoUniversal_WordpressPlugin {
 					return $user;
 				}
 			}
+			$this->duo_debug_log( "Primary auth succeeded, starting second factor for $username" );
 
 			if ( ! $this->duo_utils->duo_role_require_mfa( $user ) ) {
 				$this->duo_debug_log( "Skipping 2FA for user: $username with roles: " . print_r( $user->roles, true ) );
@@ -227,7 +227,6 @@ class DuoUniversal_WordpressPlugin {
 				return $user;
 			}
 
-			$this->duo_debug_log( "Primary auth succeeded, starting second factor for $username" );
 			$this->update_user_auth_status( $user->user_login, 'in-progress' );
 			try {
 				$this->duo_start_second_factor( $user );
