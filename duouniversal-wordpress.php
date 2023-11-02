@@ -73,7 +73,7 @@ if ( $duoup_plugin->duo_utils->duo_get_option( 'duoup_xmlrpc', 'off' ) === 'off'
 
 \add_action( 'clear_auth_cookie', array( $duoup_plugin, 'clear_current_user_auth' ), 10 );
 
-\add_filter( 'authenticate', array( $plugin, 'duo_authenticate_user' ), 30, 3 );
+\add_filter( 'authenticate', array( $duoup_plugin, 'duo_authenticate_user' ), 30, 3 );
 
 // add single-site submenu option.
 \add_action( 'admin_menu', array( $settings, 'duo_add_page' ) );
