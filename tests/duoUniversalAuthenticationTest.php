@@ -122,7 +122,7 @@ final class authenticationTest extends WPTestCase
             return;
         }]);
         WP_Mock::userFunction('wp_logout', [ 'return' => function() use (&$transients){
-            unset($transients);
+            $transients = [];
         }])->once();
 
         $authentication->duo_start_second_factor($user);
