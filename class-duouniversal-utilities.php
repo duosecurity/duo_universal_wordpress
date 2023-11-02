@@ -54,7 +54,7 @@ class DuoUniversal_Utilities {
 		 * Create a User object to get roles info
 		 * Don't use get_user_by()
 		 */
-		if ( ! isset( $user->roles ) ) {
+		if ( empty( $user->roles ) ) {
 			$user = $this->new_WP_User( 0, $user->user_login );
 		}
 

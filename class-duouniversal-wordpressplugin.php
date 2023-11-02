@@ -209,51 +209,45 @@ class DuoUniversal_WordpressPlugin {
 
 		if ( strlen( $username ) > 0 ) {
 			// primary auth.
-			// Don't use get_user_by(). It doesn't return a WP_User object if WordPress version < 3.3.
-			$user = $this->duo_utils->new_WP_User( 0, $username );
-			if ( ! $user ) {
-				$this->error_log( "Failed to retrieve WP user $username" );
-				return;
-			}
-			if ( ! $this->duo_utils->duo_role_require_mfa( $user ) ) {
-				$this->duo_debug_log( "Skipping 2FA for user: $username with roles: " . print_r( $user->roles, true ) );
-				$this->update_user_auth_status( $user->user_login, 'authenticated' );
-				return;
-			}
-
 			$this->duo_debug_log( 'Doing primary authentication' );
 			\remove_action( 'authenticate', 'wp_authenticate_username_password', 20 );
+			\remove_action( 'authenticate', 'wp_authenticate_email_password', 20 );
 
 			$user = \wp_authenticate_username_password( null, $username, $password );
 			if ( ! is_a( $user, 'WP_User' ) ) {
 				// maybe we got an email?
 				$user = \wp_authenticate_email_password( null, $username, $password );
+				if ( ! is_a( $user, 'WP_User' ) ) {
+					// on error, return said error (and skip the remaining plugin chain).
+					return $user;
+				}
+			}
+			$this->duo_debug_log( "Primary auth succeeded, starting second factor for $username" );
+
+			if ( ! $this->duo_utils->duo_role_require_mfa( $user ) ) {
+				$this->duo_debug_log( "Skipping 2FA for user: $username with roles: " . print_r( $user->roles, true ) );
+				$this->update_user_auth_status( $user->user_login, 'authenticated' );
+				return $user;
 			}
 
-			if ( ! is_a( $user, 'WP_User' ) ) {
-				// on error, return said error (and skip the remaining plugin chain).
-				return $user;
-			} else {
-				$this->duo_debug_log( "Primary auth succeeded, starting second factor for $username" );
-				$this->update_user_auth_status( $user->user_login, 'in-progress' );
-				try {
-					$this->duo_start_second_factor( $user );
-				} catch ( Duo\DuoUniversal\DuoException $e ) {
-					$this->duo_debug_log( $e->getMessage() );
-					if ( $this->duo_utils->duo_get_option( 'duoup_failmode' ) === 'open' ) {
-						// If we're failing open, errors in 2FA still allow for success.
-						$this->duo_debug_log( "Login 'Successful', but 2FA Not Performed. Confirm Duo client/secret/host values are correct" );
-						$this->update_user_auth_status( $user->user_login, 'authenticated' );
-						return $user;
-					} else {
-						$error = $this->duo_utils->new_WP_Error(
-							'Duo authentication failed',
-							\__( 'Error: 2FA Unavailable. Confirm Duo client/secret/host values are correct' )
-						);
-						$this->duo_debug_log( $error->get_error_message() );
-						$this->clear_user_auth( $user );
-						return $error;
-					}
+			$this->update_user_auth_status( $user->user_login, 'in-progress' );
+			try {
+				$this->duo_start_second_factor( $user );
+			} catch ( Duo\DuoUniversal\DuoException $e ) {
+				$this->duo_debug_log( $e->getMessage() );
+				if ( $this->duo_utils->duo_get_option( 'duoup_failmode' ) === 'open' ) {
+					// If we're failing open, errors in 2FA still allow for success.
+					$this->duo_debug_log( "Login 'Successful', but 2FA Not Performed. Confirm Duo client/secret/host values are correct" );
+					$this->update_user_auth_status( $user->user_login, 'authenticated' );
+					return $user;
+				} else {
+					$error = $this->duo_utils->new_WP_Error(
+						'Duo authentication failed',
+						\__( 'Error: 2FA Unavailable. Confirm Duo client/secret/host values are correct' )
+					);
+					$this->duo_debug_log( $error->get_error_message() );
+					$this->clear_user_auth( $user );
+					return $error;
 				}
 			}
 		}

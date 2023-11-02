@@ -26,7 +26,7 @@ require_once 'class-duouniversal-wordpressplugin.php';
 use Duo\DuoUniversal\Client;
 use Duo\DuoUniversalWordpress;
 
-$GLOBALS['duo_debug'] = false;
+$GLOBALS['duo_debug'] = true;
 
 $utils = new Duo\DuoUniversalWordpress\DuoUniversal_Utilities();
 

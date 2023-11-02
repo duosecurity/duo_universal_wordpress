@@ -74,8 +74,11 @@ final class UtilitiesTest extends TestCase
         $command->method('duo_get_option')->willReturn([]);
         $command->method('duo_get_roles')->willReturn($roles);
 
-        $user = new stdClass();
+        $user = $this->getMockBuilder(stdClass::class)
+            ->setMockClassName('WP_User')
+            ->getMock();
         $user->roles = [];
+        $user->user_login = "test";
         
         $this->assertTrue($command->duo_role_require_mfa($user));
     }
