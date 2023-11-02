@@ -123,9 +123,12 @@ class DuoUniversal_WordpressPlugin {
 		$oidc_state                     = $this->duo_client->generateState();
 		$redirect_url                   = $this->get_page_url();
 		$this->duo_client->redirect_url = $redirect_url;
+
+		// logging out clears cookies and transients so it should be done _before_ updating
+		// the auth status
+		\wp_logout();
 		$this->update_user_auth_status( $user->user_login, 'in-progress', $redirect_url, $oidc_state );
 
-		\wp_logout();
 		$prompt_uri = $this->duo_client->createAuthUrl( $user->user_login, $oidc_state );
 		\wp_redirect( $prompt_uri );
 		$this->exit();
