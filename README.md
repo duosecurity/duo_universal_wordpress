@@ -71,6 +71,11 @@ container:
 compose file. Defaults to the host machine's platform. The image used for the
 `db` service does not have `linux/arm64/v8` support. On such hosts (e.g. Apple
 Silicon Macs), set this to `linux/amd64`.
+* `WORDPRESS_VERSION`: The WordPress version to use when building the docker 
+container. Must be a valid tag per https://hub.docker.com/_/wordpress/tags. 
+Defaults to `latest`. Note that only one container at a time is currently 
+supported, so when switching versions you'll need to remove the existing
+dev container before running `docker-compose up -d` again. 
 
 #### Wordpress CLI
 The wordpress installation includes the `wp` command line tool. Note that all

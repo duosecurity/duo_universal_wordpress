@@ -1,4 +1,16 @@
 <?php
+/**
+ * Uninstall the Duo Universal plugin
+ *
+ * Deletes persistent data from the Duo Universal plugin.
+ * Note that transients created by the plugin are not deleted
+ * and left to expire normally.
+ *
+ * @link https://duo.com/docs/wordpress
+ *
+ * @package Duo Universal
+ * @since 1.0.0
+ */
 
 defined( 'ABSPATH' ) || die( 'Direct Access Denied' );
 // if uninstall not called from WordPress exit
