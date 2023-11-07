@@ -25,9 +25,15 @@ Duo's terms of service can be found here https://duo.com/legal/terms
 Integrating Duo MFA with WordPress is a breeze.
 See [our instructions](https://duo.com/docs/wordpress) at duo.com
 
-== Screenshots ==
-1. Duo\'s WordPress plugin adds strong multi-factor authentication to any WordPress login. Your users will log in as usual with their primary credentials (their WordPress username and password). Then they’ll be challenged to complete secondary authentication via one of Duo\'s supported authentication methods such as Verified Duo Push, Duo Push, WebAuthn passkeys, security keys, one-time passcodes, and more.
-2. The Duo Mobile application allows users to use Duo Push to perform secondary authentication using their mobile device.
+== Frequently Asked Questions ==
+How do I get started with Duo?
+Before installing the plugin, you’ll need to sign up for a free account at https://duo.com/.
+
+Is Duo’s two-factor service really free?
+Yes, Duo is free up to 10 users and no credit card is required to get started! Paid plans for more than 10 users start at only $1/user/month.
+
+WordPress integration is great, but what if I want to protect my own web applications with two-factor?
+If you’re interested in protecting other web applications with Duo’s two-factor authentication, check out all our online documentation to see all of our drop-in integrations and to access our APIs and web SDK.
 
 == Changelog ==
 = 1.0.0 =
