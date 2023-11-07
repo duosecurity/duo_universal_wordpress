@@ -1,6 +1,6 @@
 <?php
 /**
- * Duo Universal WordPress
+ * Duo Universal
  *
  * @package    Duo Universal
  * @author     Duo Security
@@ -9,11 +9,17 @@
  * @link https://duo.com/docs/wordpress
  *
  * Plugin Name: Duo Universal
- * Plugin URI: http://wordpress.org/extend/plugins/duo-universal-wordpress/
+ * Plugin URI: http://wordpress.org/extend/plugins/duo-universal/
  * Description: This plugin enables Duo universal authentication for WordPress logins.
  * Version: 1.0.0
+ * Requires at least: 6.0.0
+ * Requires PHP: 7.3.16
  * Author: Duo Security
  * Author URI: http://www.duosecurity.com
+ * License: Apache-2.0
+ * License URI: https://www.apache.org/licenses/LICENSE-2.0
+ * Text Domain: duo-universal
+ * Network: true
  */
 
 defined( 'ABSPATH' ) || die( 'Direct Access Denied' );
