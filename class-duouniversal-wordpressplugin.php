@@ -274,7 +274,7 @@ class DuoUniversal_WordpressPlugin {
 			if ( $this->duo_utils->duo_role_require_mfa( $user ) && ! $this->duo_verify_auth_status( $user->user_login ) ) {
 				\wp_logout();
 				wp_redirect( wp_login_url() );
-				exit();
+				$this->exit();
 			}
 			$this->duo_debug_log( "User $user->user_login allowed" );
 		}
