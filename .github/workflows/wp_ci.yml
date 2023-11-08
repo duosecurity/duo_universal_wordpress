@@ -34,3 +34,9 @@ jobs:
 
       - name: Create duo-univeral
         run: ./package.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: duo-universal
+          path: ./duo-universal.zip
