@@ -26,7 +26,7 @@ class DuoUniversal_Settings {
 		$this->duo_utils->duo_debug_log( 'Displaying duo setting page' );
 		?>
 	<div class="wrap">
-		<h2>Duo Universal Two-Factor Authentication</h2>
+		<h2>Duo Universal Authentication</h2>
 		<?php if ( is_multisite() ) { ?>
 			<form action="ms-options.php" method="post">
 		<?php } else { ?>
@@ -205,7 +205,7 @@ class DuoUniversal_Settings {
 
 	function duo_add_page() {
 		if ( ! is_multisite() ) {
-			add_options_page( 'Duo Universal Two-Factor', 'Duo Universal Two-Factor', 'manage_options', 'duo_universal_wordpress', array( $this, 'duo_settings_page' ) );
+			add_options_page( 'Duo Universal', 'Duo Universal', 'manage_options', 'duo_universal_wordpress', array( $this, 'duo_settings_page' ) );
 		}
 	}
 
