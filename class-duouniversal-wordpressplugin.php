@@ -272,9 +272,9 @@ class DuoUniversal_WordpressPlugin {
 			$user = \wp_get_current_user();
 			$this->duo_debug_log( "Verifying auth state for user: $user->user_login" );
 			if ( $this->duo_utils->duo_role_require_mfa( $user ) && ! $this->duo_verify_auth_status( $user->user_login ) ) {
-				$this->duo_debug_log( "User not authenticated with Duo. Starting second factor for: $user->user_login" );
-				// user is already logged in no need to handle primary auth
-				$this->duo_start_second_factor( $user );
+				\wp_logout();
+				wp_redirect( wp_login_url() );
+				exit();
 			}
 			$this->duo_debug_log( "User $user->user_login allowed" );
 		}
