@@ -32,7 +32,7 @@ jobs:
       - name: PHP tests
         run: ./vendor/bin/phpunit --process-isolation tests
 
-      - name: Create duo-univeral
+      - name: Package duo-universal
         run: ./package.sh
 
       - name: Upload artifact
