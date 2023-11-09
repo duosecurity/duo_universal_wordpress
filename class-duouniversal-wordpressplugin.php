@@ -124,9 +124,6 @@ class DuoUniversal_WordpressPlugin {
 		$redirect_url                   = $this->get_page_url();
 		$this->duo_client->redirect_url = $redirect_url;
 
-		// logging out clears cookies and transients so it should be done _before_ updating
-		// the auth status
-		\wp_logout();
 		$this->update_user_auth_status( $user->user_login, 'in-progress', $redirect_url, $oidc_state );
 
 		$prompt_uri = $this->duo_client->createAuthUrl( $user->user_login, $oidc_state );
@@ -232,6 +229,9 @@ class DuoUniversal_WordpressPlugin {
 
 			$this->update_user_auth_status( $user->user_login, 'in-progress' );
 			try {
+				// logging out clears cookies and transients so it should be done _before_ updating
+				// the auth status
+				\wp_logout();
 				$this->duo_start_second_factor( $user );
 			} catch ( Duo\DuoUniversal\DuoException $e ) {
 				$this->duo_debug_log( $e->getMessage() );
@@ -259,7 +259,6 @@ class DuoUniversal_WordpressPlugin {
 	 */
 	function duo_verify_auth() {
 		if ( ! $this->duo_utils->duo_auth_enabled() ) {
-			// XXX do we still need this skipping logic?
 			if ( \is_multisite() ) {
 				$site_info = \get_current_site();
 				$this->duo_debug_log( 'Duo not enabled on ' . $site_info->site_name );
@@ -273,8 +272,9 @@ class DuoUniversal_WordpressPlugin {
 			$user = \wp_get_current_user();
 			$this->duo_debug_log( "Verifying auth state for user: $user->user_login" );
 			if ( $this->duo_utils->duo_role_require_mfa( $user ) && ! $this->duo_verify_auth_status( $user->user_login ) ) {
-				$this->duo_debug_log( "User not authenticated with Duo. Starting second factor for: $user->user_login" );
-				$this->duo_start_second_factor( $user );
+				\wp_logout();
+				wp_redirect( wp_login_url() );
+				$this->exit();
 			}
 			$this->duo_debug_log( "User $user->user_login allowed" );
 		}
