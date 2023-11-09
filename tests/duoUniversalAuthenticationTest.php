@@ -96,7 +96,6 @@ final class authenticationTest extends WPTestCase
         $authentication->method('get_page_url')->willReturn('fake url');
         WP_Mock::passthruFunction('wp_redirect');
         WP_Mock::passthruFunction('set_transient');
-        WP_Mock::userFunction('wp_logout')->once();
 
         $authentication->duo_start_second_factor($user);
 
@@ -121,9 +120,6 @@ final class authenticationTest extends WPTestCase
             $transients[$name] = $value;
             return;
         }]);
-        WP_Mock::userFunction('wp_logout', [ 'return' => function() use (&$transients){
-            $transients = [];
-        }])->once();
 
         $authentication->duo_start_second_factor($user);
 
@@ -145,7 +141,6 @@ final class authenticationTest extends WPTestCase
             ->onlyMethods(['get_page_url', 'exit'])
             ->getMock();
         WP_Mock::passthruFunction('set_transient');
-        WP_Mock::userFunction('wp_logout')->once();
 
         $authentication->duo_start_second_factor($user);
         $this->assertConditionsMet();
@@ -169,7 +164,6 @@ final class authenticationTest extends WPTestCase
         $authentication->method('get_page_url')->willReturn("test url");
         WP_Mock::passthruFunction('wp_redirect');
         WP_Mock::userFunction('set_transient', ['return' => $callback]);
-        WP_Mock::userFunction('wp_logout')->once();
         $this->duo_client->method('generateState')->willReturn("test state");
 
         $authentication->duo_start_second_factor($user);
@@ -191,7 +185,6 @@ final class authenticationTest extends WPTestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(['get_page_url', 'exit'])
             ->getMock();
-        WP_Mock::userFunction('wp_logout')->once();
         WP_Mock::passthruFunction('set_transient');
         WP_Mock::passthruFunction('wp_redirect');
 
@@ -213,7 +206,6 @@ final class authenticationTest extends WPTestCase
         $authentication->expects($this->once())->method('exit');
         WP_Mock::passthruFunction('set_transient');
         WP_Mock::passthruFunction('wp_redirect');
-        WP_Mock::userFunction('wp_logout')->once();
 
         $authentication->duo_start_second_factor($user);
     }
@@ -572,6 +564,7 @@ final class authenticationTest extends WPTestCase
             $map[$key] = $value;
         };
         WP_Mock::userFunction('set_transient', ['return' => $callback]);
+        WP_Mock::userFunction('wp_logout')->once();
         $authentication = $this->getMockBuilder(DuoUniversal_WordpressPlugin::class)
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
@@ -626,6 +619,7 @@ final class authenticationTest extends WPTestCase
         $this->duo_utils->method('new_WP_user')->willReturn($user);
         WP_Mock::userFunction('wp_authenticate_username_password', [ 'return' => $user ]);
         WP_Mock::passthruFunction('remove_action');
+        WP_Mock::userFunction('wp_logout')->once();
         $this->duo_utils->method('duo_get_option')->willReturn('open');
 
         $result = $authentication->duo_authenticate_user(null, "test user");
@@ -672,6 +666,7 @@ final class authenticationTest extends WPTestCase
         WP_Mock::passthruFunction('__');
         WP_Mock::passthruFunction('remove_action');
         WP_Mock::userFunction('wp_authenticate_username_password', [ 'return' => $user ]);
+        WP_Mock::userFunction('wp_logout')->once();
         $this->duo_utils->method('duo_get_option')->willReturn('closed');
 
         $result = $authentication->duo_authenticate_user(null, "test user");
@@ -824,19 +819,22 @@ final class authenticationTest extends WPTestCase
             ->setConstructorArgs(array($this->duo_utils, $this->duo_client))
             ->onlyMethods(
                 [
-                'duo_debug_log', 'duo_verify_auth_status', 'duo_start_second_factor',
+                'duo_debug_log', 'duo_verify_auth_status', 'duo_start_second_factor', 'exit'
                 ]
             )
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
         WP_Mock::userFunction('is_user_logged_in', [ 'return' => true ]);
         WP_Mock::userFunction('wp_get_current_user', [ 'return' => $user ]);
+        WP_Mock::userFunction('wp_logout')->once();
+        WP_Mock::userFunction('wp_redirect')->once();
+        WP_Mock::userFunction('wp_login_url')->once();
         $this->duo_utils->method('duo_role_require_mfa')->willReturn(true);
         $authentication->method('duo_verify_auth_status')->willReturn(false);
-        $authentication->expects($this->once())->method('duo_start_second_factor');
+        $authentication->expects($this->once())->method('exit');
 
         $result = $authentication->duo_verify_auth();
 
-        $this->assertEquals($result, null);
+        $this->assertConditionsMet();
     }
 }
