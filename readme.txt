@@ -2,6 +2,7 @@
 Contributors: duosecurity
 Tags: authentication, muti-factor, two-factor, authenticator, login, username, password, duo, security
 Requires at least: 6.0.0
+Stable tag: 1.0.0
 Tested up to: 6.4.3
 Requires PHP: 7.3.16
 License: Apache-2.0
