@@ -145,14 +145,9 @@ class DuoUniversal_WordpressPlugin {
 		if ( isset( $_GET['duo_code'] ) ) {
 			// doing secondary auth.
 			if ( isset( $_GET['error'] ) ) {
-				$error_msg = \sanitize_text_field( wp_unslash( $_GET['error'] ) );
-				if ( isset( $_GET['error_description'] ) ) {
-					$error_msg .= ': ' . \sanitize_text_field( wp_unslash( $_GET['error_description'] ) );
-				}
 				$error = $this->duo_utils->new_WP_Error(
 					'Duo authentication failed',
-                    // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
-					\__( 'ERROR: ' . $error_msg )
+					\__( 'ERROR: Error during login, please try again later.')
 				);
 				$this->duo_debug_log( $error->get_error_message() );
 				return $error;
