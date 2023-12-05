@@ -12,7 +12,10 @@
  * @since 1.0.0
  */
 
-defined( 'ABSPATH' ) || die( 'Direct Access Denied' );
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 // if uninstall not called from WordPress exit
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit();
