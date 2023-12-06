@@ -277,7 +277,7 @@ final class authenticationTest extends WPTestCase
             ->addMethods(["get_error_message"])
             ->getMock();
         $this->duo_utils->method('duo_auth_enabled')->willReturn(true);
-        $this->duo_utils->method('new_WP_Error')->willReturn($error)->with("Duo authentication failed", "ERROR: Error during login, please contact your system administrator.");
+        $this->duo_utils->method('new_WP_Error')->willReturn($error)->with("Duo authentication failed", "ERROR: Error during login; please contact your system administrator.");
         $authentication->expects($this->once())->method('duo_debug_log')->with($this->equalTo("test error: test description"));
         WP_Mock::passthruFunction('__');
         WP_Mock::passthruFunction('wp_unslash');
