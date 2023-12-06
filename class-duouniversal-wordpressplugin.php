@@ -147,9 +147,14 @@ class DuoUniversal_WordpressPlugin {
 			if ( isset( $_GET['error'] ) ) {
 				$error = $this->duo_utils->new_WP_Error(
 					'Duo authentication failed',
-					\__( 'ERROR: Error during login, please try again later.')
+					\__( 'ERROR: Error during login, please contact your system administrator.')
 				);
-				$this->duo_debug_log( $error->get_error_message() );
+
+				$error_msg = \sanitize_text_field( wp_unslash( $_GET['error'] ) );
+				if ( isset( $_GET['error_description'] ) ) {
+					$error_msg .= ': ' . \sanitize_text_field( wp_unslash( $_GET['error_description'] ) );
+				}
+				$this->duo_debug_log( $error_msg );
 				return $error;
 			}
 
