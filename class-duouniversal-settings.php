@@ -270,6 +270,8 @@ class DuoUniversal_Settings {
 	}
 
 	function duo_update_mu_options() {
+		check_admin_referer( 'siteoptions' );
+
 		if ( isset( $_POST['duoup_client_id'] ) ) {
 			$client_id = $this->duoup_client_id_validate( sanitize_text_field( \wp_unslash( $_POST['duoup_client_id'] ) ) );
 			$result    = \update_site_option( 'duoup_client_id', $client_id );

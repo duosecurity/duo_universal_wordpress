@@ -578,6 +578,7 @@ final class SettingsTest extends WPTestCase
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_failmode', 'closed');
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_roles', $duoup_roles);
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_xmlrpc', 'off');
+        WP_Mock::passthruFunction('check_admin_referer');
         WP_Mock::passthruFunction('wp_unslash');
 
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
@@ -594,6 +595,7 @@ final class SettingsTest extends WPTestCase
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_failmode', 'open');
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_roles', []);
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_xmlrpc', 'on');
+        WP_Mock::passthruFunction('check_admin_referer');
 
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $settings->duo_update_mu_options();
