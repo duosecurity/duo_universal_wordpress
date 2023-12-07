@@ -113,8 +113,8 @@ class DuoUniversal_Utilities {
 	}
 
 	function duo_debug_log( $message ) {
-		global $duo_debug;
-		if ( $duo_debug ) {
+		global $duoup_debug;
+		if ( $duoup_debug ) {
 			error_log( 'Duo debug: ' . $message );
 		}
 	}

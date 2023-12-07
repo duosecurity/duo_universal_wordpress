@@ -36,7 +36,7 @@ require_once 'class-duouniversal-wordpressplugin.php';
 use Duo\DuoUniversal\Client;
 use Duo\DuoUniversalWordpress;
 
-$GLOBALS['duo_debug'] = true;
+$GLOBALS['duoup_debug'] = false;
 
 $utils = new Duo\DuoUniversalWordpress\DuoUniversal_Utilities();
 
@@ -61,7 +61,7 @@ $duoup_plugin = new DuoUniversal_WordpressPlugin(
 	$duo_client
 );
 
-$settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings(
+$settings = new DuoUniversal_Settings(
 	$utils
 );
 
