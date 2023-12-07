@@ -13,6 +13,10 @@
 
 namespace Duo\DuoUniversalWordpress;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 require_once 'class-duouniversal-utilities.php';
 const SECRET_PLACEHOLDER = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 

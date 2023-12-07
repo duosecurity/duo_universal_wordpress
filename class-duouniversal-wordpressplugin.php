@@ -11,6 +11,10 @@
  * @since 1.0.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 require_once 'class-duouniversal-settings.php';
 require_once 'class-duouniversal-utilities.php';
 require_once 'vendor/autoload.php';

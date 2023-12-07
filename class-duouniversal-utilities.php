@@ -13,6 +13,10 @@
 
 namespace Duo\DuoUniversalWordpress;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 class DuoUniversal_Utilities {
 
 	function xmlrpc_enabled() {
