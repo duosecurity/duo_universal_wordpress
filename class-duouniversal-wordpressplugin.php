@@ -10,6 +10,7 @@
  * @package Duo Universal
  * @since 1.0.0
  */
+namespace Duo\DuoUniversalWordpress;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
