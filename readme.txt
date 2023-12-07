@@ -6,6 +6,7 @@ Stable tag: 1.0.0
 Tested up to: 6.4.3
 Requires PHP: 7.3.16
 License: Apache-2.0
+License URI: https://www.apache.org/licenses/LICENSE-2.0
 
 Easily add Duo authentication to your WordPress website. Enable multi-factor authentication for your admins and/or users.
 
