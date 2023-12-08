@@ -26,8 +26,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-defined( 'ABSPATH' ) || die( 'Direct Access Denied' );
-
 require_once 'class-duouniversal-settings.php';
 require_once 'class-duouniversal-utilities.php';
 require_once 'vendor/autoload.php';
@@ -56,12 +54,12 @@ if ( $utils->duo_auth_enabled() ) {
 	$duo_client = null;
 }
 
-$duoup_plugin = new DuoUniversal_WordpressPlugin(
+$duoup_plugin = new Duo\DuoUniversalWordpress\DuoUniversal_WordpressPlugin(
 	$utils,
 	$duo_client
 );
 
-$settings = new DuoUniversal_Settings(
+$settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings(
 	$utils
 );
 
