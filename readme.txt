@@ -21,6 +21,9 @@ Duo is easy to set up and use. With Duo there’s no extra hardware or complicat
 This plugin reaches out to Duo's MFA cloud service for the configured user roles which provides an additional layer of authentication.
 For more information about Duo's privacy policy see https://duo.com/legal/cisco-online-privacy-statement
 Duo's terms of service can be found here https://duo.com/legal/terms
+Terms of support using Duo's cloud service are provided here https://duo.com/support
+
+Support for Duo users without a subscription is provided on a best-effort basis via email.
 
 
 == Installation ==
