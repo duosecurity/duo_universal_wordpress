@@ -56,12 +56,12 @@ if ( $utils->duo_auth_enabled() ) {
 	$duo_client = null;
 }
 
-$duoup_plugin = new DuoUniversal_WordpressPlugin(
+$duoup_plugin = new Duo\DuoUniversalWordpress\DuoUniversal_WordpressPlugin(
 	$utils,
 	$duo_client
 );
 
-$settings = new DuoUniversal_Settings(
+$settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings(
 	$utils
 );
 
