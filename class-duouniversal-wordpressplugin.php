@@ -10,6 +10,7 @@
  * @package Duo Universal
  * @since 1.0.0
  */
+namespace Duo\DuoUniversalWordpress;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
@@ -20,8 +21,6 @@ require_once 'class-duouniversal-utilities.php';
 require_once 'vendor/autoload.php';
 
 use Duo\DuoUniversal\Client;
-use Duo\DuoUniversalWordpress;
-
 
 // expire in 48hrs.
 const DUO_TRANSIENT_EXPIRATION = 48 * 60 * 60;
@@ -81,7 +80,7 @@ class DuoUniversal_WordpressPlugin {
 			\delete_transient( 'duo_auth_' . $username . '_oidc_state' );
 			\delete_transient( "duo_auth_state_$oidc_state" );
 			\delete_transient( 'duo_auth_' . $username . '_redirect_url' );
-		} catch ( Exception $e ) {
+		} catch ( \Exception $e ) {
 			// there's not much we can do but we shouldn't fail the logout because of this.
 			$this->duo_debug_log( $e->getMessage() );
 		}
@@ -151,7 +150,7 @@ class DuoUniversal_WordpressPlugin {
 			if ( isset( $_GET['error'] ) ) {
 				$error = $this->duo_utils->new_WP_Error(
 					'Duo authentication failed',
-					\__( 'ERROR: Error during login; please contact your system administrator.')
+					\__( 'ERROR: Error during login; please contact your system administrator.' )
 				);
 
 				$error_msg = \sanitize_text_field( wp_unslash( $_GET['error'] ) );
@@ -193,7 +192,7 @@ class DuoUniversal_WordpressPlugin {
 				// Update redirect URL to be one associated with initial authentication.
 				$this->duo_client->redirect_url = $this->get_redirect_url( $associated_user );
 				$decoded_token                  = $this->duo_client->exchangeAuthorizationCodeFor2FAResult( $code, $associated_user );
-			} catch ( Duo\DuoUniversal\DuoException $e ) {
+			} catch ( \Duo\DuoUniversal\DuoException $e ) {
 				$this->duo_debug_log( $e->getMessage() );
 				$error = $this->duo_utils->new_WP_Error(
 					'Duo authentication failed',
@@ -237,7 +236,7 @@ class DuoUniversal_WordpressPlugin {
 				// the auth status
 				\wp_logout();
 				$this->duo_start_second_factor( $user );
-			} catch ( Duo\DuoUniversal\DuoException $e ) {
+			} catch ( \Duo\DuoUniversal\DuoException $e ) {
 				$this->duo_debug_log( $e->getMessage() );
 				if ( $this->duo_utils->duo_get_option( 'duoup_failmode' ) === 'open' ) {
 					// If we're failing open, errors in 2FA still allow for success.
