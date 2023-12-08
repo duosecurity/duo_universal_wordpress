@@ -164,7 +164,7 @@ class DuoUniversal_WordpressPlugin {
 			if ( ! isset( $_GET['state'] ) ) {
 				$error = $this->duo_utils->new_WP_Error(
 					'Duo authentication failed',
-					\__( 'ERROR: Missing state' )
+					\__( 'ERROR: Missing state please login again' )
 				);
 				$this->duo_debug_log( $error->get_error_message() );
 				return $error;
