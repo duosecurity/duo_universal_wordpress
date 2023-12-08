@@ -26,8 +26,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-defined( 'ABSPATH' ) || die( 'Direct Access Denied' );
-
 require_once 'class-duouniversal-settings.php';
 require_once 'class-duouniversal-utilities.php';
 require_once 'vendor/autoload.php';
