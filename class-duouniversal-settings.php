@@ -178,6 +178,7 @@ class DuoUniversal_Settings {
 	}
 
 	function duo_settings_text() {
+		echo '<p>To use this plugin you must have an account with Duo Security.</p>';
 		echo "<p>See the <a target='_blank' href='https://www.duosecurity.com/docs/wordpress'>Duo for WordPress guide</a> to enable Duo two-factor authentication for your WordPress logins.</p>";
 		echo '<p>You can retrieve your Client ID, Client Secret, and API hostname by logging in to the Duo Admin Panel.</p>';
 		echo '<p>Note: After enabling the plugin, you will be immediately prompted for second factor authentication.</p>';
