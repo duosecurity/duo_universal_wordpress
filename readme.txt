@@ -37,9 +37,6 @@ Before installing the plugin, you’ll need to sign up for a free account at htt
 Is Duo’s two-factor service really free?
 Yes, Duo is free up to 10 users and no credit card is required to get started! Paid plans for more than 10 users start at only $1/user/month.
 
-WordPress integration is great, but what if I want to protect my own web applications with two-factor?
-If you’re interested in protecting other web applications with Duo’s two-factor authentication, check out all our online documentation to see all of our drop-in integrations and to access our APIs and web SDK.
-
 == Changelog ==
 = 1.0.0 =
 * Initial Release
