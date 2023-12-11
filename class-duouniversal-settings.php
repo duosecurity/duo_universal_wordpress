@@ -223,6 +223,11 @@ class DuoUniversal_Settings {
 		}
 	}
 
+	function duoup_add_settings_field( $id, $title, $callback, $sanitize_callback ) {
+	    \add_settings_field( $id, $title, $callback, 'duo_universal_settings', 'duo_universal_settings', array( 'label_for' => $id ) );
+	    \register_setting( 'duo_universal_settings', $id, $sanitize_callback );
+	}
+
 
 	function duo_admin_init() {
 		if ( is_multisite() ) {
@@ -240,20 +245,13 @@ class DuoUniversal_Settings {
 			$this->duo_add_site_option( 'duoup_roles', $allroles );
 			$this->duo_add_site_option( 'duoup_xmlrpc', 'off' );
 		} else {
-			\add_settings_section( 'duo_universal_settings', 'Main Settings', array( $this, 'duo_settings_text' ), 'duo_universal_settings' );
-			\add_settings_field( 'duoup_client_id', 'Client ID', array( $this, 'duo_settings_client_id' ), 'duo_universal_settings', 'duo_universal_settings' );
-			\add_settings_field( 'duoup_client_secret', 'Client Secret', array( $this, 'duo_settings_client_secret' ), 'duo_universal_settings', 'duo_universal_settings' );
-			\add_settings_field( 'duoup_api_host', 'API hostname', array( $this, 'duo_settings_host' ), 'duo_universal_settings', 'duo_universal_settings' );
-			\add_settings_field( 'duoup_failmode', 'Failmode', array( $this, 'duo_settings_failmode' ), 'duo_universal_settings', 'duo_universal_settings' );
-			\add_settings_field( 'duoup_roles', 'Enable for roles:', array( $this, 'duo_settings_roles' ), 'duo_universal_settings', 'duo_universal_settings' );
-			\add_settings_field( 'duoup_xmlrpc', 'Disable XML-RPC (recommended)', array( $this, 'duo_settings_xmlrpc' ), 'duo_universal_settings', 'duo_universal_settings' );
-
-			\register_setting( 'duo_universal_settings', 'duoup_client_id', array( $this, 'duoup_client_id_validate' ) );
-			\register_setting( 'duo_universal_settings', 'duoup_client_secret', array( $this, 'duoup_client_secret_validate' ) );
-			\register_setting( 'duo_universal_settings', 'duoup_api_host', array( $this, 'duoup_api_host_validate' ) );
-			\register_setting( 'duo_universal_settings', 'duoup_failmode', array( $this, 'duoup_failmode_validate' ) );
-			\register_setting( 'duo_universal_settings', 'duoup_roles', array( $this, 'duoup_roles_validate' ) );
-			\register_setting( 'duo_universal_settings', 'duoup_xmlrpc', array( $this, 'duoup_xmlrpc_validate' ) );
+			\add_settings_section( 'duo_universal_settings', 'Main Settings', array( $this, 'duo_settings_text' ), 'duo_universal_settings');
+			$this->duoup_add_settings_field( 'duoup_client_id', 'Client ID', array( $this, 'duo_settings_client_id' ), array( $this, 'duoup_client_id_validate' ) );
+			$this->duoup_add_settings_field( 'duoup_client_secret', 'Client Secret', array( $this, 'duo_settings_client_secret' ), array( $this, 'duoup_client_secret_validate' ) );
+			$this->duoup_add_settings_field( 'duoup_api_host', 'API hostname', array( $this, 'duo_settings_host' ), array( $this, 'duoup_api_host_validate' ) );
+			$this->duoup_add_settings_field( 'duoup_failmode', 'Failmode', array( $this, 'duo_settings_failmode' ), array( $this, 'duoup_failmode_validate' ) );
+			$this->duoup_add_settings_field( 'duoup_roles', 'Enable for roles:', array( $this, 'duo_settings_roles' ), array( $this, 'duoup_roles_validate' ) );
+			$this->duoup_add_settings_field( 'duoup_xmlrpc', 'Disable XML-RPC (recommended)', array( $this, 'duo_settings_xmlrpc' ), array( $this, 'duoup_xmlrpc_validate' ) );
 		}
 	}
 
@@ -264,12 +262,12 @@ class DuoUniversal_Settings {
 		<h3>Duo Security</h3>
 		<table class="form-table">
 			<?php $this->duo_settings_text(); ?></td></tr>
-			<tr><th>Client ID</th><td><?php $this->duo_settings_client_id(); ?></td></tr>
-			<tr><th>Client Secret</th><td><?php $this->duo_settings_client_secret(); ?></td></tr>
-			<tr><th>API hostname</th><td><?php $this->duo_settings_host(); ?></td></tr>
-			<tr><th>Failmode</th><td><?php $this->duo_settings_failmode(); ?></td></tr>
-			<tr><th>Roles</th><td><?php $this->duo_settings_roles(); ?></td></tr>
-			<tr><th>Disable XML-RPC</th><td><?php $this->duo_settings_xmlrpc(); ?></td></tr>
+			<tr><th><label for="duoup_client_id">Client ID</label></th><td><?php $this->duo_settings_client_id(); ?></td></tr>
+			<tr><th><label for="duoup_client_secret">Client Secret</label></th><td><?php $this->duo_settings_client_secret(); ?></td></tr>
+			<tr><th><label for="duoup_api_host">API hostname</label></th><td><?php $this->duo_settings_host(); ?></td></tr>
+			<tr><th><label for="duoup_failmode">Failmode</label></th><td><?php $this->duo_settings_failmode(); ?></td></tr>
+			<tr><th><label for="duoup_roles">Roles</label></th><td><?php $this->duo_settings_roles(); ?></td></tr>
+			<tr><th><label for="duoup_xmlrpc">Disable XML-RPC</label></th><td><?php $this->duo_settings_xmlrpc(); ?></td></tr>
 		</table>
 		<?php
 	}
