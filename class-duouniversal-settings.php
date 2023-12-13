@@ -21,6 +21,8 @@ require_once 'class-duouniversal-utilities.php';
 const SECRET_PLACEHOLDER = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
 class DuoUniversal_Settings {
+	public $duo_utils;
+
 	public function __construct(
 		$duo_utils
 	) {

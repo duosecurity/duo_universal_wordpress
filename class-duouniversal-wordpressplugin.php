@@ -26,6 +26,8 @@ use Duo\DuoUniversal\Client;
 const DUO_TRANSIENT_EXPIRATION = 48 * 60 * 60;
 
 class DuoUniversal_WordpressPlugin {
+	private $duo_client;
+	public $duo_utils;
 
 	public function __construct(
 		$duo_utils,
