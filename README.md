@@ -14,6 +14,7 @@ This plugin reaches out to Duo's MFA cloud service for the configured user roles
 For more information about Duo's privacy policy see https://duo.com/legal/cisco-online-privacy-statement
 Duo's terms of service can be found here https://duo.com/legal/terms
 
+Login sessions are affected by this plugin. If the Duo session expires before the WordPress session, you will be logged out of WordPress.
 # Usage
 
 Documentation: <http://www.duosecurity.com/docs/universal_wordpress>
