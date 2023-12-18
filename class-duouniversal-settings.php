@@ -50,7 +50,7 @@ class DuoUniversal_Settings {
 
 	function duo_settings_client_id() {
 		$client_id = \esc_attr( $this->duo_utils->duo_get_option( 'duoup_client_id' ) );
-		echo "<input id='duoup_client_id' name='duoup_client_id' size='40' type='text' value='" . \esc_attr( $client_id ) . "' />";
+		return "<input id='duoup_client_id' name='duoup_client_id' size='40' type='text' value='" . \esc_attr( $client_id ) . "' />";
 	}
 
 	function duoup_client_id_validate( $client_id ) {
@@ -74,7 +74,7 @@ class DuoUniversal_Settings {
 		} else {
 			$value = '';
 		}
-		echo "<input id='duoup_client_secret' name='duoup_client_secret' size='40' type='password' value='" . \esc_attr( $value ) . "' autocomplete='off' />";
+		return "<input id='duoup_client_secret' name='duoup_client_secret' size='40' type='password' value='" . \esc_attr( $value ) . "' autocomplete='off' />";
 	}
 
 	function duoup_client_secret_validate( $client_secret ) {
@@ -96,7 +96,7 @@ class DuoUniversal_Settings {
 
 	function duo_settings_host() {
 		$host = \esc_attr( $this->duo_utils->duo_get_option( 'duoup_api_host' ) );
-		echo "<input id='duoup_api_host' name='duoup_api_host' size='40' type='text' value='" . \esc_attr( $host ) . "' />";
+		return "<input id='duoup_api_host' name='duoup_api_host' size='40' type='text' value='" . \esc_attr( $host ) . "' />";
 	}
 
 	function duoup_api_host_validate( $host ) {
@@ -115,15 +115,17 @@ class DuoUniversal_Settings {
 
 	function duo_settings_failmode() {
 		$failmode = \esc_attr( $this->duo_utils->duo_get_option( 'duoup_failmode', 'open' ) );
-		echo '<select id="duoup_failmode" name="duoup_failmode" />';
+		$result   = '';
+		$result  .= '<select id="duoup_failmode" name="duoup_failmode" />';
 		if ( 'open' === $failmode ) {
-			printf( '<option value="open" selected>%s</option>', __( 'Open', 'duo-universal' ) );
-			printf( '<option value="closed">%s</option>', __( 'Closed', 'duo-universal' ) );
+			$result .= sprintf( '<option value="open" selected>%s</option>', __( 'Open', 'duo-universal' ) );
+			$result .= sprintf( '<option value="closed">%s</option>', __( 'Closed', 'duo-universal' ) );
 		} else {
-			printf( '<option value="open">%s</option>', __( 'Open', 'duo-universal' ) );
-			printf( '<option value="closed" selected>%s</option>', __( 'Closed', 'duo-universal' ) );
+			$result .= sprintf( '<option value="open">%s</option>', __( 'Open', 'duo-universal' ) );
+			$result .= sprintf( '<option value="closed" selected>%s</option>', __( 'Closed', 'duo-universal' ) );
 		}
-		echo '</select>';
+		$result .= '</select>';
+		return $result;
 	}
 
 	function duoup_failmode_validate( $failmode ) {
@@ -146,18 +148,26 @@ class DuoUniversal_Settings {
 
 		$selected = $this->duo_utils->duo_get_option( 'duoup_roles', $newroles );
 
+		$result = '';
 		foreach ( $wp_roles->get_names() as $key => $role ) {
 			// create checkbox for each role
-			echo ( '' .
-			"<input id='duoup_roles' " .
-				"name='duoup_roles[" . \esc_attr( $key ) . "]' " .
+			$result .= sprintf(
+				( '' .
+				"<input id='duoup_roles' " .
+				"name='duoup_roles[%s]' " .
 				"type='checkbox' " .
-				"value='" . \esc_attr( $role ) . "' " .
-				( in_array( $role, $selected, true ) ? 'checked' : '' ) .
-			'/>' .
-			\esc_html( $role ) .
-			'<br />' );
+				"value='%s' " .
+				'%s' .
+				'/>' .
+				'%s' .
+				'<br />' ),
+				\esc_attr( $key ),
+				\esc_attr( $role ),
+				in_array( $role, $selected, true ) ? 'checked' : '',
+				\esc_html( $role )
+			);
 		}
+		return $result;
 	}
 
 	function duoup_roles_validate( $options ) {
@@ -192,8 +202,9 @@ class DuoUniversal_Settings {
 		if ( $this->duo_utils->duo_get_option( 'duoup_xmlrpc', 'off' ) === 'off' ) {
 			$val = 'checked';
 		}
-		echo "<input id='duoup_xmlrpc' name='duoup_xmlrpc' type='checkbox' value='off' " . \esc_attr( $val ) . ' /> Yes<br />';
-		\_e( 'Using XML-RPC bypasses two-factor authentication and makes your website less secure. We recommend only using the WordPress web interface for managing your WordPress website.', 'duo-universal' );
+		$result  = sprintf( "<input id='duoup_xmlrpc' name='duoup_xmlrpc' type='checkbox' value='off' %s /> %s<br />", \esc_attr( $val ), __( 'Yes', 'duo-universal' ) );
+		$result .= __( 'Using XML-RPC bypasses two-factor authentication and makes your website less secure. We recommend only using the WordPress web interface for managing your WordPress website.', 'duo-universal' );
+		return $result;
 	}
 
 	function duoup_xmlrpc_validate( $option ) {
@@ -232,11 +243,25 @@ class DuoUniversal_Settings {
 		}
 	}
 
-	function duoup_add_settings_field( $id, $title, $callback, $sanitize_callback ) {
-		\add_settings_field( $id, $title, $callback, 'duo_universal_settings', 'duo_universal_settings', array( 'label_for' => $id ) );
+	function duoup_add_settings_field( $id, $title, $callback, $sanitize_callback, $arg ) {
+		\add_settings_field(
+			$id,
+			$title,
+			$callback,
+			'duo_universal_settings',
+			'duo_universal_settings',
+			array(
+				'text'      => $arg,
+				'label_for' => $id,
+			)
+		);
 		\register_setting( 'duo_universal_settings', $id, $sanitize_callback );
 	}
 
+	function printing_callback( $text ) {
+		// I wish we didn't need this but 'echo' is not a valid callback.
+		echo $text['text'];
+	}
 
 	function duo_admin_init() {
 		if ( is_multisite() ) {
@@ -255,28 +280,31 @@ class DuoUniversal_Settings {
 			$this->duo_add_site_option( 'duoup_xmlrpc', 'off' );
 		} else {
 			\add_settings_section( 'duo_universal_settings', __( 'Main Settings', 'duo-universal' ), array( $this, 'duo_settings_text' ), 'duo_universal_settings' );
-			$this->duoup_add_settings_field( 'duoup_client_id', __( 'Client ID', 'duo-universal' ), array( $this, 'duo_settings_client_id' ), array( $this, 'duoup_client_id_validate' ) );
-			$this->duoup_add_settings_field( 'duoup_client_secret', __( 'Client Secret', 'duo-universal' ), array( $this, 'duo_settings_client_secret' ), array( $this, 'duoup_client_secret_validate' ) );
-			$this->duoup_add_settings_field( 'duoup_api_host', __( 'API hostname', 'duo-universal' ), array( $this, 'duo_settings_host' ), array( $this, 'duoup_api_host_validate' ) );
-			$this->duoup_add_settings_field( 'duoup_failmode', __( 'Failmode', 'duo-universal' ), array( $this, 'duo_settings_failmode' ), array( $this, 'duoup_failmode_validate' ) );
-			$this->duoup_add_settings_field( 'duoup_roles', __( 'Enable for roles:', 'duo-universal' ), array( $this, 'duo_settings_roles' ), array( $this, 'duoup_roles_validate' ) );
-			$this->duoup_add_settings_field( 'duoup_xmlrpc', __( 'Disable XML-RPC (recommended)', 'duo-universal' ), array( $this, 'duo_settings_xmlrpc' ), array( $this, 'duoup_xmlrpc_validate' ) );
+			$this->duoup_add_settings_field( 'duoup_client_id', __( 'Client ID', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_client_id_validate' ), $this->duo_settings_client_id() );
+			$this->duoup_add_settings_field( 'duoup_client_secret', __( 'Client Secret', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_client_secret_validate' ), $this->duo_settings_client_secret() );
+			$this->duoup_add_settings_field( 'duoup_api_host', __( 'API hostname', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_api_host_validate' ), $this->duo_settings_host() );
+			$this->duoup_add_settings_field( 'duoup_failmode', __( 'Failmode', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_failmode_validate' ), $this->duo_settings_failmode() );
+			$this->duoup_add_settings_field( 'duoup_roles', __( 'Enable for roles:', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_roles_validate' ), $this->duo_settings_roles() );
+			$this->duoup_add_settings_field( 'duoup_xmlrpc', __( 'Disable XML-RPC (recommended)', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_xmlrpc_validate' ), $this->duo_settings_xmlrpc() );
 		}
+	}
+
+	function print_field( $id, $label, $input ) {
+		printf( "<tr><th><label for='$id'>%s</label></th><td>%s</td></tr>\n", $label, $input );
 	}
 
 	function duo_mu_options() {
 		$this->duo_utils->duo_debug_log( 'Displaying multisite settings' );
 
-		printf( "<tr><th><label for='duoup_client_id'>%s</label></th><td>%s</td></tr>\n", \__( 'Client ID', 'duo-universal' ), $this->duo_settings_client_id() );
 		printf( "<h3>%s</h3>\n", \__( 'Duo Security', 'duo-universal' ) );
 		echo( "<table class='form-table'>\n" );
 			printf( "%s</td></tr>\n", $this->duo_settings_text() );
-			printf( "<tr><th><label for='duoup_client_id'>%s</label></th><td>%s</td></tr>\n", \__( 'Client ID', 'duo-universal' ), $this->duo_settings_client_id() );
-			printf( "<tr><th><label for='duoup_client_secret'>%s</label></th><td>%s</td></tr\n>", \__( 'Client Secret', 'duo-universal' ), $this->duo_settings_client_secret() );
-			printf( "<tr><th><label for='duoup_api_host'>%s</label></th><td>%s</td></tr>\n", \__( 'API hostname', 'duo-universal' ), $this->duo_settings_host() );
-			printf( "<tr><th><label for='duoup_failmode'>%s</label></th><td></td></tr>\n", \__( 'Failmode', 'duo-universal' ), $this->duo_settings_failmode() );
-			printf( "<tr><th><label for='duoup_roles'>%s</label></th><td>%s</td></tr>\n", \__( 'Roles', 'duo-universal' ), $this->duo_settings_roles() );
-			printf( "<tr><th><label for='duoup_xmlrpc'>%s</label></th><td>%s</td></tr>\n", \__( 'Disable XML-RPC (recommended)', 'duo-universal' ), $this->duo_settings_xmlrpc() );
+			$this->print_field( 'duoup_client_id', \__( 'Client ID', 'duo-universal' ), $this->duo_settings_client_id() );
+			$this->print_field( 'duoup_client_secret', \__( 'Client Secret', 'duo-universal' ), $this->duo_settings_client_secret() );
+			$this->print_field( 'duoup_api_host', \__( 'API hostname', 'duo-universal' ), $this->duo_settings_host() );
+			$this->print_field( 'duoup_failmode', \__( 'Failmode', 'duo-universal' ), $this->duo_settings_failmode() );
+			$this->print_field( 'duoup_roles', \__( 'Roles', 'duo-universal' ), $this->duo_settings_roles() );
+			$this->print_field( 'duoup_xmlrpc', \__( 'Disable XML-RPC (recommended)', 'duo-universal' ), $this->duo_settings_xmlrpc() );
 		echo( "</table>\n" );
 	}
 
