@@ -243,7 +243,7 @@ class DuoUniversal_Settings {
 		}
 	}
 
-	function duoup_add_settings_field( $id, $title, $callback, $sanitize_callback, $arg ) {
+	function duoup_add_settings_field( $id, $title, $callback, $sanitize_callback, $text ) {
 		\add_settings_field(
 			$id,
 			$title,
@@ -251,7 +251,7 @@ class DuoUniversal_Settings {
 			'duo_universal_settings',
 			'duo_universal_settings',
 			array(
-				'text'      => $arg,
+				'text'      => $text,
 				'label_for' => $id,
 			)
 		);
