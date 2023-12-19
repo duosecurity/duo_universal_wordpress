@@ -14,7 +14,7 @@
 namespace Duo\DuoUniversalWordpress;
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 class DuoUniversal_Utilities {
@@ -33,7 +33,7 @@ class DuoUniversal_Utilities {
 	function duo_auth_enabled() {
 		if ( $this->xmlrpc_enabled() ) {
 			$this->duo_debug_log( 'Found an XMLRPC request. XMLRPC is allowed for this site. Skipping second factor' );
-			return false; // allows the XML-RPC protocol for remote publishing
+			return false; // allows the XML-RPC protocol for remote publishing.
 		}
 
 		if ( $this->duo_get_option( 'duoup_client_id', '' ) === '' || $this->duo_get_option( 'duoup_client_secret', '' ) === ''

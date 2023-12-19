@@ -14,7 +14,7 @@
 namespace Duo\DuoUniversalWordpress;
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 require_once 'class-duouniversal-utilities.php';
@@ -147,7 +147,7 @@ class DuoUniversal_Settings {
 		$selected = $this->duo_utils->duo_get_option( 'duoup_roles', $newroles );
 
 		foreach ( $wp_roles->get_names() as $key => $role ) {
-			// create checkbox for each role
+			// create checkbox for each role.
 			echo ( '' .
 			"<input id='duoup_roles' " .
 				"name='duoup_roles[" . \esc_attr( $key ) . "]' " .
@@ -161,14 +161,14 @@ class DuoUniversal_Settings {
 	}
 
 	function duoup_roles_validate( $options ) {
-		// return empty array
+		// return empty array.
 		if ( ! is_array( $options ) || empty( $options ) || ( false === $options ) ) {
 			return array();
 		}
 		$wp_roles = $this->duo_utils->duo_get_roles();
 
 		$valid_roles = $wp_roles->get_names();
-		// otherwise validate each role and then return the array
+		// otherwise validate each role and then return the array.
 		foreach ( $options as $opt => $value ) {
 			if ( ! array_key_exists( $opt, $valid_roles ) ) {
 				unset( $options[ $opt ] );
@@ -219,15 +219,15 @@ class DuoUniversal_Settings {
 
 	function duo_add_site_option( $option, $value = '' ) {
 		// Add multisite option only if it doesn't exist already
-		// With WordPress versions < 3.3, calling add_site_option will override old values
+		// With WordPress versions < 3.3, calling add_site_option will override old values.
 		if ( $this->duo_utils->duo_get_option( $option ) === false ) {
 			\add_site_option( $option, $value );
 		}
 	}
 
 	function duoup_add_settings_field( $id, $title, $callback, $sanitize_callback ) {
-	    \add_settings_field( $id, $title, $callback, 'duo_universal_settings', 'duo_universal_settings', array( 'label_for' => $id ) );
-	    \register_setting( 'duo_universal_settings', $id, $sanitize_callback );
+		\add_settings_field( $id, $title, $callback, 'duo_universal_settings', 'duo_universal_settings', array( 'label_for' => $id ) );
+		\register_setting( 'duo_universal_settings', $id, $sanitize_callback );
 	}
 
 
@@ -247,7 +247,7 @@ class DuoUniversal_Settings {
 			$this->duo_add_site_option( 'duoup_roles', $allroles );
 			$this->duo_add_site_option( 'duoup_xmlrpc', 'off' );
 		} else {
-			\add_settings_section( 'duo_universal_settings', 'Main Settings', array( $this, 'duo_settings_text' ), 'duo_universal_settings');
+			\add_settings_section( 'duo_universal_settings', 'Main Settings', array( $this, 'duo_settings_text' ), 'duo_universal_settings' );
 			$this->duoup_add_settings_field( 'duoup_client_id', 'Client ID', array( $this, 'duo_settings_client_id' ), array( $this, 'duoup_client_id_validate' ) );
 			$this->duoup_add_settings_field( 'duoup_client_secret', 'Client Secret', array( $this, 'duo_settings_client_secret' ), array( $this, 'duoup_client_secret_validate' ) );
 			$this->duoup_add_settings_field( 'duoup_api_host', 'API hostname', array( $this, 'duo_settings_host' ), array( $this, 'duoup_api_host_validate' ) );

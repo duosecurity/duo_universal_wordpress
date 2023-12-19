@@ -10,10 +10,11 @@
  * @package Duo Universal
  * @since 1.0.0
  */
+
 namespace Duo\DuoUniversalWordpress;
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 require_once 'class-duouniversal-settings.php';
@@ -235,7 +236,7 @@ class DuoUniversal_WordpressPlugin {
 			$this->update_user_auth_status( $user->user_login, 'in-progress' );
 			try {
 				// logging out clears cookies and transients so it should be done _before_ updating
-				// the auth status
+				// the auth status.
 				\wp_logout();
 				$this->duo_start_second_factor( $user );
 			} catch ( \Duo\DuoUniversal\DuoException $e ) {
