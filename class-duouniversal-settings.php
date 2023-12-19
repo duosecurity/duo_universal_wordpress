@@ -14,7 +14,7 @@
 namespace Duo\DuoUniversalWordpress;
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 require_once 'class-duouniversal-utilities.php';
@@ -171,14 +171,14 @@ class DuoUniversal_Settings {
 	}
 
 	function duoup_roles_validate( $options ) {
-		// return empty array
+		// return empty array.
 		if ( ! is_array( $options ) || empty( $options ) || ( false === $options ) ) {
 			return array();
 		}
 		$wp_roles = $this->duo_utils->duo_get_roles();
 
 		$valid_roles = $wp_roles->get_names();
-		// otherwise validate each role and then return the array
+		// otherwise validate each role and then return the array.
 		foreach ( $options as $opt => $value ) {
 			if ( ! array_key_exists( $opt, $valid_roles ) ) {
 				unset( $options[ $opt ] );
@@ -237,7 +237,7 @@ class DuoUniversal_Settings {
 
 	function duo_add_site_option( $option, $value = '' ) {
 		// Add multisite option only if it doesn't exist already
-		// With WordPress versions < 3.3, calling add_site_option will override old values
+		// With WordPress versions < 3.3, calling add_site_option will override old values.
 		if ( $this->duo_utils->duo_get_option( $option ) === false ) {
 			\add_site_option( $option, $value );
 		}
