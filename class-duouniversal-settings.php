@@ -226,8 +226,8 @@ class DuoUniversal_Settings {
 	}
 
 	function duoup_add_settings_field( $id, $title, $callback, $sanitize_callback ) {
-	    \add_settings_field( $id, $title, $callback, 'duo_universal_settings', 'duo_universal_settings', array( 'label_for' => $id ) );
-	    \register_setting( 'duo_universal_settings', $id, $sanitize_callback );
+		\add_settings_field( $id, $title, $callback, 'duo_universal_settings', 'duo_universal_settings', array( 'label_for' => $id ) );
+		\register_setting( 'duo_universal_settings', $id, $sanitize_callback );
 	}
 
 
@@ -247,7 +247,7 @@ class DuoUniversal_Settings {
 			$this->duo_add_site_option( 'duoup_roles', $allroles );
 			$this->duo_add_site_option( 'duoup_xmlrpc', 'off' );
 		} else {
-			\add_settings_section( 'duo_universal_settings', 'Main Settings', array( $this, 'duo_settings_text' ), 'duo_universal_settings');
+			\add_settings_section( 'duo_universal_settings', 'Main Settings', array( $this, 'duo_settings_text' ), 'duo_universal_settings' );
 			$this->duoup_add_settings_field( 'duoup_client_id', 'Client ID', array( $this, 'duo_settings_client_id' ), array( $this, 'duoup_client_id_validate' ) );
 			$this->duoup_add_settings_field( 'duoup_client_secret', 'Client Secret', array( $this, 'duo_settings_client_secret' ), array( $this, 'duoup_client_secret_validate' ) );
 			$this->duoup_add_settings_field( 'duoup_api_host', 'API hostname', array( $this, 'duo_settings_host' ), array( $this, 'duoup_api_host_validate' ) );
