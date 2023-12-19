@@ -34,8 +34,6 @@ require_once 'class-duouniversal-wordpressplugin.php';
 use Duo\DuoUniversal\Client;
 use Duo\DuoUniversalWordpress;
 
-$GLOBALS['duoup_debug'] = false;
-
 $utils = new Duo\DuoUniversalWordpress\DuoUniversal_Utilities();
 
 if ( $utils->duo_auth_enabled() ) {
