@@ -2,9 +2,11 @@
 Contributors: duosecurity
 Tags: authentication, muti-factor, two-factor, authenticator, login, username, password, duo, security
 Requires at least: 6.0.0
+Stable tag: 1.0.0
 Tested up to: 6.4.3
 Requires PHP: 7.3.16
 License: Apache-2.0
+License URI: https://www.apache.org/licenses/LICENSE-2.0
 
 Easily add Duo authentication to your WordPress website. Enable multi-factor authentication for your admins and/or users.
 
@@ -20,6 +22,10 @@ This plugin reaches out to Duo's MFA cloud service for the configured user roles
 For more information about Duo's privacy policy see https://duo.com/legal/cisco-online-privacy-statement
 Duo's terms of service can be found here https://duo.com/legal/terms
 
+Terms of support using Duo's cloud service are provided here https://duo.com/support
+
+Support for Duo users without a subscription is provided on a best-effort basis via email.
+
 
 == Installation ==
 Integrating Duo MFA with WordPress is a breeze.
@@ -31,9 +37,6 @@ Before installing the plugin, you’ll need to sign up for a free account at htt
 
 Is Duo’s two-factor service really free?
 Yes, Duo is free up to 10 users and no credit card is required to get started! Paid plans for more than 10 users start at only $1/user/month.
-
-WordPress integration is great, but what if I want to protect my own web applications with two-factor?
-If you’re interested in protecting other web applications with Duo’s two-factor authentication, check out all our online documentation to see all of our drop-in integrations and to access our APIs and web SDK.
 
 == Changelog ==
 = 1.0.0 =

@@ -482,6 +482,32 @@ final class SettingsTest extends WPTestCase
         $this->assertConditionsMet(); 
     }
 
+    public function testSettingsInputLabelsForMultisite(): void
+    {
+        $duoup_roles = array(
+            "Editor" => "editor",
+            "Author" => "author",
+        );
+        $roles = $this->getMockBuilder(stdClass::class)
+            ->addMethods(['get_names'])
+            ->getMock();
+        $roles->method('get_names')->willReturn($duoup_roles);
+        $this->duo_utils->method('duo_get_roles')->willReturn($roles);
+        // Return the default value provided to duo_get_option
+        $this->duo_utils->method('duo_get_option')->will($this->returnArgument(1));
+        WP_Mock::passthruFunction('before_last_bar');
+
+        $this->expectOutputRegex('/<label for="duoup_client_id">Client ID<\/label>/');
+        $this->expectOutputRegex('/<label for="duoup_client_secret">Client Secret<\/label>/');
+        $this->expectOutputRegex('/<label for="duoup_api_host">API hostname<\/label>/');
+        $this->expectOutputRegex('/<label for="duoup_failmode">Failmode<\/label>/');
+        $this->expectOutputRegex('/<label for="duoup_roles">Roles<\/label>/');
+        $this->expectOutputRegex('/<label for="duoup_xmlrpc">Disable XML-RPC<\/label>/');
+
+        $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
+        $settings->duo_mu_options();
+    }
+
     /**
      * Test that duo_admin_init add correct options for multisite
      */
@@ -529,12 +555,12 @@ final class SettingsTest extends WPTestCase
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         WP_Mock::userFunction('add_settings_section')->once()->with('duo_universal_settings', 'Main Settings', array($settings, 'duo_settings_text'), 'duo_universal_settings');
 
-        WP_Mock::userFunction('add_settings_field')->once()->with('duoup_client_id', 'Client ID', array($settings, 'duo_settings_client_id'), 'duo_universal_settings', 'duo_universal_settings');
-        WP_Mock::userFunction('add_settings_field')->once()->with('duoup_client_secret', 'Client Secret', array($settings, 'duo_settings_client_secret'), 'duo_universal_settings', 'duo_universal_settings');
-        WP_Mock::userFunction('add_settings_field')->once()->with('duoup_api_host', 'API hostname', array($settings, 'duo_settings_host'), 'duo_universal_settings', 'duo_universal_settings');
-        WP_Mock::userFunction('add_settings_field')->once()->with('duoup_failmode', 'Failmode', array($settings, 'duo_settings_failmode'), 'duo_universal_settings', 'duo_universal_settings');
-        WP_Mock::userFunction('add_settings_field')->once()->with('duoup_roles', 'Enable for roles:', array($settings, 'duo_settings_roles'), 'duo_universal_settings', 'duo_universal_settings');
-        WP_Mock::userFunction('add_settings_field')->once()->with('duoup_xmlrpc', 'Disable XML-RPC (recommended)', array($settings, 'duo_settings_xmlrpc'), 'duo_universal_settings', 'duo_universal_settings');
+        WP_Mock::userFunction('add_settings_field')->once()->with('duoup_client_id', 'Client ID', array($settings, 'duo_settings_client_id'), 'duo_universal_settings', 'duo_universal_settings', array('label_for' => 'duoup_client_id'));
+        WP_Mock::userFunction('add_settings_field')->once()->with('duoup_client_secret', 'Client Secret', array($settings, 'duo_settings_client_secret'), 'duo_universal_settings', 'duo_universal_settings', array('label_for' => 'duoup_client_secret'));
+        WP_Mock::userFunction('add_settings_field')->once()->with('duoup_api_host', 'API hostname', array($settings, 'duo_settings_host'), 'duo_universal_settings', 'duo_universal_settings', array('label_for' => 'duoup_api_host'));
+        WP_Mock::userFunction('add_settings_field')->once()->with('duoup_failmode', 'Failmode', array($settings, 'duo_settings_failmode'), 'duo_universal_settings', 'duo_universal_settings', array('label_for' => 'duoup_failmode'));
+        WP_Mock::userFunction('add_settings_field')->once()->with('duoup_roles', 'Enable for roles:', array($settings, 'duo_settings_roles'), 'duo_universal_settings', 'duo_universal_settings', array('label_for' => 'duoup_roles'));
+        WP_Mock::userFunction('add_settings_field')->once()->with('duoup_xmlrpc', 'Disable XML-RPC (recommended)', array($settings, 'duo_settings_xmlrpc'), 'duo_universal_settings', 'duo_universal_settings', array('label_for' => 'duoup_xmlrpc'));
 
         WP_Mock::userFunction('register_setting')->once()->with('duo_universal_settings', 'duoup_client_id', array($settings, 'duoup_client_id_validate'));
         WP_Mock::userFunction('register_setting')->once()->with('duo_universal_settings', 'duoup_client_secret', array($settings, 'duoup_client_secret_validate'));
@@ -578,6 +604,7 @@ final class SettingsTest extends WPTestCase
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_failmode', 'closed');
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_roles', $duoup_roles);
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_xmlrpc', 'off');
+        WP_Mock::passthruFunction('check_admin_referer');
         WP_Mock::passthruFunction('wp_unslash');
 
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
@@ -594,6 +621,7 @@ final class SettingsTest extends WPTestCase
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_failmode', 'open');
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_roles', []);
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_xmlrpc', 'on');
+        WP_Mock::passthruFunction('check_admin_referer');
 
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $settings->duo_update_mu_options();

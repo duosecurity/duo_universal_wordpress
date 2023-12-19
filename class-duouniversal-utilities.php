@@ -13,6 +13,10 @@
 
 namespace Duo\DuoUniversalWordpress;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 class DuoUniversal_Utilities {
 
 	function xmlrpc_enabled() {
@@ -83,23 +87,20 @@ class DuoUniversal_Utilities {
 		// paths (for which protocols are not required/enforced), and REQUEST_URI
 		// always includes the leading slash in the URI path.
 		if ( ! isset( $_SERVER['REQUEST_URI'] )
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-			|| ( ! empty( $_SERVER['QUERY_STRING'] ) && ! strpos( \sanitize_url( $_SERVER['REQUEST_URI'] ), '?', 0 ) )
+			|| ( ! empty( $_SERVER['QUERY_STRING'] ) && ! strpos( \sanitize_url( \wp_unslash( $_SERVER['REQUEST_URI'] ) ), '?', 0 ) )
 		) {
 			if ( ! isset( $_SERVER['PHP_SELF'] ) ) {
 				throw new Exception( 'Could not determine request URI' );
 			}
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-			$current_uri = isset( $_SERVER['PHP_SELF'] ) ? substr( \sanitize_url( $_SERVER['PHP_SELF'] ), 1 ) : null;
+			$current_uri = isset( $_SERVER['PHP_SELF'] ) ? substr( \sanitize_url( \wp_unslash( $_SERVER['PHP_SELF'] ) ), 1 ) : null;
 			if ( isset( $_SERVER['QUERY_STRING'] ) ) {
-                // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-				$current_uri = \sanitize_url( $current_uri . '?' . $_SERVER['QUERY_STRING'] );
+				$current_uri = \sanitize_url( $current_uri . '?' . \wp_unslash( $_SERVER['QUERY_STRING'] ) );
 			}
 
 			return $current_uri;
 		} else {
             // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-			return \sanitize_url( $_SERVER['REQUEST_URI'] );
+			return \sanitize_url( \wp_unslash( $_SERVER['REQUEST_URI'] ) );
 		}
 	}
 
@@ -112,8 +113,8 @@ class DuoUniversal_Utilities {
 	}
 
 	function duo_debug_log( $message ) {
-		global $duo_debug;
-		if ( $duo_debug ) {
+		global $duoup_debug;
+		if ( $duoup_debug ) {
 			error_log( 'Duo debug: ' . $message );
 		}
 	}

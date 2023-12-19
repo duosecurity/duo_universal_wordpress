@@ -22,7 +22,9 @@
  * Network: true
  */
 
-defined( 'ABSPATH' ) || die( 'Direct Access Denied' );
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 require_once 'class-duouniversal-settings.php';
 require_once 'class-duouniversal-utilities.php';
@@ -32,7 +34,7 @@ require_once 'class-duouniversal-wordpressplugin.php';
 use Duo\DuoUniversal\Client;
 use Duo\DuoUniversalWordpress;
 
-$GLOBALS['duo_debug'] = true;
+$GLOBALS['duoup_debug'] = false;
 
 $utils = new Duo\DuoUniversalWordpress\DuoUniversal_Utilities();
 
@@ -52,7 +54,7 @@ if ( $utils->duo_auth_enabled() ) {
 	$duo_client = null;
 }
 
-$duoup_plugin = new DuoUniversal_WordpressPlugin(
+$duoup_plugin = new Duo\DuoUniversalWordpress\DuoUniversal_WordpressPlugin(
 	$utils,
 	$duo_client
 );

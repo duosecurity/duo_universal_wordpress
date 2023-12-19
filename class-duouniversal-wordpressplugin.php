@@ -10,19 +10,24 @@
  * @package Duo Universal
  * @since 1.0.0
  */
+namespace Duo\DuoUniversalWordpress;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 require_once 'class-duouniversal-settings.php';
 require_once 'class-duouniversal-utilities.php';
 require_once 'vendor/autoload.php';
 
 use Duo\DuoUniversal\Client;
-use Duo\DuoUniversalWordpress;
-
 
 // expire in 48hrs.
 const DUO_TRANSIENT_EXPIRATION = 48 * 60 * 60;
 
 class DuoUniversal_WordpressPlugin {
+	private $duo_client;
+	public $duo_utils;
 
 	public function __construct(
 		$duo_utils,
@@ -77,7 +82,7 @@ class DuoUniversal_WordpressPlugin {
 			\delete_transient( 'duo_auth_' . $username . '_oidc_state' );
 			\delete_transient( "duo_auth_state_$oidc_state" );
 			\delete_transient( 'duo_auth_' . $username . '_redirect_url' );
-		} catch ( Exception $e ) {
+		} catch ( \Exception $e ) {
 			// there's not much we can do but we shouldn't fail the logout because of this.
 			$this->duo_debug_log( $e->getMessage() );
 		}
@@ -145,23 +150,23 @@ class DuoUniversal_WordpressPlugin {
 		if ( isset( $_GET['duo_code'] ) ) {
 			// doing secondary auth.
 			if ( isset( $_GET['error'] ) ) {
+				$error = $this->duo_utils->new_WP_Error(
+					'Duo authentication failed',
+					\__( 'ERROR: Error during login; please contact your system administrator.' )
+				);
+
 				$error_msg = \sanitize_text_field( wp_unslash( $_GET['error'] ) );
 				if ( isset( $_GET['error_description'] ) ) {
 					$error_msg .= ': ' . \sanitize_text_field( wp_unslash( $_GET['error_description'] ) );
 				}
-				$error = $this->duo_utils->new_WP_Error(
-					'Duo authentication failed',
-                    // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
-					\__( 'ERROR: ' . $error_msg )
-				);
-				$this->duo_debug_log( $error->get_error_message() );
+				$this->duo_debug_log( $error_msg );
 				return $error;
 			}
 
 			if ( ! isset( $_GET['state'] ) ) {
 				$error = $this->duo_utils->new_WP_Error(
 					'Duo authentication failed',
-					\__( 'ERROR: Missing state' )
+					\__( 'ERROR: Missing state; Please login again' )
 				);
 				$this->duo_debug_log( $error->get_error_message() );
 				return $error;
@@ -189,7 +194,7 @@ class DuoUniversal_WordpressPlugin {
 				// Update redirect URL to be one associated with initial authentication.
 				$this->duo_client->redirect_url = $this->get_redirect_url( $associated_user );
 				$decoded_token                  = $this->duo_client->exchangeAuthorizationCodeFor2FAResult( $code, $associated_user );
-			} catch ( Duo\DuoUniversal\DuoException $e ) {
+			} catch ( \Duo\DuoUniversal\DuoException $e ) {
 				$this->duo_debug_log( $e->getMessage() );
 				$error = $this->duo_utils->new_WP_Error(
 					'Duo authentication failed',
@@ -233,7 +238,7 @@ class DuoUniversal_WordpressPlugin {
 				// the auth status
 				\wp_logout();
 				$this->duo_start_second_factor( $user );
-			} catch ( Duo\DuoUniversal\DuoException $e ) {
+			} catch ( \Duo\DuoUniversal\DuoException $e ) {
 				$this->duo_debug_log( $e->getMessage() );
 				if ( $this->duo_utils->duo_get_option( 'duoup_failmode' ) === 'open' ) {
 					// If we're failing open, errors in 2FA still allow for success.
