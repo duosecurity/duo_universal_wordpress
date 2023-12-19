@@ -82,26 +82,7 @@ class DuoUniversal_Utilities {
 	}
 
 	function duo_get_uri() {
-		// Workaround for IIS which may not set REQUEST_URI, or QUERY parameters.
-		// sanitize_url can be used due to its special handling of relative
-		// paths (for which protocols are not required/enforced), and REQUEST_URI
-		// always includes the leading slash in the URI path.
-		if ( ! isset( $_SERVER['REQUEST_URI'] )
-			|| ( ! empty( $_SERVER['QUERY_STRING'] ) && ! strpos( \sanitize_url( \wp_unslash( $_SERVER['REQUEST_URI'] ) ), '?', 0 ) )
-		) {
-			if ( ! isset( $_SERVER['PHP_SELF'] ) ) {
-				throw new Exception( 'Could not determine request URI' );
-			}
-			$current_uri = isset( $_SERVER['PHP_SELF'] ) ? substr( \sanitize_url( \wp_unslash( $_SERVER['PHP_SELF'] ) ), 1 ) : null;
-			if ( isset( $_SERVER['QUERY_STRING'] ) ) {
-				$current_uri = \sanitize_url( $current_uri . '?' . \wp_unslash( $_SERVER['QUERY_STRING'] ) );
-			}
-
-			return $current_uri;
-		} else {
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-			return \sanitize_url( \wp_unslash( $_SERVER['REQUEST_URI'] ) );
-		}
+		return \sanitize_url( \wp_unslash( $_SERVER['REQUEST_URI'] ) );
 	}
 
 	function duo_get_option( $key, $default_value = '' ) {
