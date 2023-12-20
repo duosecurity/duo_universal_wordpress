@@ -23,7 +23,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 require_once 'class-duouniversal-settings.php';
@@ -33,8 +33,6 @@ require_once 'class-duouniversal-wordpressplugin.php';
 
 use Duo\DuoUniversal\Client;
 use Duo\DuoUniversalWordpress;
-
-$GLOBALS['duoup_debug'] = false;
 
 $utils = new Duo\DuoUniversalWordpress\DuoUniversal_Utilities();
 
