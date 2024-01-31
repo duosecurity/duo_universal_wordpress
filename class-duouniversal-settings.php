@@ -118,11 +118,11 @@ class DuoUniversal_Settings {
 		$result   = '';
 		$result  .= '<select id="duoup_failmode" name="duoup_failmode" />';
 		if ( 'open' === $failmode ) {
-			$result .= sprintf( '<option value="open" selected>%s</option>', __( 'Open', 'duo-universal' ) );
-			$result .= sprintf( '<option value="closed">%s</option>', __( 'Closed', 'duo-universal' ) );
+			$result .= sprintf( '<option value="open" selected>%s</option>', \esc_html__( 'Open', 'duo-universal' ) );
+			$result .= sprintf( '<option value="closed">%s</option>', \esc_html__( 'Closed', 'duo-universal' ) );
 		} else {
-			$result .= sprintf( '<option value="open">%s</option>', __( 'Open', 'duo-universal' ) );
-			$result .= sprintf( '<option value="closed" selected>%s</option>', __( 'Closed', 'duo-universal' ) );
+			$result .= sprintf( '<option value="open">%s</option>', \esc_html__( 'Open', 'duo-universal' ) );
+			$result .= sprintf( '<option value="closed" selected>%s</option>', \esc_html__( 'Closed', 'duo-universal' ) );
 		}
 		$result .= '</select>';
 		return $result;
@@ -190,11 +190,11 @@ class DuoUniversal_Settings {
 	}
 
 	function duo_settings_text() {
-		printf( '<p>%s</p>', __( 'To use this plugin you must have an account with Duo Security.', 'duo-universal' ) );
-		printf( '<p>%s</p>', __( 'See the Duo for WordPress guide to enable Duo two-factor authentication for your WordPress logins.', 'duo-universal' ) );
-		printf( "<a target='_blank' href='https://www.duosecurity.com/docs/wordpress'>%s</a>", __( 'Duo for WordPress guide', 'duo-universal' ) );
-		printf( '<p>%s</p>', __( 'You can retrieve your Client ID, Client Secret, and API hostname by logging in to the Duo Admin Panel.', 'duo-universal' ) );
-		printf( '<p>%s</p>', __( 'Note: After enabling the plugin, you will be immediately prompted for second factor authentication.', 'duo-universal' ) );
+		printf( '<p>%s</p>', \esc_html__( 'To use this plugin you must have an account with Duo Security.', 'duo-universal' ) );
+		printf( '<p>%s</p>', \esc_html__( 'See the Duo for WordPress guide to enable Duo two-factor authentication for your WordPress logins.', 'duo-universal' ) );
+		printf( "<a target='_blank' href='https://www.duosecurity.com/docs/wordpress'>%s</a>", \esc_html__( 'Duo for WordPress guide', 'duo-universal' ) );
+		printf( '<p>%s</p>', \esc_html__( 'You can retrieve your Client ID, Client Secret, and API hostname by logging in to the Duo Admin Panel.', 'duo-universal' ) );
+		printf( '<p>%s</p>', \esc_html__( 'Note: After enabling the plugin, you will be immediately prompted for second factor authentication.', 'duo-universal' ) );
 	}
 
 	function duo_settings_xmlrpc() {
@@ -202,8 +202,8 @@ class DuoUniversal_Settings {
 		if ( $this->duo_utils->duo_get_option( 'duoup_xmlrpc', 'off' ) === 'off' ) {
 			$val = 'checked';
 		}
-		$result  = sprintf( "<input id='duoup_xmlrpc' name='duoup_xmlrpc' type='checkbox' value='off' %s /> %s<br />", \esc_attr( $val ), __( 'Yes', 'duo-universal' ) );
-		$result .= __( 'Using XML-RPC bypasses two-factor authentication and makes your website less secure. We recommend only using the WordPress web interface for managing your WordPress website.', 'duo-universal' );
+		$result  = sprintf( "<input id='duoup_xmlrpc' name='duoup_xmlrpc' type='checkbox' value='off' %s /> %s<br />", \esc_attr( $val ), \esc_html__( 'Yes', 'duo-universal' ) );
+		$result .= \esc_html__( 'Using XML-RPC bypasses two-factor authentication and makes your website less secure. We recommend only using the WordPress web interface for managing your WordPress website.', 'duo-universal' );
 		return $result;
 	}
 
@@ -216,7 +216,7 @@ class DuoUniversal_Settings {
 	}
 
 	function duo_add_link( $links ) {
-		$settings_link = sprintf( '<a href="options-general.php?page=duo_universal">%s</a>', \__( 'Settings', 'duo-universal' ) );
+		$settings_link = sprintf( '<a href="options-general.php?page=duo_universal">%s</a>', \esc_html__( 'Settings', 'duo-universal' ) );
 		array_unshift( $links, $settings_link );
 		return $links;
 	}
@@ -290,13 +290,13 @@ class DuoUniversal_Settings {
 	}
 
 	function print_field( $id, $label, $input ) {
-		printf( "<tr><th><label for='$id'>%s</label></th><td>%s</td></tr>\n", $label, $input );
+		printf( "<tr><th><label for='%s'>%s</label></th><td>%s</td></tr>\n", \esc_attr( $id ), \esc_html( $label ), $input );
 	}
 
 	function duo_mu_options() {
 		$this->duo_utils->duo_debug_log( 'Displaying multisite settings' );
 
-		printf( "<h3>%s</h3>\n", \__( 'Duo Security', 'duo-universal' ) );
+		printf( "<h3>%s</h3>\n", \esc_html__( 'Duo Security', 'duo-universal' ) );
 		echo( "<table class='form-table'>\n" );
 			printf( "%s</td></tr>\n", $this->duo_settings_text() );
 			$this->print_field( 'duoup_client_id', \__( 'Client ID', 'duo-universal' ), $this->duo_settings_client_id() );
