@@ -290,7 +290,7 @@ class DuoUniversal_Settings {
 	}
 
 	function print_field( $id, $label, $input ) {
-		printf( "<tr><th><label for='$id'>%s</label></th><td>%s</td></tr>\n", \esc_html( $label ), $input );
+		printf( "<tr><th><label for='%s'>%s</label></th><td>%s</td></tr>\n", \esc_attr( $id ), \esc_html( $label ), $input );
 	}
 
 	function duo_mu_options() {
