@@ -498,6 +498,7 @@ final class SettingsTest extends WPTestCase
         // Return the default value provided to duo_get_option
         $this->duo_utils->method('duo_get_option')->will($this->returnArgument(1));
         WP_Mock::passthruFunction('before_last_bar');
+        WP_Mock::passthruFunction('wp_kses');
         WP_Mock::userFunction('__', [ 'return_arg' => 0, ]);
 
         $this->expectOutputRegex("/<label for='duoup_client_id'>Client ID<\/label>/");
