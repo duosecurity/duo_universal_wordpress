@@ -17,7 +17,7 @@ Duo's terms of service can be found here https://duo.com/legal/terms
 Login sessions are affected by this plugin. The shorter duration between your WordPress and Duo timeout will determine when the session expires. Duo sessions have a timeout of 48 hours, which is not currently configurable.
 # Usage
 
-Documentation: <http://www.duosecurity.com/docs/universal_wordpress>
+Documentation: <https://duo.com/docs/wordpress>
 
 ### TLS 1.2 and 1.3 Support
 
