@@ -2,7 +2,7 @@
 
 [![Issues](https://img.shields.io/github/issues/duosecurity/duo_universal_wordpress)](https://github.com/duosecurity/duo_universal_wordpress/issues)
 [![Forks](https://img.shields.io/github/forks/duosecurity/duo_universal_wordpress)](https://github.com/duosecurity/duo_universal_wordpress/network/members)
-[![Stars](https://img.shields.io/github/stars/duosecurity/duo_universal_wordpress)](https://github.com/duosecurity/duo_univerasl_wordpress/stargazers)
+[![Stars](https://img.shields.io/github/stars/duosecurity/duo_universal_wordpress)](https://github.com/duosecurity/duo_universal_wordpress/stargazers)
 [![License](https://img.shields.io/badge/License-View%20License-orange)](https://github.com/duosecurity/duo_universal_wordpress/blob/master/LICENSE)
 License: Apache-2.0
 
