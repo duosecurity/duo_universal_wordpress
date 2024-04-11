@@ -94,8 +94,7 @@ class DuoUniversal_Utilities {
 	}
 
 	function duo_debug_log( $message ) {
-		global $WP_DEBUG;
-		if ( $WP_DEBUG ) {
+		if ( defined('WP_DEBUG') && true == WP_DEBUG ) {
 			error_log( 'Duo debug: ' . $message );
 		}
 	}
