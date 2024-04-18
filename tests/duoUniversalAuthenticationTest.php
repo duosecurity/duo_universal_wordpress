@@ -4,7 +4,7 @@ use Duo\DuoUniversal\DuoException;
 use Duo\DuoUniversalWordpress;
 use PHPUnit\Framework\TestCase;
 use WP_Mock\Tools\TestCase as WPTestCase;
-require_once 'class-duouniversal-wordpressplugin.php';
+require_once plugin_dir_path( __FILE__ ) . 'class-duouniversal-wordpressplugin.php';
 
 
 final class authenticationTest extends WPTestCase

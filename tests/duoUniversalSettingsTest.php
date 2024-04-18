@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use WP_Mock\Tools\TestCase as WPTestCase;
 use WP_Mock;
 
-require_once 'class-duouniversal-settings.php';
+require_once plugin_dir_path( __FILE__ ) . 'class-duouniversal-settings.php';
 
 final class SettingsTest extends WPTestCase
 {

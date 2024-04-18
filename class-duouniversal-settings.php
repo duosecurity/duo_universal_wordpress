@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-require_once 'class-duouniversal-utilities.php';
+require_once plugin_dir_path( __FILE__ ) . 'class-duouniversal-utilities.php';
 const SECRET_PLACEHOLDER = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
 class DuoUniversal_Settings {
