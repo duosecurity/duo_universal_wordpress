@@ -124,6 +124,9 @@ class DuoUniversal_WordpressPlugin {
 	}
 
 	function duo_start_second_factor( $user ) {
+		// Clear any existing user state to purge old DB rows
+		$this->clear_user_auth( $user );
+
 		$this->duo_client->healthCheck();
 
 		$oidc_state                     = $this->duo_client->generateState();
