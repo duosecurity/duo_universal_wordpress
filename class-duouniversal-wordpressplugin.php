@@ -43,14 +43,14 @@ class DuoUniversal_WordpressPlugin {
 	 * status: whether or not an authentication is in progress or is completed ("in-progress" or "authenticated")
 	 **/
 	function update_user_auth_status( $user, $status, $redirect_url = '', $oidc_state = null ) {
-		\set_transient( 'duo_auth_' . $user . '_status', $status, DUO_TRANSIENT_EXPIRATION );
+		\update_site_option( 'duo_auth_' . $user . '_status', $status );
 		if ( $redirect_url ) {
-			\set_transient( 'duo_auth_' . $user . '_redirect_url', $redirect_url, DUO_TRANSIENT_EXPIRATION );
+			\update_site_option( 'duo_auth_' . $user . '_redirect_url', $redirect_url );
 		}
 		if ( $oidc_state ) {
 			// we need to track the state in two places so we can clean up later.
-			\set_transient( 'duo_auth_' . $user . '_oidc_state', $oidc_state, DUO_TRANSIENT_EXPIRATION );
-			\set_transient( "duo_auth_state_$oidc_state", $user, DUO_TRANSIENT_EXPIRATION );
+			\update_site_option( 'duo_auth_' . $user . '_oidc_state', $oidc_state );
+			\update_site_option( "duo_auth_state_$oidc_state", $user );
 		}
 	}
 
@@ -59,7 +59,7 @@ class DuoUniversal_WordpressPlugin {
 	}
 
 	function get_user_auth_status( $user ) {
-		return \get_transient( 'duo_auth_' . $user . '_status' );
+		return \get_site_option( 'duo_auth_' . $user . '_status' );
 	}
 
 	function duo_verify_auth_status( $user ) {
@@ -67,22 +67,22 @@ class DuoUniversal_WordpressPlugin {
 	}
 
 	function get_username_from_oidc_state( $oidc_state ) {
-		return \get_transient( "duo_auth_state_$oidc_state" );
+		return \get_site_option( "duo_auth_state_$oidc_state" );
 	}
 
 	function get_redirect_url( $user ) {
-		return \get_transient( 'duo_auth_' . $user . '_redirect_url' );
+		return \get_site_option( 'duo_auth_' . $user . '_redirect_url' );
 	}
 
 	function clear_user_auth( $user ) {
 		$username = $user->user_login;
 		try {
-			$oidc_state = \get_transient( 'duo_auth_' . $username . '_oidc_state' );
+			$oidc_state = \get_site_option( 'duo_auth_' . $username . '_oidc_state' );
 
-			\delete_transient( 'duo_auth_' . $username . '_status' );
-			\delete_transient( 'duo_auth_' . $username . '_oidc_state' );
-			\delete_transient( "duo_auth_state_$oidc_state" );
-			\delete_transient( 'duo_auth_' . $username . '_redirect_url' );
+			\delete_site_option( 'duo_auth_' . $username . '_status' );
+			\delete_site_option( 'duo_auth_' . $username . '_oidc_state' );
+			\delete_site_option( "duo_auth_state_$oidc_state" );
+			\delete_site_option( 'duo_auth_' . $username . '_redirect_url' );
 		} catch ( \Exception $e ) {
 			// there's not much we can do but we shouldn't fail the logout because of this.
 			$this->duo_debug_log( $e->getMessage() );
