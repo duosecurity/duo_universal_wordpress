@@ -195,7 +195,6 @@ class DuoUniversal_WordpressPlugin {
 			}
 			try {
 				// Update redirect URL to be one associated with initial authentication.
-				$associated_uri = $this->get_redirect_url( $associated_user->ID );
 				$this->duo_client->redirect_url = $this->get_redirect_url( $associated_user->ID );
 				$decoded_token                  = $this->duo_client->exchangeAuthorizationCodeFor2FAResult( $code, $associated_user->user_login );
 			} catch ( \Duo\DuoUniversal\DuoException $e ) {

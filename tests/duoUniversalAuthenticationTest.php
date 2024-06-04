@@ -126,7 +126,6 @@ final class authenticationTest extends WPTestCase
         $this->setUpMocks();
         $user = $this->createMockUser();
         WP_Mock::userFunction('wp_get_current_user', [ 'return' => $user ]);
-        WP_Mock::userFunction('delete_user_meta', ['return' => function() { throw (new Exception()); } ]);
         $authentication = new Duo\DuoUniversalWordpress\DuoUniversal_WordPressPlugin($this->duo_utils, $this->duo_client);
         
         // Make an auth to populate the database
