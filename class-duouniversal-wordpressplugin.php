@@ -76,11 +76,9 @@ class DuoUniversal_WordpressPlugin {
 	function clear_user_auth( $user_id ) {
 		try {
 			$oidc_state = \get_user_meta( $user_id, 'duo_auth_oidc_state' , true);
-			//error_log("retrieved state:".$oidc_state);
 			\delete_user_meta( $user_id, 'duo_auth_status' );
 			\delete_user_meta( $user_id, 'duo_auth_oidc_state' );
 			\delete_user_meta( $user_id, 'duo_auth_redirect_url' );
-			//error_log("deleting site option: duo_auth_state_$oidc_state");
 			\delete_site_option( "duo_auth_state_$oidc_state" );
 		} catch ( \Exception $e ) {
 			// there's not much we can do but we shouldn't fail the logout because of this.
