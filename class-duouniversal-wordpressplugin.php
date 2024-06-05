@@ -23,9 +23,6 @@ require_once 'vendor/autoload.php';
 
 use Duo\DuoUniversal\Client;
 
-// expire in 48hrs.
-const DUO_TRANSIENT_EXPIRATION = 48 * 60 * 60;
-
 class DuoUniversal_WordpressPlugin {
 	private $duo_client;
 	public $duo_utils;
@@ -42,15 +39,16 @@ class DuoUniversal_WordpressPlugin {
 	 * user: username of the user to update
 	 * status: whether or not an authentication is in progress or is completed ("in-progress" or "authenticated")
 	 **/
-	function update_user_auth_status( $user, $status, $redirect_url = '', $oidc_state = null ) {
-		\set_transient( 'duo_auth_' . $user . '_status', $status, DUO_TRANSIENT_EXPIRATION );
+	function update_user_auth_status( $user_id, $status, $redirect_url = '', $oidc_state = null ) {
+		\update_user_meta( $user_id, 'duo_auth_status', $status );
 		if ( $redirect_url ) {
-			\set_transient( 'duo_auth_' . $user . '_redirect_url', $redirect_url, DUO_TRANSIENT_EXPIRATION );
+			\update_user_meta( $user_id, 'duo_auth_redirect_url', $redirect_url );
 		}
 		if ( $oidc_state ) {
 			// we need to track the state in two places so we can clean up later.
-			\set_transient( 'duo_auth_' . $user . '_oidc_state', $oidc_state, DUO_TRANSIENT_EXPIRATION );
-			\set_transient( "duo_auth_state_$oidc_state", $user, DUO_TRANSIENT_EXPIRATION );
+			\update_user_meta( $user_id, 'duo_auth_oidc_state', $oidc_state );
+			// site_option will fallback to a standard option if this isn't multisite
+			\update_site_option( "duo_auth_state_$oidc_state", $user_id );
 		}
 	}
 
@@ -58,31 +56,30 @@ class DuoUniversal_WordpressPlugin {
 		return $this->duo_utils->duo_debug_log( $str );
 	}
 
-	function get_user_auth_status( $user ) {
-		return \get_transient( 'duo_auth_' . $user . '_status' );
+	function get_user_auth_status( $user_id ) {
+		return \get_user_meta( $user_id, 'duo_auth_status' , true);
 	}
 
-	function duo_verify_auth_status( $user ) {
-		return ( $this->get_user_auth_status( $user ) === 'authenticated' );
+	function duo_verify_auth_status( $user_id ) {
+		return ( $this->get_user_auth_status( $user_id ) === 'authenticated' );
 	}
 
-	function get_username_from_oidc_state( $oidc_state ) {
-		return \get_transient( "duo_auth_state_$oidc_state" );
+	function get_user_from_oidc_state( $oidc_state ) {
+		$user_id = \get_site_option( "duo_auth_state_$oidc_state" );
+		return get_user_by('ID', $user_id);
 	}
 
-	function get_redirect_url( $user ) {
-		return \get_transient( 'duo_auth_' . $user . '_redirect_url' );
+	function get_redirect_url( $user_id ) {
+		return \get_user_meta( $user_id, 'duo_auth_redirect_url' , true);
 	}
 
-	function clear_user_auth( $user ) {
-		$username = $user->user_login;
+	function clear_user_auth( $user_id ) {
 		try {
-			$oidc_state = \get_transient( 'duo_auth_' . $username . '_oidc_state' );
-
-			\delete_transient( 'duo_auth_' . $username . '_status' );
-			\delete_transient( 'duo_auth_' . $username . '_oidc_state' );
-			\delete_transient( "duo_auth_state_$oidc_state" );
-			\delete_transient( 'duo_auth_' . $username . '_redirect_url' );
+			$oidc_state = \get_user_meta( $user_id, 'duo_auth_oidc_state' , true);
+			\delete_user_meta( $user_id, 'duo_auth_status' );
+			\delete_user_meta( $user_id, 'duo_auth_oidc_state' );
+			\delete_user_meta( $user_id, 'duo_auth_redirect_url' );
+			\delete_site_option( "duo_auth_state_$oidc_state" );
 		} catch ( \Exception $e ) {
 			// there's not much we can do but we shouldn't fail the logout because of this.
 			$this->duo_debug_log( $e->getMessage() );
@@ -91,7 +88,7 @@ class DuoUniversal_WordpressPlugin {
 
 	function clear_current_user_auth() {
 		$user = \wp_get_current_user();
-		$this->clear_user_auth( $user );
+		$this->clear_user_auth( $user->ID );
 	}
 
 	function get_page_url() {
@@ -124,13 +121,16 @@ class DuoUniversal_WordpressPlugin {
 	}
 
 	function duo_start_second_factor( $user ) {
+		// Clear any existing user state to purge old DB rows
+		$this->clear_user_auth( $user->ID );
+
 		$this->duo_client->healthCheck();
 
 		$oidc_state                     = $this->duo_client->generateState();
 		$redirect_url                   = $this->get_page_url();
 		$this->duo_client->redirect_url = $redirect_url;
 
-		$this->update_user_auth_status( $user->user_login, 'in-progress', $redirect_url, $oidc_state );
+		$this->update_user_auth_status( $user->ID, 'in-progress', $redirect_url, $oidc_state );
 
 		$prompt_uri = $this->duo_client->createAuthUrl( $user->user_login, $oidc_state );
 		\wp_redirect( $prompt_uri );
@@ -181,7 +181,9 @@ class DuoUniversal_WordpressPlugin {
 			$state = \sanitize_text_field( wp_unslash( $_GET['state'] ) );
 
 			// Retrieve the previously stored state and username from the session.
-			$associated_user = $this->get_username_from_oidc_state( $state );
+			$associated_user = $this->get_user_from_oidc_state( $state );
+			// Immediately cleanup state after reading to reduce chance of an orphaned value
+			\delete_site_option( "duo_auth_state_$state" );
 
 			if ( empty( $associated_user ) ) {
 				$error = $this->duo_utils->new_WP_Error(
@@ -193,8 +195,8 @@ class DuoUniversal_WordpressPlugin {
 			}
 			try {
 				// Update redirect URL to be one associated with initial authentication.
-				$this->duo_client->redirect_url = $this->get_redirect_url( $associated_user );
-				$decoded_token                  = $this->duo_client->exchangeAuthorizationCodeFor2FAResult( $code, $associated_user );
+				$this->duo_client->redirect_url = $this->get_redirect_url( $associated_user->ID );
+				$decoded_token                  = $this->duo_client->exchangeAuthorizationCodeFor2FAResult( $code, $associated_user->user_login );
 			} catch ( \Duo\DuoUniversal\DuoException $e ) {
 				$this->duo_debug_log( $e->getMessage() );
 				$error = $this->duo_utils->new_WP_Error(
@@ -204,9 +206,9 @@ class DuoUniversal_WordpressPlugin {
 				$this->duo_debug_log( $error->get_error_message() );
 				return $error;
 			}
-			$this->duo_debug_log( "Completed secondary auth for $associated_user" );
-			$this->update_user_auth_status( $associated_user, 'authenticated' );
-			$user = $this->duo_utils->new_WP_user( 0, $associated_user );
+			$this->duo_debug_log( "Completed secondary auth for $associated_user->user_login" );
+			$this->update_user_auth_status( $associated_user->ID, 'authenticated' );
+			$user = $this->duo_utils->new_WP_user( 0, $associated_user->user_login );
 			return $user;
 		}
 
@@ -229,13 +231,13 @@ class DuoUniversal_WordpressPlugin {
 
 			if ( ! $this->duo_utils->duo_role_require_mfa( $user ) ) {
 				$this->duo_debug_log( "Skipping 2FA for user: $username with roles: " . print_r( $user->roles, true ) );
-				$this->update_user_auth_status( $user->user_login, 'authenticated' );
+				$this->update_user_auth_status( $user->ID, 'authenticated' );
 				return $user;
 			}
 
-			$this->update_user_auth_status( $user->user_login, 'in-progress' );
+			$this->update_user_auth_status( $user->ID, 'in-progress' );
 			try {
-				// logging out clears cookies and transients so it should be done _before_ updating
+				// logging out clears cookies and user_metadata so it should be done _before_ updating
 				// the auth status.
 				\wp_logout();
 				$this->duo_start_second_factor( $user );
@@ -244,7 +246,7 @@ class DuoUniversal_WordpressPlugin {
 				if ( $this->duo_utils->duo_get_option( 'duoup_failmode' ) === 'open' ) {
 					// If we're failing open, errors in 2FA still allow for success.
 					$this->duo_debug_log( "Login 'Successful', but 2FA Not Performed. Confirm Duo client/secret/host values are correct" );
-					$this->update_user_auth_status( $user->user_login, 'authenticated' );
+					$this->update_user_auth_status( $user->ID, 'authenticated' );
 					return $user;
 				} else {
 					$error = $this->duo_utils->new_WP_Error(
@@ -252,7 +254,7 @@ class DuoUniversal_WordpressPlugin {
 						\__( 'Error: 2FA Unavailable. Confirm Duo client/secret/host values are correct' )
 					);
 					$this->duo_debug_log( $error->get_error_message() );
-					$this->clear_user_auth( $user );
+					$this->clear_user_auth( $user->ID );
 					return $error;
 				}
 			}
@@ -277,7 +279,7 @@ class DuoUniversal_WordpressPlugin {
 		if ( \is_user_logged_in() ) {
 			$user = \wp_get_current_user();
 			$this->duo_debug_log( "Verifying auth state for user: $user->user_login" );
-			if ( $this->duo_utils->duo_role_require_mfa( $user ) && ! $this->duo_verify_auth_status( $user->user_login ) ) {
+			if ( $this->duo_utils->duo_role_require_mfa( $user ) && ! $this->duo_verify_auth_status( $user->ID ) ) {
 				\wp_logout();
 				wp_redirect( wp_login_url() );
 				$this->exit();
