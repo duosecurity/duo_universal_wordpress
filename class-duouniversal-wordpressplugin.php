@@ -17,9 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-require_once 'class-duouniversal-settings.php';
-require_once 'class-duouniversal-utilities.php';
-require_once 'vendor/autoload.php';
+require_once plugin_dir_path( __FILE__ ) . 'class-duouniversal-settings.php';
+require_once plugin_dir_path( __FILE__ ) . 'class-duouniversal-utilities.php';
+require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
 
 use Duo\DuoUniversal\Client;
 

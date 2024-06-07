@@ -3,7 +3,7 @@
 use Duo\DuoUniversal\DuoException;
 use Duo\DuoUniversalWordpress;
 use PHPUnit\Framework\TestCase;
-require_once 'class-duouniversal-utilities.php';
+require_once plugin_dir_path( __FILE__ ) . 'class-duouniversal-utilities.php';
 
 final class UtilitiesTest extends TestCase
 {
