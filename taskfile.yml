@@ -1,0 +1,20 @@
+# Run using https://taskfile.dev/
+# Or manually copy/paste these commands as needed.
+version: '3'
+
+tasks:
+  run:
+      - docker-compose up -d
+      - cmd: echo "Visit localhost/wp-login.php in a browser to continue setup"
+        silent: true
+      - cmd: echo "Run 'task stop' to stop"
+        silent: true
+  stop:
+      - docker-compose stop
+  test:
+      - docker build -f dev.dockerfile -t duo_wordpress --target test .
+  lint:
+      - docker build -f dev.dockerfile -t duo_wordpress --target lint .
+  package:
+      - docker build -f dev.dockerfile -t duo_wordpress --target package .
+      - docker run --rm duo_wordpress cat /src/duo-universal.zip > duo-universal.zip
