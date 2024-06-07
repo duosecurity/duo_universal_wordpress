@@ -26,14 +26,18 @@ jobs:
           php-version: ${{ matrix.php }}
           coverage: xdebug
 
-      - name: Composer install
+      - name: Composer install prod dependencies
+        run: composer install --no-dev
+
+        # Package before installing dev dependencies so we don't include them in the production zip
+      - name: Package duo-universal
+        run: ./package.sh
+
+      - name: Composer install dev dependencies
         run: composer install
 
       - name: PHP tests
         run: ./vendor/bin/phpunit --process-isolation tests
-
-      - name: Package duo-universal
-        run: ./package.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
