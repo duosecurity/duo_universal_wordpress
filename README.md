@@ -14,7 +14,6 @@ This plugin reaches out to Duo's MFA cloud service for the configured user roles
 For more information about Duo's privacy policy see https://duo.com/legal/cisco-online-privacy-statement
 Duo's terms of service can be found here https://duo.com/legal/terms
 
-Login sessions are affected by this plugin. The shorter duration between your WordPress and Duo timeout will determine when the session expires. Duo sessions have a timeout of 48 hours, which is not currently configurable.
 # Usage
 
 Documentation: <https://duo.com/docs/wordpress>
