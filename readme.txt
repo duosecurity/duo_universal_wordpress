@@ -3,7 +3,7 @@ Contributors: duosecurity
 Tags: authentication, muti-factor, two-factor, authenticator, login, username, password, duo, security
 Requires at least: 6.0.0
 Stable tag: 1.1.0
-Tested up to: 6.5.0
+Tested up to: 6.5.4
 Requires PHP: 7.3.16
 License: Apache-2.0
 License URI: https://www.apache.org/licenses/LICENSE-2.0
@@ -47,3 +47,7 @@ Yes, Duo is free up to 10 users and no credit card is required to get started! P
 * Fixed debug logging to properly enable when using the WP_DEBUG constant.
 = 1.0.0 =
 * Initial Release
+
+== Upgrade Notice ==
+= 1.1.0 =
+* All 2FA sessions will be reset after the upgrade; users will need to re-login.
