@@ -36,3 +36,8 @@ delete_site_option( 'duoup_api_host' );
 delete_site_option( 'duoup_roles' );
 delete_site_option( 'duoup_failmode' );
 delete_site_option( 'duoup_xmlrpc' );
+
+// Delete Duo user_meta fields for all users
+delete_metadata( 'user', 0, 'duo_auth_status', '', true );
+delete_metadata( 'user', 0, 'duo_auth_redirect_url', '', true );
+delete_metadata( 'user', 0, 'duo_auth_oidc_state', '', true );
