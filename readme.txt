@@ -2,8 +2,8 @@
 Contributors: duosecurity
 Tags: authentication, muti-factor, two-factor, authenticator, login, username, password, duo, security
 Requires at least: 6.0.0
-Stable tag: 1.0.0
-Tested up to: 6.5.0
+Stable tag: 1.1.0
+Tested up to: 6.5.4
 Requires PHP: 7.3.16
 License: Apache-2.0
 License URI: https://www.apache.org/licenses/LICENSE-2.0
@@ -38,5 +38,16 @@ Is Duo’s two-factor service really free?
 Yes, Duo is free up to 10 users and no credit card is required to get started! Paid plans for more than 10 users start at only $1/user/month.
 
 == Changelog ==
+= 1.1.0 =
+* Refactored 2FA session management
+  * Switching between multisites will no longer logout the current user.
+  * Clearing Wordpress caches will no longer logout all users.
+  * There is no longer a 48 hour Duo session separate from the Wordpress session.
+* Fix plugin file paths on clustered hosting environments.
+* Fixed debug logging to properly enable when using the WP_DEBUG constant.
 = 1.0.0 =
 * Initial Release
+
+== Upgrade Notice ==
+= 1.1.0 =
+* All 2FA sessions will be reset after the upgrade; users will need to re-login.
