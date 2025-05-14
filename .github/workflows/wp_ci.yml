@@ -40,7 +40,7 @@ jobs:
         run: ./vendor/bin/phpunit --process-isolation tests
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: duo-universal
           path: ./duo-universal.zip
