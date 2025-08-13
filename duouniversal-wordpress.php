@@ -61,6 +61,35 @@ $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings(
 	$utils
 );
 
+/**
+ * Extend User Agent string with WordPress-specific information
+ */
+function duo_extend_user_agent() {
+	global $duo_client, $utils;
+
+	if ( $duo_client && $utils && $utils->duo_auth_enabled() ) {
+		try {
+			if ( ! function_exists( 'get_plugin_data' ) ) {
+				require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+			}
+			$plugin_data = get_plugin_data( __FILE__ );
+			$plugin_version = $plugin_data['Version'];
+
+			global $wp_version;
+
+			$user_agent_extension = sprintf(
+				'duo_universal_wordpress/%s (wordpress_version=%s)',
+				$plugin_version,
+				$wp_version
+			);
+
+			$duo_client->appendToUserAgent( $user_agent_extension );
+		} catch ( Exception $e ) {
+			$utils->duo_debug_log( $e->getMessage() );
+		}
+	}
+}
+
 if ( ! \is_multisite() ) {
 	$plugin_name = plugin_basename( __FILE__ );
 	add_filter( 'plugin_action_links_' . $plugin_name, array( $settings, 'duo_add_link' ), 10, 2 );
@@ -74,6 +103,8 @@ if ( $duoup_plugin->duo_utils->duo_get_option( 'duoup_xmlrpc', 'off' ) === 'off'
 }
 
 /*-------------Register WordPress Hooks-------------*/
+
+\add_action( 'init', 'duo_extend_user_agent' );
 
 \add_action( 'init', array( $duoup_plugin, 'duo_verify_auth' ), 10 );
 
