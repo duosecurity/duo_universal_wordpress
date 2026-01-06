@@ -39,6 +39,9 @@ jobs:
       - name: PHP tests
         run: ./vendor/bin/phpunit --process-isolation tests
 
+      - name: Print artifact sha256
+        run: echo "SHA256 " && sha256sum ./duo-universal.zip
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
