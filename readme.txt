@@ -2,8 +2,8 @@
 Contributors: duosecurity
 Tags: authentication, muti-factor, two-factor, authenticator, login, username, password, duo, security
 Requires at least: 6.0.0
-Stable tag: 1.2.0
-Tested up to: 6.8.0
+Stable tag: 1.2.1
+Tested up to: 6.9
 Requires PHP: 7.3.16
 License: Apache-2.0
 License URI: https://www.apache.org/licenses/LICENSE-2.0
@@ -38,6 +38,8 @@ Is Duo’s two-factor service really free?
 Yes, Duo is free up to 10 users and no credit card is required to get started! Paid plans for more than 10 users start at only $3/user/month.
 
 == Changelog ==
+= 1.2.1 =
+* Adds support for new Duo certificate authorities.
 = 1.2.0 =
 * Updated dependencies to require duo_universal_php v1.1.0
 = 1.1.0 =
