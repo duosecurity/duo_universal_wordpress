@@ -35,7 +35,7 @@ How do I get started with Duo?
 Before installing the plugin, you’ll need to sign up for a free account at https://duo.com/.
 
 Is Duo’s two-factor service really free?
-Yes, Duo is free up to 10 users and no credit card is required to get started! Paid plans for more than 10 users start at only $1/user/month.
+Yes, Duo is free up to 10 users and no credit card is required to get started! Paid plans for more than 10 users start at only $3/user/month.
 
 == Changelog ==
 = 1.2.0 =
