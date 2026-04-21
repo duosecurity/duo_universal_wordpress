@@ -27,6 +27,7 @@ delete_option( 'duoup_client_secret' );
 delete_option( 'duoup_api_host' );
 delete_option( 'duoup_roles' );
 delete_option( 'duoup_failmode' );
+delete_option( 'duoup_username_attribute' );
 delete_option( 'duoup_xmlrpc' );
 
 // Delete Duo credentials in wp_sitemeta
@@ -35,6 +36,7 @@ delete_site_option( 'duoup_client_secret' );
 delete_site_option( 'duoup_api_host' );
 delete_site_option( 'duoup_roles' );
 delete_site_option( 'duoup_failmode' );
+delete_site_option( 'duoup_username_attribute' );
 delete_site_option( 'duoup_xmlrpc' );
 
 // Delete Duo user_meta fields for all users

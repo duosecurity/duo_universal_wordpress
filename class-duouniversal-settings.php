@@ -138,6 +138,35 @@ class DuoUniversal_Settings {
 		return $failmode;
 	}
 
+	public function duo_settings_username_attribute() {
+		$attribute = \esc_attr( $this->duo_utils->duo_get_option( 'duoup_username_attribute', 'username' ) );
+		$result    = '';
+		$result   .= '<select id="duoup_username_attribute" name="duoup_username_attribute">';
+		$result   .= sprintf(
+			'<option value="username" %s>%s</option>',
+			'username' === $attribute ? 'selected' : '',
+			\esc_html__( 'Username', 'duo-universal' )
+		);
+		$result   .= sprintf(
+			'<option value="email" %s>%s</option>',
+			'email' === $attribute ? 'selected' : '',
+			\esc_html__( 'Email Address', 'duo-universal' )
+		);
+		$result   .= '</select>';
+		$result   .= '<p class="description">' . \esc_html__( 'Choose which WordPress user attribute is sent to Duo as the username. This must match how users are enrolled in Duo.', 'duo-universal' ) . '</p>';
+		return $result;
+	}
+
+	public function duoup_username_attribute_validate( $attribute ) {
+		$attribute = sanitize_text_field( $attribute );
+		if ( ! in_array( $attribute, array( 'username', 'email' ), true ) ) {
+			\add_settings_error( 'duoup_username_attribute', '', __( 'Username attribute value is not valid', 'duo-universal' ) );
+			$current_attribute = $this->duo_utils->duo_get_option( 'duoup_username_attribute', 'username' );
+			return $current_attribute;
+		}
+		return $attribute;
+	}
+
 	public function duo_settings_roles() {
 		$wp_roles = $this->duo_utils->duo_get_roles();
 		$roles    = $wp_roles->get_names();
@@ -285,6 +314,9 @@ class DuoUniversal_Settings {
 						'selected' => array(),
 					),
 					'br'     => array(),
+					'p'      => array(
+						'class' => array(),
+					),
 				),
 			)
 		);
@@ -303,6 +335,7 @@ class DuoUniversal_Settings {
 			$this->duo_add_site_option( 'duoup_client_secret', '' );
 			$this->duo_add_site_option( 'duoup_api_host', '' );
 			$this->duo_add_site_option( 'duoup_failmode', '' );
+			$this->duo_add_site_option( 'duoup_username_attribute', 'username' );
 			$this->duo_add_site_option( 'duoup_roles', $allroles );
 			$this->duo_add_site_option( 'duoup_xmlrpc', 'off' );
 		} else {
@@ -311,6 +344,7 @@ class DuoUniversal_Settings {
 			$this->duoup_add_settings_field( 'duoup_client_secret', __( 'Client Secret', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_client_secret_validate' ), $this->duo_settings_client_secret() );
 			$this->duoup_add_settings_field( 'duoup_api_host', __( 'API hostname', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_api_host_validate' ), $this->duo_settings_host() );
 			$this->duoup_add_settings_field( 'duoup_failmode', __( 'Failmode', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_failmode_validate' ), $this->duo_settings_failmode() );
+			$this->duoup_add_settings_field( 'duoup_username_attribute', __( 'Duo Username', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_username_attribute_validate' ), $this->duo_settings_username_attribute() );
 			$this->duoup_add_settings_field( 'duoup_roles', __( 'Enable for roles:', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_roles_validate' ), $this->duo_settings_roles() );
 			$this->duoup_add_settings_field( 'duoup_xmlrpc', __( 'Disable XML-RPC (recommended)', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_xmlrpc_validate' ), $this->duo_settings_xmlrpc() );
 		}
@@ -342,6 +376,9 @@ class DuoUniversal_Settings {
 						'selected' => array(),
 					),
 					'br'     => array(),
+					'p'      => array(
+						'class' => array(),
+					),
 				),
 			)
 		);
@@ -358,6 +395,7 @@ class DuoUniversal_Settings {
 			$this->print_field( 'duoup_client_secret', \__( 'Client Secret', 'duo-universal' ), $this->duo_settings_client_secret() );
 			$this->print_field( 'duoup_api_host', \__( 'API hostname', 'duo-universal' ), $this->duo_settings_host() );
 			$this->print_field( 'duoup_failmode', \__( 'Failmode', 'duo-universal' ), $this->duo_settings_failmode() );
+			$this->print_field( 'duoup_username_attribute', \__( 'Duo Username', 'duo-universal' ), $this->duo_settings_username_attribute() );
 			$this->print_field( 'duoup_roles', \__( 'Roles', 'duo-universal' ), $this->duo_settings_roles() );
 			$this->print_field( 'duoup_xmlrpc', \__( 'Disable XML-RPC (recommended)', 'duo-universal' ), $this->duo_settings_xmlrpc() );
 		echo( "</table>\n" );
@@ -386,6 +424,13 @@ class DuoUniversal_Settings {
 			$result   = \update_site_option( 'duoup_failmode', $failmode );
 		} else {
 			$result = \update_site_option( 'duoup_failmode', 'open' );
+		}
+
+		if ( isset( $_POST['duoup_username_attribute'] ) ) {
+			$attribute = $this->duoup_username_attribute_validate( sanitize_text_field( \wp_unslash( $_POST['duoup_username_attribute'] ) ) );
+			$result    = \update_site_option( 'duoup_username_attribute', $attribute );
+		} else {
+			$result = \update_site_option( 'duoup_username_attribute', 'username' );
 		}
 
 		if ( isset( $_POST['duoup_roles'] ) ) {

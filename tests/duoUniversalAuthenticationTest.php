@@ -70,6 +70,7 @@ final class authenticationTest extends WPTestCase
         ->setMockClassName('WP_User')
         ->getMock();
         $user->user_login = "test user";
+        $user->user_email = "testuser@example.com";
         $user->ID = 1;
         return $user;
     }
@@ -84,6 +85,132 @@ final class authenticationTest extends WPTestCase
         WP_Mock::passthruFunction('sanitize_text_field');
 
         $this->duo_utils = $this->createMock(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class);
+    }
+
+    /**
+     * Test that get_duo_username returns user_login by default
+     */
+    function testGetDuoUsernameDefaultIsLogin(): void
+    {
+        $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class)
+            ->onlyMethods(['duo_get_option'])
+            ->getMock();
+        $duo_utils->method('duo_get_option')->with('duoup_username_attribute', 'username')->willReturn('username');
+        $authentication = new Duo\DuoUniversalWordpress\DuoUniversal_WordPressPlugin($duo_utils, $this->duo_client);
+        $user = $this->createMockUser();
+
+        $result = $authentication->get_duo_username($user);
+
+        $this->assertEquals("test user", $result);
+    }
+
+    /**
+     * Test that get_duo_username returns user_email when setting is 'email'
+     */
+    function testGetDuoUsernameReturnsEmailWhenConfigured(): void
+    {
+        $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class)
+            ->onlyMethods(['duo_get_option'])
+            ->getMock();
+        $duo_utils->method('duo_get_option')->with('duoup_username_attribute', 'username')->willReturn('email');
+        $authentication = new Duo\DuoUniversalWordpress\DuoUniversal_WordPressPlugin($duo_utils, $this->duo_client);
+        $user = $this->createMockUser();
+
+        $result = $authentication->get_duo_username($user);
+
+        $this->assertEquals("testuser@example.com", $result);
+    }
+
+    /**
+     * Test that createAuthUrl receives the email when username attribute is 'email'
+     */
+    function testStartSecondFactorPassesEmailToDuo(): void
+    {
+        $this->setUpMocks();
+        $user = $this->createMockUser();
+        $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class)
+            ->onlyMethods(['duo_get_option', 'duo_debug_log'])
+            ->getMock();
+        $duo_utils->method('duo_get_option')->willReturn('email');
+        $this->duo_client->expects($this->once())
+            ->method('createAuthUrl')
+            ->with($this->equalTo('testuser@example.com'), $this->anything())
+            ->willReturn('prompt url');
+
+        $authentication = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_WordPressPlugin::class)
+            ->setConstructorArgs(array($duo_utils, $this->duo_client))
+            ->onlyMethods(['get_page_url', 'exit'])
+            ->getMock();
+        $authentication->method('get_page_url')->willReturn('fake url');
+        WP_Mock::passthruFunction('wp_redirect');
+
+        $authentication->duo_start_second_factor($user);
+        $this->assertConditionsMet();
+    }
+
+    /**
+     * Test that createAuthUrl receives user_login when username attribute is 'username'
+     */
+    function testStartSecondFactorPassesUsernameToDuo(): void
+    {
+        $this->setUpMocks();
+        $user = $this->createMockUser();
+        $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class)
+            ->onlyMethods(['duo_get_option', 'duo_debug_log'])
+            ->getMock();
+        $duo_utils->method('duo_get_option')->willReturn('username');
+        $this->duo_client->expects($this->once())
+            ->method('createAuthUrl')
+            ->with($this->equalTo('test user'), $this->anything())
+            ->willReturn('prompt url');
+
+        $authentication = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_WordPressPlugin::class)
+            ->setConstructorArgs(array($duo_utils, $this->duo_client))
+            ->onlyMethods(['get_page_url', 'exit'])
+            ->getMock();
+        $authentication->method('get_page_url')->willReturn('fake url');
+        WP_Mock::passthruFunction('wp_redirect');
+
+        $authentication->duo_start_second_factor($user);
+        $this->assertConditionsMet();
+    }
+
+    /**
+     * Test that exchangeAuthorizationCodeFor2FAResult receives the email
+     * when username attribute is 'email' during secondary auth
+     */
+    function testSecondaryAuthPassesEmailToDuo(): void
+    {
+        $this->setUpMocks();
+        WP_Mock::passthruFunction('wp_unslash');
+        $user = $this->createMockUser();
+        $duo_utils = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class)
+            ->onlyMethods(['duo_get_option', 'duo_debug_log', 'duo_auth_enabled', 'new_WP_user'])
+            ->getMock();
+        $duo_utils->method('duo_auth_enabled')->willReturn(true);
+        $duo_utils->method('duo_get_option')->willReturn('email');
+        $duo_utils->method('new_WP_user')->willReturnArgument(1);
+
+        $this->duo_client->expects($this->once())
+            ->method('exchangeAuthorizationCodeFor2FAResult')
+            ->with($this->equalTo('testcode'), $this->equalTo('testuser@example.com'));
+
+        $authentication = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_WordPressPlugin::class)
+            ->setConstructorArgs(array($duo_utils, $this->duo_client))
+            ->onlyMethods(
+                [
+                'get_user_from_oidc_state',
+                'get_redirect_url'
+                ]
+            )
+            ->getMock();
+        $authentication->method('get_user_from_oidc_state')->willReturn($user);
+
+        $_GET['duo_code'] = "testcode";
+        $_GET['state'] = "teststate";
+
+        $authentication->duo_authenticate_user();
+        $this->assertConditionsMet();
     }
 
     /**

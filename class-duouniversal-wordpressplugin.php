@@ -34,6 +34,22 @@ class DuoUniversal_WordpressPlugin {
 		$this->duo_client = $duo_client;
 		$this->duo_utils  = $duo_utils;
 	}
+
+	/**
+	 * Returns the identifier to send to Duo for a given user,
+	 * based on the duoup_username_attribute setting.
+	 *
+	 * @param \WP_User $user The WordPress user object.
+	 * @return string The username or email to pass to Duo.
+	 */
+	function get_duo_username( $user ) {
+		$attribute = $this->duo_utils->duo_get_option( 'duoup_username_attribute', 'username' );
+		if ( 'email' === $attribute ) {
+			return $user->user_email;
+		}
+		return $user->user_login;
+	}
+
 	/**
 	 * Sets a user's auth state
 	 * user: username of the user to update
@@ -132,7 +148,9 @@ class DuoUniversal_WordpressPlugin {
 
 		$this->update_user_auth_status( $user->ID, 'in-progress', $redirect_url, $oidc_state );
 
-		$prompt_uri = $this->duo_client->createAuthUrl( $user->user_login, $oidc_state );
+		$duo_username = $this->get_duo_username( $user );
+		$this->duo_debug_log( "Starting Duo auth for user identifier: $duo_username" );
+		$prompt_uri = $this->duo_client->createAuthUrl( $duo_username, $oidc_state );
 		\wp_redirect( $prompt_uri );
 		$this->exit();
 	}
@@ -196,7 +214,8 @@ class DuoUniversal_WordpressPlugin {
 			try {
 				// Update redirect URL to be one associated with initial authentication.
 				$this->duo_client->redirect_url = $this->get_redirect_url( $associated_user->ID );
-				$decoded_token                  = $this->duo_client->exchangeAuthorizationCodeFor2FAResult( $code, $associated_user->user_login );
+				$duo_username                   = $this->get_duo_username( $associated_user );
+				$decoded_token                  = $this->duo_client->exchangeAuthorizationCodeFor2FAResult( $code, $duo_username );
 			} catch ( \Duo\DuoUniversal\DuoException $e ) {
 				$this->duo_debug_log( $e->getMessage() );
 				$error = $this->duo_utils->new_WP_Error(
