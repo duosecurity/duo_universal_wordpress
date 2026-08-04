@@ -43,7 +43,14 @@ if ( $utils->duo_auth_enabled() ) {
 			$utils->duo_get_option( 'duoup_client_secret' ),
 			$utils->duo_get_option( 'duoup_api_host' ),
 			'',
+			true,
+			null,
+			$utils->duo_get_option( 'duoup_disable_ca_pinning', 'off' ) === 'on',
 		);
+		$utils->duo_debug_log( 'CA bundle version: ' . Client::CA_BUNDLE_VERSION );
+		if ( $utils->duo_get_option( 'duoup_disable_ca_pinning', 'off' ) === 'on' ) {
+			$utils->duo_debug_log( 'WARNING: CA pinning is disabled via configuration' );
+		}
 	} catch ( Exception $e ) {
 		$utils->duo_debug_log( $e->getMessage() );
 		$duo_client = null;
