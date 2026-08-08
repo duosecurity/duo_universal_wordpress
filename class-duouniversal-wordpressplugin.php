@@ -218,7 +218,15 @@ class DuoUniversal_WordpressPlugin {
 			\remove_action( 'authenticate', 'wp_authenticate_username_password', 20 );
 			\remove_action( 'authenticate', 'wp_authenticate_email_password', 20 );
 
-			$user = \wp_authenticate_username_password( null, $username, $password );
+			/**
+			 * Filter the user object, allowing other plugins to provide their own authentication methods.
+			 *
+			 * @param WP_User|WP_Error $user The authenticated user object or WP_Error on failure.
+			 * @param string           $username The username passed to the primary authentication method.
+			 * @param string           $password The password passed to the primary authentication method.
+			 *
+			 */
+			$user = \apply_filters( 'duo_universal_authenticated_user', \wp_authenticate_username_password( null, $username, $password ), $username, $password );
 			if ( ! is_a( $user, 'WP_User' ) ) {
 				// maybe we got an email?
 				$user = \wp_authenticate_email_password( null, $username, $password );
