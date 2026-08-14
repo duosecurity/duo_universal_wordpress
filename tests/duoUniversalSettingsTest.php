@@ -535,7 +535,7 @@ final class SettingsTest extends WPTestCase
             ->onlyMethods(['duo_add_site_option'])
             ->getMock();
 
-        $settings->expects($this->exactly(6))
+        $settings->expects($this->exactly(7))
             ->method('duo_add_site_option')
             ->withConsecutive(
                 ['duoup_client_id', ''],
@@ -544,6 +544,7 @@ final class SettingsTest extends WPTestCase
                 ['duoup_failmode', ''],
                 ['duoup_roles', $duoup_roles],
                 ['duoup_xmlrpc', 'off'],
+                ['duoup_disable_ca_pinning', 'off'],
             );
 
         $settings->duo_admin_init();
@@ -558,7 +559,7 @@ final class SettingsTest extends WPTestCase
         WP_Mock::userFunction('is_multisite', ['return' => false]);
         $settings = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Settings::class)
             ->setConstructorArgs(array($this->duo_utils))
-            ->onlyMethods(['duo_settings_client_id', 'duo_settings_client_secret', 'duo_settings_host', 'duo_settings_failmode', 'duo_settings_roles', 'duo_settings_xmlrpc'])
+            ->onlyMethods(['duo_settings_client_id', 'duo_settings_client_secret', 'duo_settings_host', 'duo_settings_failmode', 'duo_settings_roles', 'duo_settings_xmlrpc', 'duo_settings_disable_ca_pinning'])
             ->getMock();
 
         WP_Mock::userFunction('add_settings_section')->once()->with('duo_universal_settings', 'Main Settings', array($settings, 'duo_settings_text'), 'duo_universal_settings');
@@ -569,6 +570,7 @@ final class SettingsTest extends WPTestCase
         WP_Mock::userFunction('add_settings_field')->once()->with('duoup_failmode', 'Failmode', array($settings, 'printing_callback'), 'duo_universal_settings', 'duo_universal_settings', array('text' => $settings->duo_settings_failmode(), 'label_for' => 'duoup_failmode'));
         WP_Mock::userFunction('add_settings_field')->once()->with('duoup_roles', 'Enable for roles:', array($settings, 'printing_callback'), 'duo_universal_settings', 'duo_universal_settings', array('text' => $settings->duo_settings_roles(), 'label_for' => 'duoup_roles'));
         WP_Mock::userFunction('add_settings_field')->once()->with('duoup_xmlrpc', 'Disable XML-RPC (recommended)', array($settings, 'printing_callback'), 'duo_universal_settings', 'duo_universal_settings', array('text' => $settings->duo_settings_xmlrpc(), 'label_for' => 'duoup_xmlrpc'));
+        WP_Mock::userFunction('add_settings_field')->once()->with('duoup_disable_ca_pinning', 'Disable CA Pinning', array($settings, 'printing_callback'), 'duo_universal_settings', 'duo_universal_settings', array('text' => $settings->duo_settings_disable_ca_pinning(), 'label_for' => 'duoup_disable_ca_pinning'));
 
         WP_Mock::userFunction('register_setting')->once()->with('duo_universal_settings', 'duoup_client_id', array($settings, 'duoup_client_id_validate'));
         WP_Mock::userFunction('register_setting')->once()->with('duo_universal_settings', 'duoup_client_secret', array($settings, 'duoup_client_secret_validate'));
@@ -576,6 +578,7 @@ final class SettingsTest extends WPTestCase
         WP_Mock::userFunction('register_setting')->once()->with('duo_universal_settings', 'duoup_failmode', array($settings, 'duoup_failmode_validate'));
         WP_Mock::userFunction('register_setting')->once()->with('duo_universal_settings', 'duoup_roles', array($settings, 'duoup_roles_validate'));
         WP_Mock::userFunction('register_setting')->once()->with('duo_universal_settings', 'duoup_xmlrpc', array($settings, 'duoup_xmlrpc_validate'));
+        WP_Mock::userFunction('register_setting')->once()->with('duo_universal_settings', 'duoup_disable_ca_pinning', array($settings, 'duoup_disable_ca_pinning_validate'));
 
         $settings->duo_admin_init();
         $this->assertConditionsMet(); 
@@ -603,7 +606,8 @@ final class SettingsTest extends WPTestCase
             'duoup_api_host' => 'api-duo1.duo.test',
             'duoup_failmode' => 'closed',
             'duoup_roles' => $duoup_roles,
-            'duoup_xmlrpc' => 'off'
+            'duoup_xmlrpc' => 'off',
+            'duoup_disable_ca_pinning' => 'on'
         );
 
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_client_id', 'DIAAAAAAAAAAAAAAAAAA');
@@ -612,6 +616,7 @@ final class SettingsTest extends WPTestCase
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_failmode', 'closed');
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_roles', $duoup_roles);
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_xmlrpc', 'off');
+        WP_Mock::userFunction('update_site_option')->once()->with('duoup_disable_ca_pinning', 'on');
         WP_Mock::passthruFunction('check_admin_referer');
         WP_Mock::passthruFunction('wp_unslash');
 
@@ -629,11 +634,33 @@ final class SettingsTest extends WPTestCase
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_failmode', 'open');
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_roles', []);
         WP_Mock::userFunction('update_site_option')->once()->with('duoup_xmlrpc', 'on');
+        WP_Mock::userFunction('update_site_option')->once()->with('duoup_disable_ca_pinning', 'off');
         WP_Mock::passthruFunction('check_admin_referer');
 
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $settings->duo_update_mu_options();
-        $this->assertConditionsMet(); 
+        $this->assertConditionsMet();
+    }
+
+    /**
+     * Test that disable CA pinning validate returns 'on' for valid input
+     */
+    public function testDuoDisableCaPinningValidateOn(): void
+    {
+        $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
+        $result = $settings->duoup_disable_ca_pinning_validate('on');
+        $this->assertEquals('on', $result);
+    }
+
+    /**
+     * Test that disable CA pinning validate returns 'off' for any other input
+     */
+    public function testDuoDisableCaPinningValidateOff(): void
+    {
+        $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
+        $this->assertEquals('off', $settings->duoup_disable_ca_pinning_validate('off'));
+        $this->assertEquals('off', $settings->duoup_disable_ca_pinning_validate(''));
+        $this->assertEquals('off', $settings->duoup_disable_ca_pinning_validate('invalid'));
     }
 
 }

@@ -219,6 +219,24 @@ class DuoUniversal_Settings {
 		return 'on';
 	}
 
+	public function duo_settings_disable_ca_pinning() {
+		$val = '';
+		if ( $this->duo_utils->duo_get_option( 'duoup_disable_ca_pinning', 'off' ) === 'on' ) {
+			$val = 'checked=true';
+		}
+		$result  = sprintf( "<input id='duoup_disable_ca_pinning' name='duoup_disable_ca_pinning' type='checkbox' value='on' %s /> %s<br />", \esc_attr( $val ), \esc_html__( 'Yes', 'duo-universal' ) );
+		$result .= \esc_html__( 'Disabling CA pinning allows connections to validate via the OS trust store instead of pinned Duo certificates. Only disable this if required by your network environment (e.g., TLS-inspecting proxy). TLS verification is still enforced.', 'duo-universal' );
+		return $result;
+	}
+
+	public function duoup_disable_ca_pinning_validate( $option ) {
+		$option = sanitize_text_field( $option );
+		if ( 'on' === $option ) {
+			return $option;
+		}
+		return 'off';
+	}
+
 	public function duo_add_link( $links ) {
 		$settings_link = sprintf( '<a href="options-general.php?page=duo_universal">%s</a>', \esc_html__( 'Settings', 'duo-universal' ) );
 		array_unshift( $links, $settings_link );
@@ -305,6 +323,7 @@ class DuoUniversal_Settings {
 			$this->duo_add_site_option( 'duoup_failmode', '' );
 			$this->duo_add_site_option( 'duoup_roles', $allroles );
 			$this->duo_add_site_option( 'duoup_xmlrpc', 'off' );
+			$this->duo_add_site_option( 'duoup_disable_ca_pinning', 'off' );
 		} else {
 			\add_settings_section( 'duo_universal_settings', __( 'Main Settings', 'duo-universal' ), array( $this, 'duo_settings_text' ), 'duo_universal_settings' );
 			$this->duoup_add_settings_field( 'duoup_client_id', __( 'Client ID', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_client_id_validate' ), $this->duo_settings_client_id() );
@@ -313,6 +332,7 @@ class DuoUniversal_Settings {
 			$this->duoup_add_settings_field( 'duoup_failmode', __( 'Failmode', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_failmode_validate' ), $this->duo_settings_failmode() );
 			$this->duoup_add_settings_field( 'duoup_roles', __( 'Enable for roles:', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_roles_validate' ), $this->duo_settings_roles() );
 			$this->duoup_add_settings_field( 'duoup_xmlrpc', __( 'Disable XML-RPC (recommended)', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_xmlrpc_validate' ), $this->duo_settings_xmlrpc() );
+			$this->duoup_add_settings_field( 'duoup_disable_ca_pinning', __( 'Disable CA Pinning', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_disable_ca_pinning_validate' ), $this->duo_settings_disable_ca_pinning() );
 		}
 	}
 
@@ -360,6 +380,7 @@ class DuoUniversal_Settings {
 			$this->print_field( 'duoup_failmode', \__( 'Failmode', 'duo-universal' ), $this->duo_settings_failmode() );
 			$this->print_field( 'duoup_roles', \__( 'Roles', 'duo-universal' ), $this->duo_settings_roles() );
 			$this->print_field( 'duoup_xmlrpc', \__( 'Disable XML-RPC (recommended)', 'duo-universal' ), $this->duo_settings_xmlrpc() );
+			$this->print_field( 'duoup_disable_ca_pinning', \__( 'Disable CA Pinning', 'duo-universal' ), $this->duo_settings_disable_ca_pinning() );
 		echo( "</table>\n" );
 	}
 
@@ -401,6 +422,13 @@ class DuoUniversal_Settings {
 			$result = \update_site_option( 'duoup_xmlrpc', $xmlrpc );
 		} else {
 			$result = \update_site_option( 'duoup_xmlrpc', 'on' );
+		}
+
+		if ( isset( $_POST['duoup_disable_ca_pinning'] ) ) {
+			$disable_ca_pinning = $this->duoup_disable_ca_pinning_validate( sanitize_text_field( \wp_unslash( $_POST['duoup_disable_ca_pinning'] ) ) );
+			$result             = \update_site_option( 'duoup_disable_ca_pinning', $disable_ca_pinning );
+		} else {
+			$result = \update_site_option( 'duoup_disable_ca_pinning', 'off' );
 		}
 	}
 }
