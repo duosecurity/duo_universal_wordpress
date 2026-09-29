@@ -4,7 +4,7 @@ Tags: authentication, muti-factor, two-factor, authenticator, login, username, p
 Requires at least: 6.0.0
 Stable tag: 1.2.1
 Tested up to: 6.9
-Requires PHP: 7.3.16
+Requires PHP: 8.0
 License: Apache-2.0
 License URI: https://www.apache.org/licenses/LICENSE-2.0
 

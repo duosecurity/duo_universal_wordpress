@@ -13,7 +13,7 @@
  * Description: This plugin enables Duo universal authentication for WordPress logins.
  * Version: 1.2.1
  * Requires at least: 6.0.0
- * Requires PHP: 7.3.16
+ * Requires PHP: 8.0
  * Author: Duo Security
  * Author URI: http://www.duosecurity.com
  * License: Apache-2.0
