@@ -663,4 +663,187 @@ final class SettingsTest extends WPTestCase
         $this->assertEquals('off', $settings->duoup_disable_ca_pinning_validate('invalid'));
     }
 
+    public function testAuditLogOnSettingChange(): void
+    {
+        $user = new stdClass();
+        $user->user_login = 'admin_user';
+        $user->ID = 42;
+        WP_Mock::userFunction('wp_get_current_user', ['return' => $user]);
+
+        $this->duo_utils->expects($this->once())
+            ->method('duo_audit_log')
+            ->with($this->callback(function ($message) {
+                return str_contains($message, 'Failmode')
+                    && str_contains($message, '"open"')
+                    && str_contains($message, '"closed"')
+                    && str_contains($message, 'admin_user')
+                    && str_contains($message, '42');
+            }));
+
+        $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
+        $settings->on_option_update('duoup_failmode', 'open', 'closed');
+    }
+
+    public function testAuditLogSecretRedacted(): void
+    {
+        $user = new stdClass();
+        $user->user_login = 'admin_user';
+        $user->ID = 42;
+        WP_Mock::userFunction('wp_get_current_user', ['return' => $user]);
+
+        $old_secret = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+        $new_secret = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+
+        $this->duo_utils->expects($this->once())
+            ->method('duo_audit_log')
+            ->with($this->callback(function ($message) use ($old_secret, $new_secret) {
+                return str_contains($message, 'Client Secret')
+                    && str_contains($message, 'redacted')
+                    && !str_contains($message, $old_secret)
+                    && !str_contains($message, $new_secret);
+            }));
+
+        $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
+        $settings->on_option_update('duoup_client_secret', $old_secret, $new_secret);
+    }
+
+    public function testAuditLogOnSiteOptionUpdate(): void
+    {
+        $user = new stdClass();
+        $user->user_login = 'admin_user';
+        $user->ID = 42;
+        WP_Mock::userFunction('wp_get_current_user', ['return' => $user]);
+
+        $this->duo_utils->expects($this->once())
+            ->method('duo_audit_log')
+            ->with($this->callback(function ($message) {
+                return str_contains($message, 'API hostname')
+                    && str_contains($message, 'api-old.duo.test')
+                    && str_contains($message, 'api-new.duo.test');
+            }));
+
+        $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
+        $settings->on_site_option_update('duoup_api_host', 'api-new.duo.test', 'api-old.duo.test', 1);
+    }
+
+    public function testAuditLogSecretRedactedMultisite(): void
+    {
+        $user = new stdClass();
+        $user->user_login = 'admin_user';
+        $user->ID = 42;
+        WP_Mock::userFunction('wp_get_current_user', ['return' => $user]);
+
+        $old_secret = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+        $new_secret = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+
+        $this->duo_utils->expects($this->once())
+            ->method('duo_audit_log')
+            ->with($this->callback(function ($message) use ($old_secret, $new_secret) {
+                return str_contains($message, 'Client Secret')
+                    && str_contains($message, 'redacted')
+                    && !str_contains($message, $old_secret)
+                    && !str_contains($message, $new_secret);
+            }));
+
+        $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
+        $settings->on_site_option_update('duoup_client_secret', $new_secret, $old_secret, 1);
+    }
+
+    public function testAuditLogRolesFormatted(): void
+    {
+        $user = new stdClass();
+        $user->user_login = 'admin_user';
+        $user->ID = 42;
+        WP_Mock::userFunction('wp_get_current_user', ['return' => $user]);
+
+        $old_roles = array('administrator' => 'Administrator', 'editor' => 'Editor');
+        $new_roles = array('administrator' => 'Administrator');
+
+        $this->duo_utils->expects($this->once())
+            ->method('duo_audit_log')
+            ->with($this->callback(function ($message) {
+                return str_contains($message, 'Enabled roles')
+                    && str_contains($message, 'administrator, editor')
+                    && str_contains($message, '"administrator"');
+            }));
+
+        $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
+        $settings->on_option_update('duoup_roles', $old_roles, $new_roles);
+    }
+
+    public function testAuditLogUnknownFieldBasicMessage(): void
+    {
+        $user = new stdClass();
+        $user->user_login = 'admin_user';
+        $user->ID = 42;
+        WP_Mock::userFunction('wp_get_current_user', ['return' => $user]);
+
+        $this->duo_utils->expects($this->once())
+            ->method('duo_audit_log')
+            ->with($this->callback(function ($message) {
+                return str_contains($message, 'duoup_new_field')
+                    && str_contains($message, 'admin_user')
+                    && !str_contains($message, 'old_val')
+                    && !str_contains($message, 'new_val');
+            }));
+
+        $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
+        $settings->on_option_update('duoup_new_field', 'old_val', 'new_val');
+    }
+
+    public function testAuditLogIgnoresNonDuoOptions(): void
+    {
+        $this->duo_utils->expects($this->never())
+            ->method('duo_audit_log');
+
+        $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
+        $settings->on_option_update('blogname', 'Old Blog', 'New Blog');
+    }
+
+    public function testAuditHookRegisteredForSingleSite(): void
+    {
+        WP_Mock::userFunction('is_multisite', ['return' => false]);
+        $settings = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Settings::class)
+            ->setConstructorArgs(array($this->duo_utils))
+            ->onlyMethods(['duo_settings_client_id', 'duo_settings_client_secret', 'duo_settings_host', 'duo_settings_failmode', 'duo_settings_roles', 'duo_settings_xmlrpc', 'duo_settings_disable_ca_pinning'])
+            ->getMock();
+
+        WP_Mock::userFunction('add_settings_section');
+        WP_Mock::userFunction('add_settings_field');
+        WP_Mock::userFunction('register_setting');
+
+        WP_Mock::expectActionAdded('update_option', array($settings, 'on_option_update'), 10, 3);
+
+        $settings->duo_admin_init();
+        $this->assertConditionsMet();
+    }
+
+    public function testAuditHookRegisteredForMultisite(): void
+    {
+        $duoup_roles = array(
+            "Editor" => "editor",
+            "Author" => "author",
+        );
+        $roles = $this->getMockBuilder(stdClass::class)
+            ->addMethods(['get_names'])
+            ->getMock();
+        $roles->method('get_names')->willReturn($duoup_roles);
+        $this->duo_utils->method('duo_get_roles')->willReturn($roles);
+
+        WP_Mock::userFunction('is_multisite', ['return' => true]);
+        WP_Mock::passthruFunction('before_last_bar');
+
+        $settings = $this->getMockBuilder(Duo\DuoUniversalWordpress\DuoUniversal_Settings::class)
+            ->setConstructorArgs(array($this->duo_utils))
+            ->onlyMethods(['duo_add_site_option'])
+            ->getMock();
+
+        $settings->method('duo_add_site_option');
+
+        WP_Mock::expectActionAdded('update_site_option', array($settings, 'on_site_option_update'), 10, 4);
+
+        $settings->duo_admin_init();
+        $this->assertConditionsMet();
+    }
+
 }
