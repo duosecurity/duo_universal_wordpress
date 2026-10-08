@@ -21,6 +21,34 @@ require_once plugin_dir_path( __FILE__ ) . 'class-duouniversal-utilities.php';
 const SECRET_PLACEHOLDER = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
 class DuoUniversal_Settings {
+	// Audit logging constants.
+	// New duoup_* settings are auto-logged with a basic message (no values).
+	// To enable detailed old→new logging for a new setting, add it to AUDIT_OPTION_KEYS and OPTION_LABELS.
+	// To redact a sensitive setting's value, add it to SECRET_OPTION_KEYS.
+	const AUDIT_OPTION_KEYS = array(
+		'duoup_client_id',
+		'duoup_client_secret',
+		'duoup_api_host',
+		'duoup_failmode',
+		'duoup_roles',
+		'duoup_xmlrpc',
+		'duoup_disable_ca_pinning',
+	);
+
+	const SECRET_OPTION_KEYS = array(
+		'duoup_client_secret',
+	);
+
+	const OPTION_LABELS = array(
+		'duoup_client_id'          => 'Client ID',
+		'duoup_client_secret'      => 'Client Secret',
+		'duoup_api_host'           => 'API hostname',
+		'duoup_failmode'           => 'Failmode',
+		'duoup_roles'              => 'Enabled roles',
+		'duoup_xmlrpc'             => 'XML-RPC',
+		'duoup_disable_ca_pinning' => 'CA Pinning',
+	);
+
 	public $duo_utils;
 
 	public function __construct(
@@ -244,6 +272,62 @@ class DuoUniversal_Settings {
 	}
 
 
+	// Timestamp is added automatically by syslog — no need to include it in the message.
+	public function duo_audit_setting_change( $option, $old_value, $new_value ) {
+		$user     = \wp_get_current_user();
+		$username = $user->user_login ?? 'unknown';
+		$user_id  = $user->ID ?? 0;
+		$label    = self::OPTION_LABELS[ $option ] ?? $option;
+
+		if ( in_array( $option, self::SECRET_OPTION_KEYS, true ) ) {
+			$this->duo_utils->duo_audit_log(
+				sprintf(
+					'Duo setting changed: %s (value redacted) by user=%s (ID=%d)',
+					$label,
+					$username,
+					$user_id
+				)
+			);
+		} elseif ( in_array( $option, self::AUDIT_OPTION_KEYS, true ) ) {
+			$old_display = is_array( $old_value ) ? implode( ', ', array_keys( $old_value ) ) : (string) $old_value;
+			$new_display = is_array( $new_value ) ? implode( ', ', array_keys( $new_value ) ) : (string) $new_value;
+			$this->duo_utils->duo_audit_log(
+				sprintf(
+					'Duo setting changed: %s from "%s" to "%s" by user=%s (ID=%d)',
+					$label,
+					$old_display,
+					$new_display,
+					$username,
+					$user_id
+				)
+			);
+		} else {
+			$this->duo_utils->duo_audit_log(
+				sprintf(
+					'Duo setting changed: %s by user=%s (ID=%d)',
+					$label,
+					$username,
+					$user_id
+				)
+			);
+		}
+	}
+
+	// Generic hook callback for single-site: fires on every update_option call.
+	// Filters for duoup_* prefix so new settings are auto-logged without code changes.
+	public function on_option_update( $option, $old_value, $new_value ) {
+		if ( str_starts_with( $option, 'duoup_' ) ) {
+			$this->duo_audit_setting_change( $option, $old_value, $new_value );
+		}
+	}
+
+	// Generic hook callback for multisite: fires on every update_site_option call.
+	public function on_site_option_update( $option, $new_value, $old_value, $network_id ) {
+		if ( str_starts_with( $option, 'duoup_' ) ) {
+			$this->duo_audit_setting_change( $option, $old_value, $new_value );
+		}
+	}
+
 	public function duo_add_page() {
 		if ( ! is_multisite() ) {
 			add_options_page(
@@ -324,6 +408,8 @@ class DuoUniversal_Settings {
 			$this->duo_add_site_option( 'duoup_roles', $allroles );
 			$this->duo_add_site_option( 'duoup_xmlrpc', 'off' );
 			$this->duo_add_site_option( 'duoup_disable_ca_pinning', 'off' );
+
+			\add_action( 'update_site_option', array( $this, 'on_site_option_update' ), 10, 4 );
 		} else {
 			\add_settings_section( 'duo_universal_settings', __( 'Main Settings', 'duo-universal' ), array( $this, 'duo_settings_text' ), 'duo_universal_settings' );
 			$this->duoup_add_settings_field( 'duoup_client_id', __( 'Client ID', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_client_id_validate' ), $this->duo_settings_client_id() );
@@ -333,6 +419,8 @@ class DuoUniversal_Settings {
 			$this->duoup_add_settings_field( 'duoup_roles', __( 'Enable for roles:', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_roles_validate' ), $this->duo_settings_roles() );
 			$this->duoup_add_settings_field( 'duoup_xmlrpc', __( 'Disable XML-RPC (recommended)', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_xmlrpc_validate' ), $this->duo_settings_xmlrpc() );
 			$this->duoup_add_settings_field( 'duoup_disable_ca_pinning', __( 'Disable CA Pinning', 'duo-universal' ), array( $this, 'printing_callback' ), array( $this, 'duoup_disable_ca_pinning_validate' ), $this->duo_settings_disable_ca_pinning() );
+
+			\add_action( 'update_option', array( $this, 'on_option_update' ), 10, 3 );
 		}
 	}
 

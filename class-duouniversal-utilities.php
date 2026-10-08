@@ -99,6 +99,15 @@ class DuoUniversal_Utilities {
 		}
 	}
 
+	function duo_audit_log( $message ) {
+		\openlog( 'duo_universal_wordpress', LOG_PID, LOG_AUTH );
+		\syslog( LOG_INFO, $message );
+		\closelog();
+		// Also write to PHP error log so the entry is visible in environments
+		// without a syslog daemon (e.g. Docker containers).
+		\error_log( 'Duo audit: ' . $message );
+	}
+
 	function new_WP_User( $id, $name = '', $site_id = '' ) {
 		return new \WP_User( $id, $name, $site_id );
 	}
