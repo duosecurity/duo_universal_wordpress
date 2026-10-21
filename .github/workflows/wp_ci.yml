@@ -17,7 +17,7 @@ jobs:
 
     strategy:
       matrix:
-        php: [8.1]
+        php: [8.2, 8.3, 8.4, 8.5]
 
     steps:
       - name: Checkout
@@ -44,10 +44,13 @@ jobs:
       - name: PHP tests
         run: ./vendor/bin/phpunit --process-isolation tests
 
+        # Only publish the artifact from one matrix job; artifact names must be unique
       - name: Print artifact sha256
+        if: matrix.php == '8.2'
         run: echo "SHA256 " && sha256sum ./duo-universal.zip
 
       - name: Upload artifact
+        if: matrix.php == '8.2'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: duo-universal
