@@ -10,6 +10,9 @@ require_once plugin_dir_path( __FILE__ ) . 'class-duouniversal-settings.php';
 
 final class SettingsTest extends WPTestCase
 {
+    private $duo_client;
+    private $duo_utils;
+    private $old_POST;
 
     function setUp(): void
     {
@@ -78,6 +81,8 @@ final class SettingsTest extends WPTestCase
     public function testDuoClientIDValidateInvalid(): void
     {
         WP_Mock::userFunction('add_settings_error', ['return' => null]);
+        // duo_get_option() defaults to '' when the option is unset
+        $this->duo_utils->method('duo_get_option')->willReturn('');
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
 
         $result = $settings->duoup_client_id_validate("invalid id");
@@ -140,6 +145,8 @@ final class SettingsTest extends WPTestCase
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         WP_Mock::passthruFunction('esc_attr');
         $duo_utils = $this->createMock(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class);
+        // duo_get_option() defaults to '' when the option is unset
+        $duo_utils->method('duo_get_option')->willReturn('');
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($duo_utils);
 
         $result = $settings->duoup_client_secret_validate("invalid secret");
@@ -169,6 +176,8 @@ final class SettingsTest extends WPTestCase
         WP_Mock::passthruFunction('esc_attr');
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($this->duo_utils);
         $duo_utils = $this->createMock(Duo\DuoUniversalWordpress\DuoUniversal_Utilities::class);
+        // duo_get_option() defaults to '' when the option is unset
+        $duo_utils->method('duo_get_option')->willReturn('');
         $settings = new Duo\DuoUniversalWordpress\DuoUniversal_Settings($duo_utils);
         $client_secret = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
@@ -599,6 +608,8 @@ final class SettingsTest extends WPTestCase
             ->getMock();
         $roles->method('get_names')->willReturn($duoup_roles);
         $this->duo_utils->method('duo_get_roles')->willReturn($roles);
+        // duo_get_option() defaults to '' when the option is unset
+        $this->duo_utils->method('duo_get_option')->willReturn('');
 
         $_POST = array(
             'duoup_client_id' => 'DIAAAAAAAAAAAAAAAAAA',

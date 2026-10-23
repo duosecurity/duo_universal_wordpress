@@ -9,6 +9,11 @@ require_once plugin_dir_path( __FILE__ ) . 'class-duouniversal-wordpressplugin.p
 
 final class authenticationTest extends WPTestCase
 {
+    private $duo_client;
+    private $duo_utils;
+    private $user_meta;
+    private $site_options;
+
     // Setup "fully functional" mocks for both user_meta and site_options
     function setUpMocks(): void
     {
